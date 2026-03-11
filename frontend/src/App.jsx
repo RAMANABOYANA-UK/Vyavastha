@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore, useUIStore, useComplaintsStore } from './store';
+
+// Lazy-load MobileRatingScreen — keeps the /rate/:serviceId bundle tiny
+// so phones scanning QR codes don't need to download the whole app
+const MobileRatingScreen = lazy(() => import('./components/screens/MobileRatingScreen'));
 
 // Screens
 import SplashScreen from './components/screens/SplashScreen';
@@ -10,7 +14,6 @@ import RoleSelectionScreen from './components/screens/RoleSelectionScreen';
 import OTPAuthScreen from './components/screens/OTPAuthScreen';
 import AdminPortal from './components/screens/AdminPortal';
 import OfficialPortal from './components/screens/OfficialPortal';
-import MobileRatingScreen from './components/screens/MobileRatingScreen';
 
 // Citizen Portal Components
 import PhoneShell from './components/PhoneShell';
@@ -240,13 +243,69 @@ function MainApp() {
   );
 }
 
+// Lightweight loading fallback for the QR rating page on mobile
+function RatingLoadingFallback() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex',
+      alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #F8FAFC, #E2E8F0)',
+      fontFamily: "'Inter', 'Nunito', sans-serif"
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16, animation: 'pulse 1.5s ease-in-out infinite' }}>⏳</div>
+        <div style={{ color: '#64748b', fontSize: 16, fontWeight: 500 }}>Loading rating page...</div>
+        <style>{`@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }`}</style>
+      </div>
+    </div>
+  );
+}
+
+// Error boundary for the QR rating route
+class RatingErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(err, info) { console.error('Rating page error:', err, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          background: '#FFF5F5', padding: 24,
+          fontFamily: "'Inter', 'Nunito', sans-serif"
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: 320 }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>⚠️</div>
+            <div style={{ fontWeight: 700, fontSize: 20, color: '#DC2626', marginBottom: 12 }}>Something went wrong</div>
+            <div style={{ color: '#9ca3af', fontSize: 14, marginBottom: 20 }}>
+              {String(this.state.error?.message || 'Failed to load rating page')}
+            </div>
+            <button onClick={() => window.location.reload()} style={{
+              padding: '12px 28px', background: '#0D4F44', color: '#fff',
+              border: 'none', borderRadius: 12, fontWeight: 600, cursor: 'pointer'
+            }}>Reload Page</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Main App with Router
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* QR Code Rating Route - Standalone page for mobile scanning */}
-        <Route path="/rate/:serviceId" element={<MobileRatingScreen />} />
+        {/* QR Code Rating Route - Standalone lazy-loaded page for mobile scanning */}
+        <Route path="/rate/:serviceId" element={
+          <RatingErrorBoundary>
+            <Suspense fallback={<RatingLoadingFallback />}>
+              <MobileRatingScreen />
+            </Suspense>
+          </RatingErrorBoundary>
+        } />
         
         {/* Main App Route - All other paths */}
         <Route path="/*" element={<MainApp />} />

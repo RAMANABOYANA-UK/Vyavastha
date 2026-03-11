@@ -96,27 +96,29 @@ export default function MobileRatingScreen() {
     const fetchService = async () => {
       try {
         const response = await fetch(`/api/services/${serviceId}`);
+        if (!response.ok) {
+          // API returned 404 or other error — try demo data
+          const found = findDemoService(serviceId);
+          if (found) { setService(found); return; }
+          setError('Service not found');
+          return;
+        }
         const data = await response.json();
-        
-        if (data.success) {
+        if (data.success && data.data) {
           setService(data.data);
         } else {
-          // Fall back to demo data keyed by serviceId
           const found = findDemoService(serviceId);
-          if (found) {
-            setService(found);
-          } else {
-            setError(data.message || 'Service not found');
-          }
+          if (found) { setService(found); return; }
+          setError(data.message || 'Service not found');
         }
       } catch (err) {
-        // Offline or backend down — try demo data
+        // Offline, network error, or backend down — try demo data
+        console.warn('API fetch failed, using demo data:', err.message);
         const found = findDemoService(serviceId);
         if (found) {
           setService(found);
         } else {
-          console.error('Failed to load service:', err);
-          setError('Failed to load service. Please try again.');
+          setError('Service not found. Please scan a valid QR code.');
         }
       } finally {
         setLoading(false);
@@ -125,6 +127,9 @@ export default function MobileRatingScreen() {
 
     if (serviceId) {
       fetchService();
+    } else {
+      setError('No service ID provided');
+      setLoading(false);
     }
   }, [serviceId]);
 
