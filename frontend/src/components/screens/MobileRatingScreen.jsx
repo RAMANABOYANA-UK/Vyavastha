@@ -6,6 +6,31 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// Mirror of the demo services defined in RateServiceScreen — used as fallback
+// when the service isn't yet in the database.
+const DEMO_SERVICES_FLAT = [
+  { serviceId: 'PT-KDP-001', name: 'Main Bus Stand Public Toilet',    category: 'Public Toilet',    address: 'Near RTC Bus Stand, Kadapa',       city: 'Kadapa' },
+  { serviceId: 'PT-KDP-002', name: 'Old Town Market Toilet',          category: 'Public Toilet',    address: 'Old Town Market, Kadapa',           city: 'Kadapa' },
+  { serviceId: 'PT-KDP-003', name: 'Collectorate Complex Toilet',     category: 'Public Toilet',    address: 'Collector Office Road, Kadapa',     city: 'Kadapa' },
+  { serviceId: 'WS-KDP-001', name: 'Ward 1 Water Distribution Point', category: 'Water Supply',     address: 'Main Road, Ward 1, Kadapa',         city: 'Kadapa' },
+  { serviceId: 'WS-KDP-002', name: 'Siddhapuram Water Point',         category: 'Water Supply',     address: 'Siddhapuram, Kadapa',               city: 'Kadapa' },
+  { serviceId: 'WC-KDP-001', name: 'Ward 1 Garbage Collection',       category: 'Waste Collection', address: 'Ward 1, Kadapa',                    city: 'Kadapa' },
+  { serviceId: 'WC-KDP-002', name: 'Nehru Nagar Waste Point',         category: 'Waste Collection', address: 'Nehru Nagar, Kadapa',               city: 'Kadapa' },
+  { serviceId: 'TR-KDP-001', name: 'RTC Bus Stand Kadapa',            category: 'Public Transport', address: 'RTC Bus Stand, Kadapa',             city: 'Kadapa' },
+  { serviceId: 'TR-KDP-002', name: 'City Bus Route 11 Stop',          category: 'Public Transport', address: 'Main Road, Kadapa',                 city: 'Kadapa' },
+  { serviceId: 'PG-KDP-001', name: 'Kadapa Municipal Garden',         category: 'Park & Garden',    address: 'Near Collector Office, Kadapa',     city: 'Kadapa' },
+  { serviceId: 'PG-KDP-002', name: 'Gandhi Park',                     category: 'Park & Garden',    address: 'Gandhi Nagar, Kadapa',              city: 'Kadapa' },
+  { serviceId: 'SL-KDP-001', name: 'Main Road Street Lighting',       category: 'Street Light',     address: 'Main Road, Kadapa',                 city: 'Kadapa' },
+  { serviceId: 'SL-KDP-002', name: 'Bypass Road Lighting',            category: 'Street Light',     address: 'Bypass Road, Kadapa',               city: 'Kadapa' },
+  { serviceId: 'GH-KDP-001', name: 'Government General Hospital',     category: 'Govt Hospital',    address: '4th Road, Kadapa',                  city: 'Kadapa' },
+  { serviceId: 'GH-KDP-002', name: 'Area Hospital Rajampet',          category: 'Govt Hospital',    address: 'Main Road, Rajampet',               city: 'Kadapa' },
+  { serviceId: 'GO-KDP-001', name: 'Municipal Corporation Office',    category: 'Govt Office',      address: 'Municipal Office Road, Kadapa',     city: 'Kadapa' },
+  { serviceId: 'GO-KDP-002', name: 'District Collectorate',           category: 'Govt Office',      address: 'Collector Office Road, Kadapa',     city: 'Kadapa' },
+];
+
+const findDemoService = (serviceId) =>
+  DEMO_SERVICES_FLAT.find(s => s.serviceId === serviceId) || null;
+
 function StarRating({ label, value, onChange, readonly = false }) {
   return (
     <div style={{
@@ -76,11 +101,23 @@ export default function MobileRatingScreen() {
         if (data.success) {
           setService(data.data);
         } else {
-          setError(data.message || 'Service not found');
+          // Fall back to demo data keyed by serviceId
+          const found = findDemoService(serviceId);
+          if (found) {
+            setService(found);
+          } else {
+            setError(data.message || 'Service not found');
+          }
         }
       } catch (err) {
-        console.error('Failed to load service:', err);
-        setError('Failed to load service. Please try again.');
+        // Offline or backend down — try demo data
+        const found = findDemoService(serviceId);
+        if (found) {
+          setService(found);
+        } else {
+          console.error('Failed to load service:', err);
+          setError('Failed to load service. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

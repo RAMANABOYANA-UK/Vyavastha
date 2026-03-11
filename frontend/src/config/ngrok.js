@@ -10,27 +10,23 @@
 //
 // NOTE: Free ngrok URL changes every restart, so update .env each time
 
-// Your local network IP (for same WiFi testing)
-const LOCAL_NETWORK_IP = '192.168.29.99';
-
 // Get the base URL for QR codes
+// Automatically uses the current browser origin, so QR codes work
+// on any phone on the same WiFi — no manual IP configuration needed.
 export const getBaseUrl = () => {
   // First priority: ngrok URL from environment
   if (import.meta.env.VITE_NGROK_URL) {
     return import.meta.env.VITE_NGROK_URL;
   }
   
-  // Second priority: current origin (works when accessed via ngrok directly)
+  // Use whatever origin the browser is currently using.
+  // If accessed via http://192.168.x.x:5173, QR codes will encode that IP.
+  // If accessed via ngrok/Netlify/any domain, QR codes use that domain.
   if (typeof window !== 'undefined') {
-    const origin = window.location.origin;
-    // If we're already on ngrok, use that URL
-    if (origin.includes('ngrok')) {
-      return origin;
-    }
+    return window.location.origin;
   }
   
-  // Third priority: Use local network IP for same WiFi testing
-  return `http://${LOCAL_NETWORK_IP}:5173`;
+  return 'http://localhost:5173';
 };
 
 // Build the rating URL for QR codes
