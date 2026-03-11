@@ -403,14 +403,21 @@ export default function AdminPortal({ user, onLogout }) {
     setShowAssignModal(true);
   };
 
+  // Normalize status to a canonical form for filtering
+  const ns = (status) => (status || '').toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+  const UNASSIGNED_ST  = ['pending', 'submitted'];
+  const ASSIGNED_ST    = ['assigned', 'acknowledged'];
+  const INPROGRESS_ST  = ['in_progress', 'under_inspection', 'work_scheduled'];
+  const RESOLVED_ST    = ['resolved', 'closed', 'final_resolution', 'rejected'];
+
   const filteredComplaints = complaints.filter(c => {
-    const st = (c.status || '').toLowerCase().replace(/[_ ]/g, '_');
+    const st = ns(c.status);
     const matchesStatus = filterStatus === 'all'
-      || (filterStatus === 'unassigned' && !c.assignedTo && ['pending','submitted','acknowledged'].includes(st))
-      || (filterStatus === 'escalated' && c.isEscalated)
-      || (filterStatus === 'assigned'   && c.assignedTo)
-      || (filterStatus === 'in_progress' && ['in_progress','under_inspection','work_scheduled','acknowledged'].includes(st))
-      || (filterStatus === 'resolved'    && ['resolved','closed','final_resolution'].includes(st));
+      || (filterStatus === 'unassigned'  && UNASSIGNED_ST.includes(st))
+      || (filterStatus === 'assigned'    && ASSIGNED_ST.includes(st))
+      || (filterStatus === 'in_progress' && INPROGRESS_ST.includes(st))
+      || (filterStatus === 'resolved'    && RESOLVED_ST.includes(st))
+      || (filterStatus === 'escalated'   && c.isEscalated);
 
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q
@@ -426,9 +433,12 @@ export default function AdminPortal({ user, onLogout }) {
     return matchesStatus && matchesSearch;
   });
 
-  // Count unassigned and escalated
-  const unassignedCount = complaints.filter(c => !c.assignedTo && ['pending','Pending','Submitted','acknowledged'].includes(c.status)).length;
-  const escalatedCount = complaints.filter(c => c.isEscalated).length;
+  // Tab counts (derived from same normalizer)
+  const unassignedCount  = complaints.filter(c => UNASSIGNED_ST.includes(ns(c.status))).length;
+  const assignedCount    = complaints.filter(c => ASSIGNED_ST.includes(ns(c.status))).length;
+  const inProgressCount  = complaints.filter(c => INPROGRESS_ST.includes(ns(c.status))).length;
+  const resolvedCount    = complaints.filter(c => RESOLVED_ST.includes(ns(c.status))).length;
+  const escalatedCount   = complaints.filter(c => c.isEscalated).length;
 
 
   const StatCard = ({ title, value, icon: Icon, color, trend, subtitle }) => (
@@ -457,10 +467,10 @@ export default function AdminPortal({ user, onLogout }) {
   );
 
   const renderDashboard = () => {
-    const totalCount   = stats?.total    || complaints.length || 0;
-    const pendingCount = stats?.pending  || complaints.filter(c => ['pending','Pending','Submitted'].includes(c.status)).length || 0;
-    const inProgCount  = stats?.inProgress || complaints.filter(c => ['In Progress','in_progress','acknowledged','under_inspection','work_scheduled'].includes(c.status)).length || 0;
-    const resolvedCnt  = stats?.resolved || complaints.filter(c => ['resolved','Resolved','closed','Closed'].includes(c.status)).length || 0;
+    const totalCount   = stats?.total      || complaints.length || 0;
+    const pendingCount = stats?.pending    || unassignedCount || 0;
+    const inProgCount  = stats?.inProgress || inProgressCount + assignedCount || 0;
+    const resolvedCnt  = stats?.resolved   || resolvedCount || 0;
     const resolutionRate = totalCount > 0 ? Math.round((resolvedCnt / totalCount) * 100) : 0;
 
     return (
@@ -698,12 +708,12 @@ export default function AdminPortal({ user, onLogout }) {
       <div className="p-4 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-between">
         <div className="flex gap-2 flex-wrap">
           {[
-            { key: 'all', label: 'All' },
-            { key: 'unassigned', label: `Unassigned (${unassignedCount})`, color: 'text-red-600' },
-            { key: 'assigned', label: 'Assigned' },
-            { key: 'in_progress', label: 'In Progress' },
-            { key: 'resolved', label: 'Resolved' },
-            { key: 'escalated', label: `🚨 Escalated (${escalatedCount})`, color: 'text-orange-600' },
+            { key: 'all',         label: `All (${complaints.length})` },
+            { key: 'unassigned',  label: `Unassigned (${unassignedCount})`,  color: 'text-red-600' },
+            { key: 'assigned',    label: `Assigned (${assignedCount})` },
+            { key: 'in_progress', label: `In Progress (${inProgressCount})` },
+            { key: 'resolved',    label: `Resolved (${resolvedCount})` },
+            { key: 'escalated',   label: `🚨 Escalated (${escalatedCount})`, color: 'text-orange-600' },
           ].map((item) => (
             <button
               key={item.key}
@@ -718,15 +728,24 @@ export default function AdminPortal({ user, onLogout }) {
             </button>
           ))}
         </div>
-        <div className="relative">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by ID, title, location..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-teal w-64"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by ID, title, location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-teal w-64"
+            />
+          </div>
+          <button
+            onClick={() => fetchData()}
+            title="Refresh complaints"
+            className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-teal hover:border-teal transition-colors"
+          >
+            <RefreshCw size={16} />
+          </button>
         </div>
       </div>
 
