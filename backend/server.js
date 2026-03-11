@@ -40,7 +40,7 @@ app.use('/api', limiter);
 // Trust proxy for correct IP detection behind ngrok
 app.set('trust proxy', true);
 
-// CORS configuration - allows ngrok URLs
+// CORS configuration - allows ngrok URLs and production domains
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (mobile apps, curl, etc)
@@ -52,6 +52,15 @@ app.use(cors({
     // Allow ngrok URLs
     if (origin.includes('ngrok')) return callback(null, true);
     
+    // Allow Vercel deployments
+    if (origin.includes('vercel.app')) return callback(null, true);
+    
+    // Allow Render deployments
+    if (origin.includes('onrender.com')) return callback(null, true);
+
+    // Allow any configured frontend URL
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+
     // Allow any origin for QR code scanning from mobile
     callback(null, true);
   },
