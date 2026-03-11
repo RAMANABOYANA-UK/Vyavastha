@@ -100,6 +100,28 @@ export default function AdminPortal({ user, onLogout }) {
   const bellRef = useRef(null);
   const prevComplaintCount = useRef(0);
 
+  // Persistent settings state (saved to localStorage)
+  const [settings, setSettings] = useState(() => {
+    const s = loadAdminSettings();
+    return {
+      autoRefresh:          s.autoRefresh          ?? true,
+      newComplaintAlerts:   s.newComplaintAlerts   ?? true,
+      escalationAlerts:     s.escalationAlerts     ?? true,
+      officialUpdateAlerts: s.officialUpdateAlerts ?? true,
+    };
+  });
+  const updateSetting = useCallback((key, value) => {
+    setSettings(prev => {
+      const next = { ...prev, [key]: value };
+      saveAdminSettings(next);
+      return next;
+    });
+  }, []);
+
+  // Add official modal
+  const [showAddOfficialModal, setShowAddOfficialModal] = useState(false);
+  const [addOfficialForm, setAddOfficialForm] = useState({ name: '', email: '', phone: '', department: '' });
+
   const buildActivityFeed = useCallback((latestComplaints) => {
     // Demo notifications from localStorage (status updates by officials)
     const demoNotifs = loadDemoNotifs().slice(0, 20).map(n => ({
@@ -141,21 +163,30 @@ export default function AdminPortal({ user, onLogout }) {
     }
   }, [activeTab]);
 
-  // Poll every 15s for new complaints; also listen for localStorage writes (official updates)
+  // Poll for new data; also listen for localStorage writes (citizen/official demo activity)
   useEffect(() => {
-    const interval = setInterval(() => fetchData(), 15000);
+    const interval = settings.autoRefresh ? setInterval(() => fetchData(), 15000) : null;
     const onStorage = (e) => {
       if (e.key === DEMO_NOTIF_KEY) {
         buildActivityFeed(complaints);
-        setBellUnread(prev => prev + 1);
+        if (settings.officialUpdateAlerts) setBellUnread(prev => prev + 1);
+      }
+      if (e.key === DEMO_COMPLAINTS_KEY) {
+        const fresh = loadAdminDemoComplaints();
+        setComplaints(prev => {
+          const apiIds = new Set(prev.filter(c => !String(c._id).startsWith('demo_')).map(c => String(c._id)));
+          return [...prev.filter(c => !String(c._id).startsWith('demo_')), ...fresh.filter(c => !apiIds.has(String(c._id)))];
+        });
+        buildActivityFeed(fresh);
+        if (settings.newComplaintAlerts) setBellUnread(prev => prev + 1);
       }
     };
     window.addEventListener('storage', onStorage);
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
       window.removeEventListener('storage', onStorage);
     };
-  }, [complaints, buildActivityFeed]);
+  }, [complaints, buildActivityFeed, settings]);
 
   // Close bell dropdown when clicking outside
   useEffect(() => {
@@ -192,8 +223,15 @@ export default function AdminPortal({ user, onLogout }) {
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      setStats({ total: 0, pending: 0, inProgress: 0, resolved: 0, todayNew: 0 });
-      buildActivityFeed([]);
+      // API unavailable (demo mode) — load from shared localStorage
+      const demoComplaints = loadAdminDemoComplaints();
+      setComplaints(demoComplaints);
+      const total = demoComplaints.length;
+      const pending = demoComplaints.filter(c => ['pending', 'Pending', 'Submitted'].includes(c.status)).length;
+      const inProg  = demoComplaints.filter(c => ['in_progress', 'In Progress', 'acknowledged', 'under_inspection', 'work_scheduled'].includes(c.status)).length;
+      const resolvd = demoComplaints.filter(c => ['resolved', 'Resolved', 'closed', 'Closed'].includes(c.status)).length;
+      setStats({ total, pending, inProgress: inProg, resolved: resolvd, todayNew: 0 });
+      buildActivityFeed(demoComplaints);
     } finally {
       setIsLoading(false);
     }
@@ -505,7 +543,14 @@ export default function AdminPortal({ user, onLogout }) {
               >
                 <span className="text-xl mt-0.5">{item.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{item.message}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium text-gray-800 truncate">{item.message}</p>
+                    {item.badge && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0 ${item.badgeColor || 'bg-gray-100 text-gray-500'}`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
                   {item.detail && (
                     <p className="text-xs text-gray-500 mt-0.5 truncate">{item.detail}</p>
                   )}
@@ -648,54 +693,140 @@ export default function AdminPortal({ user, onLogout }) {
     </div>
   );
 
-  const renderOfficials = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b border-gray-100 flex justify-between items-center">
-        <h3 className="font-semibold text-gray-800">Government Officials</h3>
-        <button className="px-4 py-2 bg-teal text-white rounded-lg text-sm font-medium flex items-center gap-2">
-          <UserPlus size={16} />
-          Add Official
-        </button>
-      </div>
-      <div className="p-5">
-        {officials.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {officials.map((official) => (
-              <div key={official._id} className="p-4 border border-gray-200 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
-                    <User size={24} className="text-teal" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{official.name}</p>
-                    <p className="text-sm text-gray-500">{official.email}</p>
-                  </div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-gray-500">Active</p>
-                    <p className="font-bold text-amber-600">{official.activeComplaints || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Resolved</p>
-                    <p className="font-bold text-green-600">{official.resolvedComplaints || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Rating</p>
-                    <p className="font-bold text-blue-600">⭐ {official.avgRating || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+  // Seed demo officials shown when API is unavailable
+  const DEMO_OFFICIALS = [
+    { _id: 'demo_off_1', name: 'Ravi Kumar', email: 'ravi.kumar@gov.in', department: 'Public Works Department', activeComplaints: 4, resolvedComplaints: 23, avgRating: 4.8 },
+    { _id: 'demo_off_2', name: 'Priya Sharma', email: 'priya.sharma@gov.in', department: 'Water Supply Board', activeComplaints: 6, resolvedComplaints: 19, avgRating: 4.5 },
+    { _id: 'demo_off_3', name: 'Arun Singh', email: 'arun.singh@gov.in', department: 'Sanitation Department', activeComplaints: 3, resolvedComplaints: 15, avgRating: 4.6 },
+    { _id: 'demo_off_4', name: 'Sunita Devi', email: 'sunita.devi@gov.in', department: 'Municipal Corporation', activeComplaints: 5, resolvedComplaints: 12, avgRating: 4.3 },
+  ];
+
+  const handleAddOfficial = async () => {
+    if (!addOfficialForm.name || !addOfficialForm.department) {
+      toast.error('Name and department are required');
+      return;
+    }
+    try {
+      await adminAPI.createOfficial(addOfficialForm);
+      toast.success('Official added successfully');
+      setShowAddOfficialModal(false);
+      setAddOfficialForm({ name: '', email: '', phone: '', department: '' });
+      fetchData();
+    } catch {
+      // Demo fallback
+      const newOfficial = { _id: 'demo_off_' + Date.now(), ...addOfficialForm, activeComplaints: 0, resolvedComplaints: 0, avgRating: 'N/A' };
+      setOfficials(prev => [...prev, newOfficial]);
+      toast.success('Official added (demo mode)');
+      setShowAddOfficialModal(false);
+      setAddOfficialForm({ name: '', email: '', phone: '', department: '' });
+    }
+  };
+
+  const renderOfficials = () => {
+    const displayOfficials = officials.length > 0 ? officials : DEMO_OFFICIALS;
+    const isDemo = officials.length === 0;
+    return (
+      <div className="space-y-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold text-gray-800">Government Officials</h3>
+              {isDemo && <p className="text-xs text-amber-600 mt-0.5">Showing demo data — connect backend to see real officials</p>}
+            </div>
+            <button
+              onClick={() => setShowAddOfficialModal(true)}
+              className="px-4 py-2 bg-teal text-white rounded-lg text-sm font-medium flex items-center gap-2"
+            >
+              <UserPlus size={16} />
+              Add Official
+            </button>
           </div>
-        ) : (
-          <p className="text-center text-gray-500 py-8">
-            No officials registered yet. Add officials to start assigning complaints.
-          </p>
-        )}
+          <div className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayOfficials.map((official) => (
+                <div key={official._id} className={`p-4 border rounded-xl ${isDemo ? 'border-dashed border-amber-200 bg-amber-50/30' : 'border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                      <span className="text-teal font-bold text-lg">{official.name?.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{official.name}</p>
+                      <p className="text-xs text-gray-500">{official.email}</p>
+                      <p className="text-xs text-teal font-medium">{official.department}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-center">
+                      <p className="text-gray-500 text-xs">Active</p>
+                      <p className="font-bold text-amber-600">{official.activeComplaints || 0}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-500 text-xs">Resolved</p>
+                      <p className="font-bold text-green-600">{official.resolvedComplaints || 0}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-500 text-xs">Rating</p>
+                      <p className="font-bold text-blue-600">⭐ {official.avgRating || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Add Official Modal */}
+        <AnimatePresence>
+          {showAddOfficialModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddOfficialModal(false)}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-2xl p-6 w-full max-w-md"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-5">
+                  <h3 className="font-bold text-lg text-gray-800">Add Government Official</h3>
+                  <button onClick={() => setShowAddOfficialModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" value={addOfficialForm.name} onChange={e => setAddOfficialForm(f => ({ ...f, name: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal" placeholder="e.g. Ravi Kumar" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" value={addOfficialForm.email} onChange={e => setAddOfficialForm(f => ({ ...f, email: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal" placeholder="official@gov.in" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" value={addOfficialForm.phone} onChange={e => setAddOfficialForm(f => ({ ...f, phone: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal" placeholder="+91 9XXXXXXXXX" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                    <select value={addOfficialForm.department} onChange={e => setAddOfficialForm(f => ({ ...f, department: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal">
+                      <option value="">Select department…</option>
+                      {departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <button onClick={handleAddOfficial}
+                    className="w-full bg-teal text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-teal-700 transition-colors">
+                    Add Official
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
-  );
+    );
+  };
+
 
   const renderAnalytics = () => {
     const data = analytics || {};
@@ -1037,57 +1168,135 @@ export default function AdminPortal({ user, onLogout }) {
   };
 
   const renderSettings = () => {
-    const [autoRefresh, setAutoRefresh] = useState(true);
-    const [emailAlerts, setEmailAlerts] = useState(true);
-    const [escalationAlerts, setEscalationAlerts] = useState(true);
-    const [newComplaintAlerts, setNewComplaintAlerts] = useState(true);
-
-    const Toggle = ({ value, onChange, label, description }) => (
+    const Toggle = ({ sKey, label, description }) => (
       <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
         <div>
           <p className="font-medium text-gray-800 text-sm">{label}</p>
           <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
         <button
-          onClick={() => onChange(!value)}
-          className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-teal' : 'bg-gray-300'}`}
+          onClick={() => updateSetting(sKey, !settings[sKey])}
+          className={`w-12 h-6 rounded-full transition-colors relative ${settings[sKey] ? 'bg-teal' : 'bg-gray-300'}`}
         >
-          <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-7' : 'translate-x-1'}`} />
+          <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${settings[sKey] ? 'translate-x-7' : 'translate-x-1'}`} />
         </button>
       </div>
     );
 
+    const handleExportData = () => {
+      const exportPayload = {
+        exportedAt: new Date().toISOString(),
+        complaints,
+        activityFeed,
+        officials,
+        stats,
+      };
+      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `praja-admin-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Dashboard data exported!');
+    };
+
+    const handleClearCache = () => {
+      localStorage.removeItem('praja_demo_complaints');
+      localStorage.removeItem('praja_demo_notifications');
+      setComplaints([]);
+      setActivityFeed([]);
+      setBellUnread(0);
+      toast.success('Demo cache cleared. Refresh to load live data.');
+    };
+
     return (
       <div className="max-w-2xl space-y-6">
-        {/* Notifications */}
+        {/* Notification Preferences */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
             <Bell size={18} className="text-teal" /> Notification Preferences
           </h3>
-          <p className="text-xs text-gray-500 mb-4">Control which events trigger alerts in the admin portal</p>
-          <Toggle value={newComplaintAlerts} onChange={setNewComplaintAlerts}
-            label="New Complaint Submitted"
-            description="Show in activity feed when a citizen submits a complaint" />
-          <Toggle value={escalationAlerts} onChange={setEscalationAlerts}
-            label="Complaint Escalated"
+          <p className="text-xs text-gray-500 mb-4">Control which events trigger alerts and appear in the activity feed</p>
+          <Toggle sKey="newComplaintAlerts" label="New Complaint Submitted"
+            description="Show when a citizen submits a new complaint" />
+          <Toggle sKey="escalationAlerts" label="Complaint Escalated"
             description="Alert when a complaint is escalated by a citizen" />
-          <Toggle value={emailAlerts} onChange={setEmailAlerts}
-            label="Status Updates by Officials"
-            description="Show in activity feed when an official changes complaint status" />
+          <Toggle sKey="officialUpdateAlerts" label="Official Status Updates"
+            description="Show when an official changes the status of a complaint" />
         </div>
 
-        {/* Display */}
+        {/* Dashboard Behaviour */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
             <RefreshCw size={18} className="text-teal" /> Dashboard Behaviour
           </h3>
           <p className="text-xs text-gray-500 mb-4">Control how the portal fetches and displays data</p>
-          <Toggle value={autoRefresh} onChange={setAutoRefresh}
-            label="Auto-refresh (every 15s)"
+          <Toggle sKey="autoRefresh" label="Auto-refresh (every 15 s)"
             description="Automatically poll for new complaints and status updates" />
         </div>
 
-        {/* Admin Info */}
+        {/* Data Management */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Download size={18} className="text-teal" /> Data Management
+          </h3>
+          <div className="space-y-3">
+            <button
+              onClick={handleExportData}
+              className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-left transition-colors"
+            >
+              <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Download size={18} className="text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">Export Dashboard Data</p>
+                <p className="text-xs text-gray-500">Download complaints + activity as JSON</p>
+              </div>
+            </button>
+            <button
+              onClick={handleClearCache}
+              className="w-full flex items-center gap-3 p-3 border border-red-100 rounded-lg hover:bg-red-50 text-left transition-colors"
+            >
+              <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Trash2 size={18} className="text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-red-700">Clear Demo Cache</p>
+                <p className="text-xs text-gray-500">Remove locally-stored demo complaints &amp; notifications</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* System Status */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Activity size={18} className="text-teal" /> System Status
+          </h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Activity Feed</span>
+              <span className="font-medium text-green-600">{activityFeed.length} events tracked</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Demo Complaints</span>
+              <span className="font-medium text-blue-600">{loadAdminDemoComplaints().length} stored locally</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Demo Notifications</span>
+              <span className="font-medium text-purple-600">{loadDemoNotifs().length} stored locally</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Auto-refresh</span>
+              <span className={`font-medium ${settings.autoRefresh ? 'text-green-600' : 'text-gray-400'}`}>
+                {settings.autoRefresh ? 'Active (15 s)' : 'Disabled'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Admin Account */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <ShieldCheck size={18} className="text-teal" /> Admin Account
@@ -1108,7 +1317,9 @@ export default function AdminPortal({ user, onLogout }) {
               <p className="text-xs text-gray-500">Total Complaints</p>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">{complaints.filter(c => c.status === 'resolved' || c.status === 'Resolved').length}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {complaints.filter(c => ['resolved', 'Resolved', 'closed', 'Closed'].includes(c.status)).length}
+              </p>
               <p className="text-xs text-gray-500">Resolved</p>
             </div>
             <div className="p-3 bg-orange-50 rounded-lg">

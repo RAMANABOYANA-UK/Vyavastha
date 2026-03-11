@@ -2,14 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authAPI, complaintsAPI, usersAPI } from '../services/api';
 
-// ─── Demo / offline notification helpers (localStorage) ──────────────────────
-const DEMO_NOTIF_KEY = 'praja_demo_notifications';
-function loadDemoNotifs() {
-  try { return JSON.parse(localStorage.getItem(DEMO_NOTIF_KEY) || '[]'); } catch { return []; }
-}
-function saveDemoNotifs(list) {
-  try { localStorage.setItem(DEMO_NOTIF_KEY, JSON.stringify(list.slice(0, 100))); } catch {}
-}
+// ─── Demo / offline helpers (localStorage) ─────────────────────────────────
+const DEMO_NOTIF_KEY      = 'praja_demo_notifications';
+const DEMO_COMPLAINTS_KEY = 'praja_demo_complaints';
+function loadDemoNotifs()       { try { return JSON.parse(localStorage.getItem(DEMO_NOTIF_KEY)      || '[]'); } catch { return []; } }
+function saveDemoNotifs(list)   { try { localStorage.setItem(DEMO_NOTIF_KEY,      JSON.stringify(list.slice(0, 100))); } catch {} }
+function loadDemoComplaints()   { try { return JSON.parse(localStorage.getItem(DEMO_COMPLAINTS_KEY) || '[]'); } catch { return []; } }
+function saveDemoComplaints(l)  { try { localStorage.setItem(DEMO_COMPLAINTS_KEY, JSON.stringify(l.slice(0, 50)));  } catch {} }
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Auth Store
@@ -226,6 +225,9 @@ export const useComplaintsStore = create(
         complaints: [demoComplaint, ...state.complaints],
         isLoading: false,
       }));
+
+      // Persist to shared key so admin portal can read it cross-tab
+      saveDemoComplaints([demoComplaint, ...loadDemoComplaints()]);
       
       return { 
         success: true, 
@@ -278,6 +280,15 @@ export const useComplaintsStore = create(
             : c
         ),
       }));
+
+      // Keep admin portal's shared complaints store in sync
+      saveDemoComplaints(
+        loadDemoComplaints().map(c =>
+          String(c._id) === idStr
+            ? { ...c, status: data.status, updatedAt: new Date().toISOString() }
+            : c
+        )
+      );
 
       // Push a local notification so the citizen-side screen shows the update
       const statusLabels = {
