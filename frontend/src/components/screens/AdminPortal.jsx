@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, FileText, BarChart3, Settings, 
   LogOut, Bell, Search, Filter, ChevronDown, CheckCircle,
   Clock, AlertTriangle, TrendingUp, Building2, MapPin,
   Eye, UserPlus, Trash2, Edit, X, User, Calendar,
-  AlertCircle, ArrowUpRight, RefreshCw, Download
+  AlertCircle, ArrowUpRight, RefreshCw, Download, Activity,
+  ShieldCheck, ToggleLeft, ToggleRight, Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -60,6 +61,20 @@ const CHART_COLORS = {
   closed: '#0D4F44'
 };
 
+// ─── helpers to read & clear the shared demo-notification log ──────────────
+const DEMO_NOTIF_KEY = 'praja_demo_notifications';
+function loadDemoNotifs() {
+  try { return JSON.parse(localStorage.getItem(DEMO_NOTIF_KEY) || '[]'); } catch { return []; }
+}
+function timeAgo(isoStr) {
+  const diff = Math.floor((Date.now() - new Date(isoStr)) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return new Date(isoStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 export default function AdminPortal({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [complaints, setComplaints] = useState([]);
@@ -78,6 +93,44 @@ export default function AdminPortal({ user, onLogout }) {
     priorityOverride: null
   });
 
+  // Live activity feed state
+  const [activityFeed, setActivityFeed] = useState([]);
+  const [showBell, setShowBell] = useState(false);
+  const [bellUnread, setBellUnread] = useState(0);
+  const bellRef = useRef(null);
+  const prevComplaintCount = useRef(0);
+
+  const buildActivityFeed = useCallback((latestComplaints) => {
+    // Demo notifications from localStorage (status updates by officials)
+    const demoNotifs = loadDemoNotifs().slice(0, 20).map(n => ({
+      id: n._id,
+      type: n.type,
+      icon: n.type === 'complaint_resolved' ? '✅' : '🔄',
+      message: n.title,
+      detail: n.message,
+      time: timeAgo(n.createdAt),
+      raw: n.createdAt,
+      severity: n.type === 'complaint_resolved' ? 'resolved' : 'update',
+    }));
+
+    // Recent complaints from API (new submissions by citizens)
+    const recentItems = (latestComplaints || []).slice(0, 10).map(c => ({
+      id: c._id,
+      type: 'new_complaint',
+      icon: '📋',
+      message: `New ${c.categoryLabel || 'complaint'} submitted`,
+      detail: c.location?.address || c.location?.city || '',
+      time: timeAgo(c.createdAt),
+      raw: c.createdAt,
+      severity: c.aiVerification?.severity || c.priority || 'medium',
+    }));
+
+    const merged = [...demoNotifs, ...recentItems]
+      .sort((a, b) => new Date(b.raw) - new Date(a.raw))
+      .slice(0, 25);
+    setActivityFeed(merged);
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -88,6 +141,31 @@ export default function AdminPortal({ user, onLogout }) {
     }
   }, [activeTab]);
 
+  // Poll every 15s for new complaints; also listen for localStorage writes (official updates)
+  useEffect(() => {
+    const interval = setInterval(() => fetchData(), 15000);
+    const onStorage = (e) => {
+      if (e.key === DEMO_NOTIF_KEY) {
+        buildActivityFeed(complaints);
+        setBellUnread(prev => prev + 1);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [complaints, buildActivityFeed]);
+
+  // Close bell dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) setShowBell(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -95,8 +173,15 @@ export default function AdminPortal({ user, onLogout }) {
         api.get('/complaints?limit=100'),
         api.get('/complaints/stats'),
       ]);
-      setComplaints(complaintsRes.data || []);
+      const list = complaintsRes.data || [];
+      setComplaints(list);
       setStats(statsRes.data || {});
+      // Detect new complaints since last fetch and add to activity feed
+      if (prevComplaintCount.current > 0 && list.length > prevComplaintCount.current) {
+        setBellUnread(prev => prev + (list.length - prevComplaintCount.current));
+      }
+      prevComplaintCount.current = list.length;
+      buildActivityFeed(list);
       
       // Fetch officials
       try {
@@ -107,13 +192,8 @@ export default function AdminPortal({ user, onLogout }) {
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      setStats({
-        total: 156,
-        pending: 42,
-        inProgress: 38,
-        resolved: 76,
-        todayNew: 12,
-      });
+      setStats({ total: 0, pending: 0, inProgress: 0, resolved: 0, todayNew: 0 });
+      buildActivityFeed([]);
     } finally {
       setIsLoading(false);
     }
@@ -334,6 +414,9 @@ export default function AdminPortal({ user, onLogout }) {
                 </div>
               </div>
             ))}
+            {complaints.length === 0 && (
+              <div className="p-8 text-center text-gray-400">No complaints yet</div>
+            )}
           </div>
         </div>
 
@@ -380,6 +463,60 @@ export default function AdminPortal({ user, onLogout }) {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Live Activity Feed — full width */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+            <Zap size={18} className="text-amber-500" />
+            Live Activity Feed
+          </h3>
+          <button
+            onClick={() => { fetchData(); setBellUnread(0); }}
+            className="flex items-center gap-1.5 text-xs text-teal hover:underline"
+          >
+            <RefreshCw size={13} /> Refresh
+          </button>
+        </div>
+        <div className="divide-y divide-gray-50 max-h-[340px] overflow-y-auto">
+          {activityFeed.length === 0 ? (
+            <div className="p-8 text-center text-gray-400">
+              <Activity size={32} className="mx-auto mb-2 opacity-30" />
+              <p className="text-sm">No activity yet. Activity will appear here when citizens submit complaints or officials update statuses.</p>
+            </div>
+          ) : activityFeed.map((item, idx) => {
+            const dotColor = {
+              resolved: 'bg-green-500',
+              update: 'bg-blue-500',
+              critical: 'bg-red-500 animate-pulse',
+              high: 'bg-orange-500',
+              medium: 'bg-amber-500',
+              low: 'bg-green-400',
+            }[item.severity] || 'bg-gray-400';
+            return (
+              <motion.div
+                key={item.id || idx}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.03 }}
+                className="px-5 py-3 flex items-start gap-3 hover:bg-gray-50"
+              >
+                <span className="text-xl mt-0.5">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{item.message}</p>
+                  {item.detail && (
+                    <p className="text-xs text-gray-500 mt-0.5 truncate">{item.detail}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                  <span className="text-xs text-gray-400 whitespace-nowrap">{item.time}</span>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -899,6 +1036,91 @@ export default function AdminPortal({ user, onLogout }) {
     );
   };
 
+  const renderSettings = () => {
+    const [autoRefresh, setAutoRefresh] = useState(true);
+    const [emailAlerts, setEmailAlerts] = useState(true);
+    const [escalationAlerts, setEscalationAlerts] = useState(true);
+    const [newComplaintAlerts, setNewComplaintAlerts] = useState(true);
+
+    const Toggle = ({ value, onChange, label, description }) => (
+      <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+        <div>
+          <p className="font-medium text-gray-800 text-sm">{label}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        </div>
+        <button
+          onClick={() => onChange(!value)}
+          className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-teal' : 'bg-gray-300'}`}
+        >
+          <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-7' : 'translate-x-1'}`} />
+        </button>
+      </div>
+    );
+
+    return (
+      <div className="max-w-2xl space-y-6">
+        {/* Notifications */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            <Bell size={18} className="text-teal" /> Notification Preferences
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">Control which events trigger alerts in the admin portal</p>
+          <Toggle value={newComplaintAlerts} onChange={setNewComplaintAlerts}
+            label="New Complaint Submitted"
+            description="Show in activity feed when a citizen submits a complaint" />
+          <Toggle value={escalationAlerts} onChange={setEscalationAlerts}
+            label="Complaint Escalated"
+            description="Alert when a complaint is escalated by a citizen" />
+          <Toggle value={emailAlerts} onChange={setEmailAlerts}
+            label="Status Updates by Officials"
+            description="Show in activity feed when an official changes complaint status" />
+        </div>
+
+        {/* Display */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            <RefreshCw size={18} className="text-teal" /> Dashboard Behaviour
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">Control how the portal fetches and displays data</p>
+          <Toggle value={autoRefresh} onChange={setAutoRefresh}
+            label="Auto-refresh (every 15s)"
+            description="Automatically poll for new complaints and status updates" />
+        </div>
+
+        {/* Admin Info */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <ShieldCheck size={18} className="text-teal" /> Admin Account
+          </h3>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+              <span className="text-purple-600 font-bold text-xl">{user?.name?.charAt(0) || 'A'}</span>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-800">{user?.name || 'Admin'}</p>
+              <p className="text-sm text-gray-500">{user?.email || user?.phone || ''}</p>
+              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">Administrator</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">{complaints.length}</p>
+              <p className="text-xs text-gray-500">Total Complaints</p>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{complaints.filter(c => c.status === 'resolved' || c.status === 'Resolved').length}</p>
+              <p className="text-xs text-gray-500">Resolved</p>
+            </div>
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <p className="text-2xl font-bold text-orange-600">{officials.length}</p>
+              <p className="text-xs text-gray-500">Officials</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -958,18 +1180,65 @@ export default function AdminPortal({ user, onLogout }) {
           </div>
           <div className="flex items-center gap-4">
             <button 
-              onClick={fetchData}
+              onClick={() => { fetchData(); setBellUnread(0); }}
               className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
               title="Refresh data"
             >
               <RefreshCw size={20} />
             </button>
-            <button className="relative p-2 text-gray-400 hover:text-gray-600">
-              <Bell size={22} />
-              {escalatedCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              )}
-            </button>
+            {/* Notification Bell */}
+            <div className="relative" ref={bellRef}>
+              <button
+                onClick={() => { setShowBell(v => !v); setBellUnread(0); }}
+                className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <Bell size={22} />
+                {(bellUnread + escalatedCount) > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                    {bellUnread + escalatedCount}
+                  </span>
+                )}
+              </button>
+              <AnimatePresence>
+                {showBell && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                    className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                      <span className="font-semibold text-gray-800 text-sm">Recent Updates</span>
+                      <span className="text-xs text-gray-400">{activityFeed.length} events</span>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                      {activityFeed.length === 0 ? (
+                        <div className="p-4 text-center text-gray-400 text-sm">No recent activity</div>
+                      ) : activityFeed.slice(0, 8).map((item, idx) => (
+                        <div key={idx} className="px-4 py-3 hover:bg-gray-50">
+                          <div className="flex items-start gap-2">
+                            <span className="text-base">{item.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-800 truncate">{item.message}</p>
+                              {item.detail && <p className="text-xs text-gray-400 truncate">{item.detail}</p>}
+                            </div>
+                            <span className="text-[10px] text-gray-400 whitespace-nowrap">{item.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-3 border-t border-gray-100 text-center">
+                      <button
+                        onClick={() => { setShowBell(false); setActiveTab('dashboard'); }}
+                        className="text-xs text-teal hover:underline"
+                      >
+                        View full activity feed
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
               <span className="text-purple-600 font-semibold">
                 {user?.name?.charAt(0) || 'A'}
@@ -990,9 +1259,7 @@ export default function AdminPortal({ user, onLogout }) {
               {activeTab === 'complaints' && renderComplaints()}
               {activeTab === 'officials' && renderOfficials()}
               {activeTab === 'analytics' && renderAnalytics()}
-              {activeTab === 'settings' && (
-                <div className="bg-white rounded-xl p-5">Settings coming soon...</div>
-              )}
+              {activeTab === 'settings' && renderSettings()}
             </>
           )}
         </div>
