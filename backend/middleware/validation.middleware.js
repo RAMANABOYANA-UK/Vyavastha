@@ -81,7 +81,7 @@ export const updateComplaintValidation = [
     .isMongoId().withMessage('Invalid complaint ID'),
   body('status')
     .optional()
-    .isIn(['pending', 'in_progress', 'resolved', 'rejected', 'closed'])
+    .isIn(['pending', 'acknowledged', 'in_progress', 'under_inspection', 'work_scheduled', 'resolved', 'rejected', 'closed'])
     .withMessage('Invalid status'),
   validate
 ];

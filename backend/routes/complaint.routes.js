@@ -45,11 +45,11 @@ router.get('/:id', idParamValidation, optionalAuth, getComplaint);
 router.post('/:id/upvote', protect, idParamValidation, upvoteComplaint);
 router.post('/:id/feedback', protect, idParamValidation, addFeedback);
 
-// Admin routes
+// Admin/Official routes
 router.put(
   '/:id/status',
   protect,
-  authorize('admin', 'moderator'),
+  authorize('admin', 'moderator', 'official'),
   updateComplaintValidation,
   updateComplaintStatus
 );
@@ -58,7 +58,7 @@ router.put(
 router.patch(
   '/:id/status',
   protect,
-  authorize('admin', 'moderator'),
+  authorize('admin', 'moderator', 'official'),
   updateComplaintValidation,
   updateComplaintStatus
 );

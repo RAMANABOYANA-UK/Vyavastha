@@ -289,17 +289,19 @@ export const useComplaintsStore = create(
 
 // Notifications Store
 export const useNotificationsStore = create((set, get) => ({
-  notifications: [],
+  notifications: [],   // always the full list (read + unread)
   unreadCount: 0,
   isLoading: false,
 
-  fetchNotifications: async (params = {}) => {
+  // Always fetch the full list so read/unread tabs are both populated
+  fetchNotifications: async () => {
     set({ isLoading: true });
     try {
-      const response = await usersAPI.getNotifications(params);
+      const response = await usersAPI.getNotifications({ limit: 50 });
+      const all = response.data || [];
       set({
-        notifications: response.data,
-        unreadCount: response.unreadCount,
+        notifications: all,
+        unreadCount: response.unreadCount ?? all.filter(n => !n.isRead).length,
         isLoading: false,
       });
     } catch (error) {

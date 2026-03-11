@@ -281,12 +281,25 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
 
   await complaint.save();
 
+  // Human-readable status labels
+  const statusLabels = {
+    pending: 'Pending',
+    acknowledged: 'Acknowledged',
+    in_progress: 'In Progress',
+    under_inspection: 'Under Inspection',
+    work_scheduled: 'Work Scheduled',
+    resolved: 'Resolved',
+    rejected: 'Rejected',
+    closed: 'Closed',
+  };
+  const statusLabel = statusLabels[status] || status;
+
   // Create notification for user
   await Notification.create({
     user: complaint.user,
     type: status === 'resolved' ? 'complaint_resolved' : 'complaint_update',
-    title: status === 'resolved' ? 'Complaint Resolved!' : 'Complaint Update',
-    message: `Your complaint ${complaint.complaintId} has been ${status === 'resolved' ? 'resolved' : 'updated to ' + status}.`,
+    title: status === 'resolved' ? '✅ Complaint Resolved!' : `📋 Status Updated: ${statusLabel}`,
+    message: `Your complaint ${complaint.complaintId} has been updated to "${statusLabel}".${comment ? ` Official note: ${comment}` : ''}`,
     data: { complaintId: complaint._id }
   });
 
