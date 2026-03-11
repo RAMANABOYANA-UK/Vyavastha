@@ -1,41 +1,39 @@
 # PRAJA - प्रजा | Citizen Grievance Portal
 
-A modern AI-powered civic grievance management system for India. Report civic issues, track complaint status, and contribute to improving public services in your community.
+A modern AI-powered civic grievance management platform designed to help citizens report public issues easily and assist authorities in resolving them efficiently. The system improves transparency, accountability, and community participation in civic services.
 
 ## Key Features
 
 
 ## AI-Powered Analysis
-- **Google Gemini Vision Integration**: Automatic image analysis for civic issues
-- **Smart Categorization**: AI detects issue type, severity, and recommends department
-- **Confidence Scoring**: Reliability metrics for each analysis
-- **Auto-fill Forms**: AI generates descriptions from uploaded photos
+- **Google Gemini Vision Integration**: Automatically analyzes uploaded images of civic issues.
+- **Smart Categorization**: Detects issue type, severity, and recommends the responsible department.
+- **Confidence Scoring**: Shows reliability of AI analysis.
+- **Auto-fill Forms**: AI suggests complaint descriptions from uploaded photos.
 
 ## Multi-Role System
-- **Citizens**: Report issues, track complaints, earn points
-- **Government Officials**: Manage assigned complaints, update status, ATR reports
-- **Administrators**: Full system oversight, analytics, user management
 
-## Citizen Features
-- **Post Complaints**: Report civic issues with photos and GPS location
-- **Real-time Tracking**: Monitor complaint resolution progress
-- **Gamification**: Earn XP points for civic participation
-- **Community Hub**: Upvote and support others' complaints
-- **Civic Quiz**: Learn and earn rewards
-- **Rate Services**: Review public toilets, transport, and more
-- **OTP Authentication**: Secure phone/email verification
+**Citizens**:
+- Report civic issues with images and GPS location
+- Track complaint status in real time
+- Earn XP points for participation
+- Support community complaints with upvotes
+- Participate in civic quizzes
+- Rate public services
+  
+**Government Officials**: 
+- View and manage assigned complaints
+- Filter complaints by status, priority, or search
+- Update complaint progress
+- View AI severity indicators
+- Maintain ATR (Action Taken Report) history
 
-## Official Portal
-- **Complaint Dashboard**: Filter by status, priority, search
-- **AI Severity Badges**: Visual priority indicators
-- **Map Integration**: Google Maps embed for location
-- **ATR History**: Action Taken Report timeline
-- **Status Updates**: Acknowledge → In Progress → Resolved
+**Administrators**: 
+- Monitor system statistics
+- Manage users and officials
+- View analytics and performance metrics
+- Maintain full platform control
 
-## Admin Portal
-- **Real-time Statistics**: Complaints, users, resolution rates
-- **User Management**: View and manage all users
-- **Analytics Dashboard**: Trends and performance metrics
 
 ## Tech Stack
 
@@ -69,15 +67,15 @@ A modern AI-powered civic grievance management system for India. Report civic is
 - Verify OTP
 
 ### Complaints
-- List all complaints
-- Get user's complaints
-- Create complaint (with AI analysis)
-- Get complaint details
-- Update status
+- Create Complaint
+- Get Complaint Details
+- List All Complaints
+- Get User Complaints
+- Update Complaint Status
 
 ### Users
 - Get notifications
-- Mark as read
+- Mark notifications as read
 - Get leaderboard
 
 ## 🎨
