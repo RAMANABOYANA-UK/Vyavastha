@@ -8,7 +8,7 @@ import {
   Shield, Sparkles, Trophy, Eye, Copy, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { buildRatingUrl, getBaseUrl } from '../../config/ngrok';
+import { buildRatingUrl, getBaseUrl, detectLanIp } from '../../config/ngrok';
 
 // Demo service data — shown when no services exist in the DB yet.
 // Each serviceId must be unique; the QR code encodes /rate/<serviceId>.
@@ -290,6 +290,8 @@ export default function RateServiceScreen({ onBack }) {
       }
     };
     fetchServices();
+    // Kick off async LAN IP detection so QR codes encode the right IP
+    detectLanIp();
   }, []);
 
   // Get services for selected category (uses category name as key)
@@ -541,6 +543,23 @@ export default function RateServiceScreen({ onBack }) {
                 </div>
               </div>
             </div>
+
+            {/* Localhost warning — phones can't reach localhost */}
+            {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-sm font-semibold text-amber-800 mb-1">📱 Want to scan QR from another phone?</p>
+                <p className="text-xs text-amber-700">
+                  Open this page on your PC using your <strong>WiFi IP</strong> instead of localhost:
+                </p>
+                <p className="text-xs font-mono bg-amber-100 px-3 py-2 rounded-lg mt-2 text-amber-900 select-all break-all">
+                  http://{window.__PRAJA_LAN_IP || '<your-wifi-ip>'}:{window.location.port || '5173'}
+                </p>
+                <p className="text-[11px] text-amber-600 mt-2">
+                  To find your IP: open a terminal → run <code className="bg-amber-100 px-1 rounded">ipconfig</code> → look for "IPv4 Address" under your WiFi adapter.
+                  Then QR codes will automatically use that IP and work on any phone on the same WiFi.
+                </p>
+              </div>
+            )}
 
             {/* Category Selection */}
             <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">

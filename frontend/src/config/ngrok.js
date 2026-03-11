@@ -18,15 +18,66 @@ export const getBaseUrl = () => {
   if (import.meta.env.VITE_NGROK_URL) {
     return import.meta.env.VITE_NGROK_URL;
   }
-  
-  // Use whatever origin the browser is currently using.
-  // If accessed via http://192.168.x.x:5173, QR codes will encode that IP.
-  // If accessed via ngrok/Netlify/any domain, QR codes use that domain.
+
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    const origin = window.location.origin;
+    const hostname = window.location.hostname;
+
+    // If already on a LAN IP, ngrok, or deployed domain — use as-is
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return origin;
+    }
+
+    // On localhost: QR codes must use the machine's LAN IP so other
+    // phones on the same WiFi can reach the dev server.
+    // We inject this at build time via VITE_LAN_IP, or fall back to
+    // a runtime WebRTC-based detection saved earlier.
+    const lanIp = import.meta.env.VITE_LAN_IP || window.__PRAJA_LAN_IP;
+    if (lanIp) {
+      return `http://${lanIp}:${window.location.port || '5173'}`;
+    }
+
+    // Last resort: try to detect via the RTCPeerConnection trick
+    // and cache the result for subsequent calls.
+    detectLanIp();
+
+    // While detection runs asynchronously, return origin (localhost).
+    // The user will see a banner suggesting they open via LAN IP.
+    return origin;
   }
-  
+
   return 'http://localhost:5173';
+};
+
+// Async LAN IP detection using WebRTC (works in most browsers)
+let _detecting = false;
+export const detectLanIp = () => {
+  if (_detecting || typeof window === 'undefined') return;
+  if (window.__PRAJA_LAN_IP) return;
+  _detecting = true;
+
+  try {
+    const pc = new RTCPeerConnection({ iceServers: [] });
+    pc.createDataChannel('');
+    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+    pc.onicecandidate = (e) => {
+      if (!e || !e.candidate || !e.candidate.candidate) return;
+      const match = e.candidate.candidate.match(
+        /([0-9]{1,3}\.){3}[0-9]{1,3}/
+      );
+      if (match) {
+        const ip = match[0];
+        if (ip !== '0.0.0.0' && !ip.startsWith('127.')) {
+          window.__PRAJA_LAN_IP = ip;
+          console.log('[Praja] Detected LAN IP:', ip);
+        }
+      }
+      pc.close();
+      _detecting = false;
+    };
+  } catch {
+    _detecting = false;
+  }
 };
 
 // Build the rating URL for QR codes
