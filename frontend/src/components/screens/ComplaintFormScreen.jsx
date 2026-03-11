@@ -43,7 +43,12 @@ export default function ComplaintFormScreen() {
   const [duplicateComplaints, setDuplicateComplaints] = useState([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const [showLocationMap, setShowLocationMap] = useState(false);
+  const [imageRejected, setImageRejected] = useState(false);
+  const [imageRejectionReason, setImageRejectionReason] = useState('');
   const fileRef = useRef();
+
+  // Gemini API key for image validation
+  const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   // Check for duplicates when location and AI result are available
   useEffect(() => {
@@ -138,31 +143,50 @@ export default function ComplaintFormScreen() {
         return;
       }
       
-      // Store file reference for AI analysis
+      // Reset previous state
       setPhotoFile(file);
       setAiVisionResult(null);
+      setImageRejected(false);
+      setImageRejectionReason('');
       resetAnalysis();
       
+      // Show preview immediately
       const reader = new FileReader();
       reader.onload = (ev) => setPhoto(ev.target.result);
       reader.readAsDataURL(file);
       
-      // Auto-analyze with Gemini Vision if API key is available
+      // AI image validation — enforce civic/sanitation images only
       if (geminiApiKey) {
-        toast.loading('Analyzing image with AI...', { id: 'ai-analysis' });
+        toast.loading('Verifying image...', { id: 'ai-analysis' });
         const result = await analyzeImage(file);
         toast.dismiss('ai-analysis');
         
         if (result) {
           setAiVisionResult(result);
-          toast.success('AI analysis complete!', { icon: '🤖' });
           
-          // Auto-fill description if empty and AI found civic issue
-          if (!description && result.isCivicIssue && result.description) {
+          if (!result.isCivicIssue) {
+            // REJECT: not a civic/sanitation issue
+            setPhoto(null);
+            setPhotoFile(null);
+            setImageRejected(true);
+            setImageRejectionReason(
+              result.reason || 'This image does not appear to show a civic or sanitation issue.'
+            );
+            toast.error('Image rejected — please upload a photo of the actual issue', { duration: 4000, icon: '🚫' });
+            return;
+          }
+          
+          // ACCEPTED: valid civic issue
+          setImageRejected(false);
+          toast.success('Image verified! Valid civic issue detected.', { icon: '✅' });
+          
+          // Auto-fill description if empty
+          if (!description && result.description) {
             setDescription(result.description);
           }
         } else if (geminiError) {
-          toast.error('AI analysis failed - you can still submit');
+          // AI failed — still allow submission but warn
+          toast.error('AI verification failed — you can still submit', { icon: '⚠️' });
         }
       }
     }
@@ -221,7 +245,9 @@ export default function ComplaintFormScreen() {
     }
   };
 
-  const isValid = description.trim() && photo;
+  // Block submit if: no description, no photo, image rejected by AI, or AI is still analyzing
+  const isValid = description.trim() && photo && !imageRejected && !isAnalyzing
+    && (!aiVisionResult || aiVisionResult.isCivicIssue);
 
   if (submitted) {
     return (
@@ -574,6 +600,28 @@ export default function ComplaintFormScreen() {
                   <p className="text-xs text-red-600 mt-1">You can still submit your complaint manually.</p>
                 </div>
               )}
+
+              {/* Image Rejected Banner */}
+              {imageRejected && (
+                <div className="flex-1 bg-red-50 border-2 border-red-300 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <XCircle size={18} className="text-red-600" />
+                    <span className="text-sm font-bold text-red-800">Image Rejected</span>
+                  </div>
+                  <p className="text-xs text-red-700 mb-2">
+                    {imageRejectionReason}
+                  </p>
+                  <p className="text-xs text-gray-600 font-medium">
+                    Please upload a clear photo showing:
+                  </p>
+                  <ul className="text-xs text-gray-600 ml-3 mt-1 list-disc space-y-0.5">
+                    <li>Garbage dumps or dirty spots</li>
+                    <li>Overflowing dustbins or drains</li>
+                    <li>Stagnant water or sewerage</li>
+                    <li>Any sanitation/cleanliness issue</li>
+                  </ul>
+                </div>
+              )}
             </div>
             <input
               ref={fileRef}
@@ -584,9 +632,22 @@ export default function ComplaintFormScreen() {
             />
           </div>
 
-          {!isValid && (
+          {!isValid && !imageRejected && !isAnalyzing && (
             <div className="text-sm text-gray-500 italic">
               Add a description and photo to submit your complaint.
+            </div>
+          )}
+
+          {isAnalyzing && (
+            <div className="flex items-center gap-2 text-sm text-indigo-600 font-medium">
+              <Loader size={16} className="animate-spin" />
+              Verifying image with AI...
+            </div>
+          )}
+
+          {imageRejected && (
+            <div className="text-sm text-red-600 font-medium italic">
+              Upload a valid photo of the issue to continue.
             </div>
           )}
 
@@ -599,7 +660,7 @@ export default function ComplaintFormScreen() {
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {isLoading ? 'Submitting...' : 'Submit'}
+            {isLoading ? 'Submitting...' : isAnalyzing ? 'Verifying Image...' : 'Submit'}
           </button>
         </div>
       </div>

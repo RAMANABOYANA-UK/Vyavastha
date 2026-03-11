@@ -100,6 +100,56 @@ export const deactivateUser = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Create a new official account (Admin)
+// @route   POST /api/users/officials
+// @access  Private/Admin
+export const createOfficial = asyncHandler(async (req, res) => {
+  const { name, email, phone, department, password } = req.body;
+
+  if (!name || !department) {
+    res.status(400);
+    throw new Error('Name and department are required');
+  }
+
+  // Check if email/phone already exists
+  if (email) {
+    const existing = await User.findOne({ email });
+    if (existing) {
+      res.status(400);
+      throw new Error('Email already registered');
+    }
+  }
+  if (phone) {
+    const existing = await User.findOne({ phone });
+    if (existing) {
+      res.status(400);
+      throw new Error('Phone number already registered');
+    }
+  }
+
+  const official = await User.create({
+    name,
+    email: email || undefined,
+    phone: phone || undefined,
+    department,
+    password: password || 'official123',
+    role: 'official',
+    isActive: true,
+  });
+
+  res.status(201).json({
+    success: true,
+    data: {
+      _id: official._id,
+      name: official.name,
+      email: official.email,
+      phone: official.phone,
+      department: official.department,
+      role: official.role,
+    }
+  });
+});
+
 // @desc    Get user notifications
 // @route   GET /api/users/notifications
 // @access  Private

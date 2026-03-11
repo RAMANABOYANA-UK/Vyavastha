@@ -4,6 +4,7 @@ import {
   getUserById,
   updateUserRole,
   deactivateUser,
+  createOfficial,
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
@@ -26,6 +27,7 @@ router.put('/notifications/:id/read', protect, idParamValidation, markNotificati
 
 // Admin routes
 router.get('/', protect, authorize('admin'), paginationValidation, getUsers);
+router.post('/officials', protect, authorize('admin'), createOfficial);
 router.get('/:id', protect, authorize('admin'), idParamValidation, getUserById);
 router.put('/:id/role', protect, authorize('admin'), idParamValidation, updateUserRole);
 router.put('/:id/deactivate', protect, authorize('admin'), idParamValidation, deactivateUser);

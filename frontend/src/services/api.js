@@ -69,6 +69,7 @@ export const adminAPI = {
   bulkAssign: (data) => api.post('/admin/complaints/bulk-assign', data),
   getOfficials: (params) => api.get('/admin/officials', { params }),
   getAssignmentStats: () => api.get('/admin/assignment-stats'),
+  createOfficial: (data) => api.post('/users/officials', data),
   
   // Analytics
   getAnalytics: () => api.get('/admin/analytics'),

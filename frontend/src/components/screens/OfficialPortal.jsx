@@ -298,36 +298,35 @@ export default function OfficialPortal({ user, onLogout }) {
   const fetchComplaints = async () => {
     setIsLoading(true);
     try {
-      // In production, filter by assigned officer
-      const response = await api.get('/complaints?limit=50');
+      // Get all complaints - server returns all, we'll show ones assigned to this official
+      // plus unassigned ones so officials can see the full workload
+      const response = await api.get('/complaints?limit=100&order=desc');
       let allComplaints = response.data || [];
       
       // Merge with store complaints (includes demo complaints)
       if (storeComplaints && storeComplaints.length > 0) {
-        const storeIds = new Set(storeComplaints.map(c => c._id));
-        // Add store complaints that aren't already in API response
-        const newFromStore = storeComplaints.filter(sc => !allComplaints.find(ac => ac._id === sc._id));
+        const apiIds = new Set(allComplaints.map(c => String(c._id)));
+        const newFromStore = storeComplaints.filter(sc => !apiIds.has(String(sc._id)));
         allComplaints = [...newFromStore, ...allComplaints];
       }
       
-      // Enhance with mock AI data if not present
+      // Enhance with real data where missing (don't randomize if already present)
       const enhanced = allComplaints.map(c => ({
         ...c,
-        priority: c.aiVerification?.severity || c.priority || ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)],
+        priority: c.aiVerification?.severity || c.priority || 'medium',
         aiVerification: c.aiVerification || {
-          severity: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)],
-          confidence: 0.75 + Math.random() * 0.2,
-          tags: ['garbage', 'drainage', 'overflow'][Math.floor(Math.random() * 3)]
+          severity: c.priority || 'medium',
+          confidence: 0.80,
+          tags: [],
         },
-        assignedDate: c.assignedDate || new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        daysElapsed: c.daysElapsed || Math.max(1, Math.floor((Date.now() - new Date(c.createdAt).getTime()) / (24 * 60 * 60 * 1000))),
-        atrHistory: c.atrHistory || []
+        daysElapsed: c.daysElapsed || Math.max(0, Math.floor((Date.now() - new Date(c.createdAt).getTime()) / (24 * 60 * 60 * 1000))),
+        atrHistory: c.timeline || c.atrHistory || []
       }));
       
       setComplaints(enhanced);
-      const pending = enhanced.filter(c => c.status === 'pending' || c.status === 'acknowledged').length;
-      const inProg = enhanced.filter(c => ['in_progress', 'under_inspection', 'work_scheduled'].includes(c.status)).length;
-      const resolved = enhanced.filter(c => c.status === 'resolved').length;
+      const pending = enhanced.filter(c => ['pending','Pending','Submitted','acknowledged'].includes(c.status)).length;
+      const inProg = enhanced.filter(c => ['in_progress', 'In Progress', 'under_inspection', 'work_scheduled', 'Assigned'].includes(c.status)).length;
+      const resolved = enhanced.filter(c => ['resolved','Resolved','closed','Closed'].includes(c.status)).length;
       
       setStats({
         assigned: pending + inProg,

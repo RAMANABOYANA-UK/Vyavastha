@@ -23,16 +23,24 @@ const navItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-const departmentOptions = [
-  'Public Works Department',
-  'Water Supply Board',
-  'Electricity Department',
-  'Sanitation Department',
-  'Municipal Corporation',
-  'Transport Department',
-  'Health Department',
-  'Revenue Department'
-];
+// Backend department enum values → display labels
+const DEPT_MAP = {
+  sanitation: 'Sanitation Department',
+  roads: 'Public Works / Roads',
+  water: 'Water Supply Board',
+  electricity: 'Electricity Department',
+  health: 'Health Department',
+  environment: 'Environment Department',
+  general: 'General / Municipal',
+};
+const DEPT_KEYS = Object.keys(DEPT_MAP);
+const deptLabel = (key) => DEPT_MAP[key] || key;
+
+// For backward-compat: long label → backend key
+const deptKeyFromLabel = (label) => {
+  const entry = Object.entries(DEPT_MAP).find(([, v]) => v === label);
+  return entry ? entry[0] : label;
+};
 
 const severityColors = {
   low: 'bg-green-100 text-green-700',
@@ -262,65 +270,84 @@ export default function AdminPortal({ user, onLogout }) {
       const res = await adminAPI.getAnalytics();
       setAnalytics(res.data);
     } catch (error) {
-      console.error('Analytics fetch failed:', error);
-      // Set demo data
+      console.error('Analytics API failed, computing from local data:', error);
+      // Compute analytics from the complaints we already have
+      const list = complaints;
+      const total = list.length;
+      const resolvedList = list.filter(c => ['resolved','Resolved','closed','Closed','Final Resolution'].includes(c.status));
+      const pendingList = list.filter(c => ['pending','Pending','Submitted'].includes(c.status));
+      const inProgList = list.filter(c => ['in_progress','In Progress','acknowledged','Assigned','under_inspection','work_scheduled'].includes(c.status));
+      const escalatedList = list.filter(c => c.isEscalated);
+      const todayList = list.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString());
+      const todayResolved = resolvedList.filter(c => {
+        const d = c.resolution?.resolvedAt || c.updatedAt;
+        return d && new Date(d).toDateString() === new Date().toDateString();
+      });
+
+      // By category
+      const catMap = {};
+      list.forEach(c => {
+        const k = c.categoryLabel || c.category || 'Other';
+        if (!catMap[k]) catMap[k] = { category: k, count: 0, resolved: 0 };
+        catMap[k].count++;
+        if (['resolved','Resolved','closed','Closed'].includes(c.status)) catMap[k].resolved++;
+      });
+      // By status
+      const stMap = {};
+      list.forEach(c => { stMap[c.status] = (stMap[c.status]||0)+1; });
+      // By severity
+      const sevMap = { Low: 0, Medium: 0, High: 0, Critical: 0 };
+      list.forEach(c => {
+        const s = (c.aiVerification?.severity || c.priority || 'medium').toLowerCase();
+        if (s === 'low') sevMap.Low++;
+        else if (s === 'medium') sevMap.Medium++;
+        else if (s === 'high') sevMap.High++;
+        else if (s === 'critical') sevMap.Critical++;
+      });
+      // 7-day trend
+      const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const trend = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const ds = d.toDateString();
+        trend.push({
+          date: dayNames[d.getDay()],
+          complaints: list.filter(c => new Date(c.createdAt).toDateString() === ds).length,
+          resolved: resolvedList.filter(c => { const rd = c.resolution?.resolvedAt || c.updatedAt; return rd && new Date(rd).toDateString() === ds; }).length,
+        });
+      }
+
       setAnalytics({
         overview: {
-          totalComplaints: 156,
-          resolvedComplaints: 98,
-          pendingComplaints: 42,
-          inProgressComplaints: 16,
-          totalCitizens: 1250,
-          totalOfficials: 24,
-          avgResolutionDays: 2.4,
-          resolutionRate: 69,
-          escalatedCount: 8,
-          todayNew: 12,
-          todayResolved: 8
+          totalComplaints: total,
+          resolvedComplaints: resolvedList.length,
+          pendingComplaints: pendingList.length,
+          inProgressComplaints: inProgList.length,
+          totalCitizens: 0,
+          totalOfficials: officials.length,
+          avgResolutionDays: 0,
+          resolutionRate: total > 0 ? Math.round((resolvedList.length / total) * 100) : 0,
+          escalatedCount: escalatedList.length,
+          todayNew: todayList.length,
+          todayResolved: todayResolved.length,
         },
-        byCategory: [
-          { category: 'Dirty Spot', count: 45, resolved: 30 },
-          { category: 'Garbage Dump', count: 38, resolved: 28 },
-          { category: 'Sewerage Overflow', count: 28, resolved: 20 },
-          { category: 'Stagnant Water', count: 22, resolved: 15 },
-          { category: 'Sweeping Issue', count: 15, resolved: 12 },
-          { category: 'Other', count: 8, resolved: 5 }
-        ],
-        byStatus: [
-          { status: 'Submitted', count: 22 },
-          { status: 'Assigned', count: 20 },
-          { status: 'In Progress', count: 16 },
-          { status: 'Resolved', count: 78 },
-          { status: 'Closed', count: 20 }
-        ],
-        bySeverity: [
-          { severity: 'Low', count: 35 },
-          { severity: 'Medium', count: 58 },
-          { severity: 'High', count: 48 },
-          { severity: 'Critical', count: 15 }
-        ],
-        trend: [
-          { date: 'Mon', complaints: 12, resolved: 8 },
-          { date: 'Tue', complaints: 18, resolved: 14 },
-          { date: 'Wed', complaints: 15, resolved: 12 },
-          { date: 'Thu', complaints: 22, resolved: 18 },
-          { date: 'Fri', complaints: 19, resolved: 15 },
-          { date: 'Sat', complaints: 8, resolved: 6 },
-          { date: 'Sun', complaints: 6, resolved: 4 }
-        ],
-        topOfficials: [
-          { name: 'Ravi Kumar', resolved: 23, pending: 4, rating: 4.8 },
-          { name: 'Priya Sharma', resolved: 19, pending: 6, rating: 4.5 },
-          { name: 'Arun Singh', resolved: 15, pending: 3, rating: 4.6 },
-          { name: 'Sunita Devi', resolved: 12, pending: 5, rating: 4.3 },
-          { name: 'Vikram Patel', resolved: 10, pending: 2, rating: 4.7 }
-        ],
-        recentActivity: [
-          { type: 'complaint_submitted', message: 'New complaint: Garbage Dump', time: '2 mins ago', severity: 'high', location: 'Sector 5' },
-          { type: 'complaint_resolved', message: 'Complaint resolved: Water leak', time: '15 mins ago', severity: 'medium', location: 'Ward 3' },
-          { type: 'status_updated', message: 'Status updated: Road repair', time: '32 mins ago', severity: 'low', location: 'MG Road' },
-          { type: 'complaint_submitted', message: 'New complaint: Sewerage overflow', time: '1 hour ago', severity: 'critical', location: 'Old City' }
-        ]
+        byCategory: Object.values(catMap).sort((a,b) => b.count - a.count).slice(0, 8),
+        byStatus: Object.entries(stMap).map(([status, count]) => ({ status, count })),
+        bySeverity: Object.entries(sevMap).map(([severity, count]) => ({ severity, count })).filter(x => x.count > 0),
+        trend,
+        topOfficials: officials.slice(0, 5).map(o => ({
+          name: o.name,
+          resolved: o.resolvedComplaints || 0,
+          pending: o.activeComplaints || 0,
+          rating: o.avgRating || 'N/A',
+        })),
+        recentActivity: list.slice(0, 6).map(c => ({
+          type: ['resolved','Resolved','closed','Closed'].includes(c.status) ? 'complaint_resolved' : 'complaint_submitted',
+          message: `${c.categoryLabel || c.category} — ${c.grv_id || c.complaintId}`,
+          time: timeAgo(c.createdAt),
+          severity: (c.aiVerification?.severity || c.priority || 'medium').toLowerCase(),
+          location: c.location?.city || '',
+        })),
       });
     }
   };
@@ -755,7 +782,7 @@ export default function AdminPortal({ user, onLogout }) {
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600">
-                  {complaint.assignedDepartment || complaint.department || '—'}
+                  {deptLabel(complaint.assignedDepartment || complaint.department || '') || '—'}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">
                   {new Date(complaint.createdAt).toLocaleDateString()}
@@ -791,14 +818,6 @@ export default function AdminPortal({ user, onLogout }) {
     </div>
   );
 
-  // Seed demo officials shown when API is unavailable
-  const DEMO_OFFICIALS = [
-    { _id: 'demo_off_1', name: 'Ravi Kumar', email: 'ravi.kumar@gov.in', department: 'Public Works Department', activeComplaints: 4, resolvedComplaints: 23, avgRating: 4.8 },
-    { _id: 'demo_off_2', name: 'Priya Sharma', email: 'priya.sharma@gov.in', department: 'Water Supply Board', activeComplaints: 6, resolvedComplaints: 19, avgRating: 4.5 },
-    { _id: 'demo_off_3', name: 'Arun Singh', email: 'arun.singh@gov.in', department: 'Sanitation Department', activeComplaints: 3, resolvedComplaints: 15, avgRating: 4.6 },
-    { _id: 'demo_off_4', name: 'Sunita Devi', email: 'sunita.devi@gov.in', department: 'Municipal Corporation', activeComplaints: 5, resolvedComplaints: 12, avgRating: 4.3 },
-  ];
-
   const handleAddOfficial = async () => {
     if (!addOfficialForm.name || !addOfficialForm.department) {
       toast.error('Name and department are required');
@@ -810,26 +829,19 @@ export default function AdminPortal({ user, onLogout }) {
       setShowAddOfficialModal(false);
       setAddOfficialForm({ name: '', email: '', phone: '', department: '' });
       fetchData();
-    } catch {
-      // Demo fallback
-      const newOfficial = { _id: 'demo_off_' + Date.now(), ...addOfficialForm, activeComplaints: 0, resolvedComplaints: 0, avgRating: 'N/A' };
-      setOfficials(prev => [...prev, newOfficial]);
-      toast.success('Official added (demo mode)');
-      setShowAddOfficialModal(false);
-      setAddOfficialForm({ name: '', email: '', phone: '', department: '' });
+    } catch (err) {
+      toast.error(err.error || err.message || 'Failed to add official');
     }
   };
 
   const renderOfficials = () => {
-    const displayOfficials = officials.length > 0 ? officials : DEMO_OFFICIALS;
-    const isDemo = officials.length === 0;
+    const displayOfficials = officials;
     return (
       <div className="space-y-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-5 border-b border-gray-100 flex justify-between items-center">
             <div>
-              <h3 className="font-semibold text-gray-800">Government Officials</h3>
-              {isDemo && <p className="text-xs text-amber-600 mt-0.5">Showing demo data — connect backend to see real officials</p>}
+              <h3 className="font-semibold text-gray-800">Government Officials ({displayOfficials.length})</h3>
             </div>
             <button
               onClick={() => setShowAddOfficialModal(true)}
@@ -841,16 +853,23 @@ export default function AdminPortal({ user, onLogout }) {
           </div>
           <div className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayOfficials.length === 0 && (
+                <div className="col-span-full p-8 text-center">
+                  <Users size={32} className="mx-auto mb-2 text-gray-200" />
+                  <p className="text-sm text-gray-400">No officials registered yet</p>
+                  <p className="text-xs text-gray-300 mt-1">Click "Add Official" to register government officials</p>
+                </div>
+              )}
               {displayOfficials.map((official) => (
-                <div key={official._id} className={`p-4 border rounded-xl ${isDemo ? 'border-dashed border-amber-200 bg-amber-50/30' : 'border-gray-200'}`}>
+                <div key={official._id} className="p-4 border rounded-xl border-gray-200">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
                       <span className="text-teal font-bold text-lg">{official.name?.charAt(0)}</span>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800">{official.name}</p>
-                      <p className="text-xs text-gray-500">{official.email}</p>
-                      <p className="text-xs text-teal font-medium">{official.department}</p>
+                      <p className="text-xs text-gray-500">{official.email || official.phone || '—'}</p>
+                      <p className="text-xs text-teal font-medium">{deptLabel(official.department)}</p>
                     </div>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -909,7 +928,7 @@ export default function AdminPortal({ user, onLogout }) {
                     <select value={addOfficialForm.department} onChange={e => setAddOfficialForm(f => ({ ...f, department: e.target.value }))}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal">
                       <option value="">Select department…</option>
-                      {departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}
+                      {DEPT_KEYS.map(k => <option key={k} value={k}>{deptLabel(k)}</option>)}
                     </select>
                   </div>
                   <button onClick={handleAddOfficial}
@@ -1771,12 +1790,12 @@ export default function AdminPortal({ user, onLogout }) {
                         </label>
                         <select
                           value={assignmentForm.department}
-                          onChange={(e) => setAssignmentForm(prev => ({ ...prev, department: e.target.value }))}
+                          onChange={(e) => setAssignmentForm(prev => ({ ...prev, department: e.target.value, officialId: '' }))}
                           className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal"
                         >
                           <option value="">Select Department</option>
-                          {departmentOptions.map((dept) => (
-                            <option key={dept} value={dept}>{dept}</option>
+                          {DEPT_KEYS.map((key) => (
+                            <option key={key} value={key}>{deptLabel(key)}</option>
                           ))}
                         </select>
                       </div>
@@ -1792,10 +1811,10 @@ export default function AdminPortal({ user, onLogout }) {
                         >
                           <option value="">Select Official (Optional)</option>
                           {officials
-                            .filter(o => !assignmentForm.department || o.department === assignmentForm.department.toLowerCase())
+                            .filter(o => !assignmentForm.department || o.department === assignmentForm.department)
                             .map((official) => (
                               <option key={official._id} value={official._id}>
-                                {official.name} ({official.activeComplaints || 0} active)
+                                {official.name} — {deptLabel(official.department)} ({official.activeComplaints || 0} active)
                               </option>
                             ))}
                         </select>
