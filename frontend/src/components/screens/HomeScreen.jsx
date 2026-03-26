@@ -3,22 +3,22 @@ import { useUIStore, useAuthStore } from '../../store';
 
 const banners = [
   {
-    bg: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500',
+    bg: 'bg-gradient-to-br from-cyan-500 via-cyan-400 to-teal-500',
     title: 'Smart City\nSmart Citizens',
     emoji: '🏙️',
     sub: 'Your voice builds better infrastructure',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500',
+    bg: 'bg-gradient-to-br from-emerald-400 via-green-500 to-cyan-500',
     title: 'Report. Track.\nTransform.',
     emoji: '🎯',
     sub: 'AI-powered civic engagement platform',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-500',
-    title: 'प्रजा\nसेवा',
+    bg: 'bg-gradient-to-br from-cyan-400 via-sky-400 to-blue-500',
+    title: 'व्यवस्था\nसेवा',
     emoji: '🇮🇳',
     sub: 'VYAVASTHA - Citizen Grievance Portal',
     textColor: 'text-white',
@@ -30,28 +30,28 @@ const actionCards = [
     icon: '📋', 
     title: 'Post a Complaint', 
     sub: 'AI-powered issue reporting', 
-    gradient: 'gradient-teal',
+    gradient: 'gradient-cyan',
     screen: 'category' 
   },
   { 
     icon: '🏛️', 
     title: 'Rate Public Service', 
     sub: 'Rate Toilets, Transport & More', 
-    gradient: 'gradient-amber',
+    gradient: 'gradient-emerald',
     screen: 'rateToilet' 
   },
   { 
     icon: '👥', 
     title: 'Community Hub', 
     sub: 'Upvote & Support Issues', 
-    gradient: 'gradient-green',
+    gradient: 'gradient-vyvy',
     screen: 'community' 
   },
   { 
     icon: '🏆', 
     title: 'Civic Quiz', 
     sub: 'Learn & Earn XP', 
-    gradient: 'gradient-pink',
+    gradient: 'gradient-cyan',
     screen: 'quiz' 
   },
 ];
@@ -118,7 +118,7 @@ export default function HomeScreen() {
         <div className="mt-5 mb-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-indigo-600 font-extrabold text-xl">
+              <div className="text-cyan-600 font-extrabold text-xl">
                 {getGreeting()},<br />
                 Welcome {isAuthenticated ? user?.name || 'Citizen' : 'Active Citizen'} 👋
               </div>
@@ -127,7 +127,7 @@ export default function HomeScreen() {
               </div>
             </div>
             {/* XP Badge */}
-            <div className="bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 rounded-xl text-white">
+            <div className="bg-gradient-to-r from-cyan-400 to-cyan-500 px-4 py-2 rounded-xl text-white">
               <p className="text-xs">Your XP</p>
               <p className="text-xl font-bold">{user?.points || 850}</p>
             </div>
