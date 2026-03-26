@@ -9,6 +9,15 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Light theme colors
+        primary: { DEFAULT: '#3B82F6', dark: '#2563EB', light: '#DBEAFE' },
+        secondary: { DEFAULT: '#8B5CF6', dark: '#7C3AED', light: '#EDE9FE' },
+        accent: { DEFAULT: '#6366F1', dark: '#4F46E5', light: '#E0E7FF' },
+        success: { DEFAULT: '#10B981', dark: '#059669', light: '#D1FAE5' },
+        warning: { DEFAULT: '#F59E0B', dark: '#D97706', light: '#FEF3C7' },
+        danger: { DEFAULT: '#EF4444', dark: '#DC2626', light: '#FEE2E2' },
+        
+        // Legacy colors for compatibility
         saffron: { DEFAULT: '#FF9933', dark: '#E6821A' },
         navyIndia: { DEFAULT: '#0F1F3D', light: '#1A2F5A' },
         indiaGreen: { DEFAULT: '#138808', light: '#1AAD0A' },
@@ -16,17 +25,6 @@ export default {
         white: '#FFFFFF',
         red: { DEFAULT: '#E53935' },
         amber: { DEFAULT: '#FFC107' },
-        // Vyavastha Modern Colors
-        vyvy: {
-          primary: '#06B6D4',      // Cyan
-          secondary: '#0891B2',    // Dark Cyan
-          accent: '#06B6D4',       // Bright Cyan
-          dark: '#0F172A',         // Deep Navy
-          light: '#E0F2FE',        // Light Cyan
-          success: '#10B981',      // Emerald
-          warning: '#F59E0B',      // Amber
-          danger: '#EF4444',       // Red
-        },
       },
       fontFamily: {
         rajdhani: ['Rajdhani', 'sans-serif'],
@@ -61,8 +59,8 @@ export default {
           '100%': { transform: 'scale(1)' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)' },
-          '50%': { boxShadow: '0 0 40px rgba(6, 182, 212, 0.8)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.6)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-1000px 0' },
@@ -70,7 +68,7 @@ export default {
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '50%': { transform: 'translateY(-8px)' },
         },
         rotateSpin: {
           '0%': { transform: 'rotate(0deg)' },

@@ -1,23 +1,50 @@
 import { useState, useEffect } from 'react';
 import { useUIStore, useAuthStore } from '../../store';
+import { useTranslation } from 'react-i18next';
+
+export function HomeScreen_getBanners(t) {
+  return [
+    {
+      bg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+      title: t('home.smartCity'),
+      emoji: '🏙️',
+      sub: t('home.buildBetter'),
+      textColor: 'text-white',
+    },
+    {
+      bg: 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-500',
+      title: t('home.reportTrack'),
+      emoji: '🎯',
+      sub: t('home.aiPowered'),
+      textColor: 'text-white',
+    },
+    {
+      bg: 'bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-500',
+      title: 'व्यवस्था\nसेवा',
+      emoji: '🇮🇳',
+      sub: t('home.vyavasthaPortal'),
+      textColor: 'text-white',
+    },
+  ];
+}
 
 const banners = [
   {
-    bg: 'bg-gradient-to-br from-cyan-500 via-cyan-400 to-teal-500',
+    bg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
     title: 'Smart City\nSmart Citizens',
     emoji: '🏙️',
     sub: 'Your voice builds better infrastructure',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-emerald-400 via-green-500 to-cyan-500',
+    bg: 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-500',
     title: 'Report. Track.\nTransform.',
     emoji: '🎯',
     sub: 'AI-powered civic engagement platform',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-cyan-400 via-sky-400 to-blue-500',
+    bg: 'bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-500',
     title: 'व्यवस्था\nसेवा',
     emoji: '🇮🇳',
     sub: 'VYAVASTHA - Citizen Grievance Portal',
@@ -30,28 +57,28 @@ const actionCards = [
     icon: '📋', 
     title: 'Post a Complaint', 
     sub: 'AI-powered issue reporting', 
-    gradient: 'gradient-cyan',
+    gradient: 'from-blue-500 to-indigo-600',
     screen: 'category' 
   },
   { 
     icon: '🏛️', 
     title: 'Rate Public Service', 
     sub: 'Rate Toilets, Transport & More', 
-    gradient: 'gradient-emerald',
+    gradient: 'from-purple-500 to-pink-600',
     screen: 'rateToilet' 
   },
   { 
     icon: '👥', 
     title: 'Community Hub', 
     sub: 'Upvote & Support Issues', 
-    gradient: 'gradient-vyvy',
+    gradient: 'from-emerald-500 to-teal-600',
     screen: 'community' 
   },
   { 
     icon: '🏆', 
     title: 'Civic Quiz', 
     sub: 'Learn & Earn XP', 
-    gradient: 'gradient-cyan',
+    gradient: 'from-amber-500 to-orange-600',
     screen: 'quiz' 
   },
 ];
@@ -60,6 +87,7 @@ export default function HomeScreen() {
   const [slide, setSlide] = useState(0);
   const { setScreen, setShowAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -82,16 +110,16 @@ export default function HomeScreen() {
   // Get greeting based on time
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('common.goodMorning');
+    if (hour < 17) return t('common.goodAfternoon');
+    return t('common.goodEvening');
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Banner */}
       <div 
-        className={`h-72 ${banner.bg} flex flex-col items-center justify-center gap-3 transition-all duration-500 relative px-6`}
+        className={`h-72 ${banner.bg} flex flex-col items-center justify-center gap-3 transition-all duration-500 relative px-6 shadow-lg`}
       >
         <div className="text-7xl mb-2 drop-shadow-lg">{banner.emoji}</div>
         <div className={`font-extrabold text-2xl md:text-4xl ${banner.textColor || 'text-white'} text-center leading-tight whitespace-pre-line drop-shadow-lg`}>
@@ -106,7 +134,7 @@ export default function HomeScreen() {
               key={i}
               onClick={() => setSlide(i)}
               className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                i === slide ? 'w-6 bg-white' : 'w-2.5 bg-white/50'
+                i === slide ? 'w-6 bg-white' : 'w-white/50'
               }`}
             />
           ))}
@@ -118,17 +146,17 @@ export default function HomeScreen() {
         <div className="mt-5 mb-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-cyan-600 font-extrabold text-xl">
+              <div className="text-blue-600 font-extrabold text-xl">
                 {getGreeting()},<br />
-                Welcome {isAuthenticated ? user?.name || 'Citizen' : 'Active Citizen'} 👋
+                Welcome {isAuthenticated ? user?.name || t('common.citizen') : t('common.activeCitizen')} 👋
               </div>
               <div className="text-gray-500 text-sm mt-1">
-                Here are today's actions for you
+                {t('home.todayActions')}
               </div>
             </div>
             {/* XP Badge */}
-            <div className="bg-gradient-to-r from-cyan-400 to-cyan-500 px-4 py-2 rounded-xl text-white">
-              <p className="text-xs">Your XP</p>
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 rounded-xl text-white shadow-lg">
+              <p className="text-xs">{t('home.yourXP')}</p>
               <p className="text-xl font-bold">{user?.points || 850}</p>
             </div>
           </div>
@@ -140,7 +168,7 @@ export default function HomeScreen() {
             <div
               key={i}
               onClick={() => handleActionClick(card.screen)}
-              className={`h-[170px] rounded-2xl ${card.gradient} p-5 text-white flex flex-col justify-between shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl ${
+              className={`h-[170px] rounded-2xl bg-gradient-to-br ${card.gradient} p-5 text-white flex flex-col justify-between shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl ${
                 card.screen ? 'cursor-pointer' : 'cursor-default'
               }`}
             >
@@ -158,9 +186,9 @@ export default function HomeScreen() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 pb-6">
           {[
-            { value: user?.complaintsPosted || 3, label: 'Posted', icon: '📝', color: 'from-blue-500 to-indigo-500' },
-            { value: user?.complaintsResolved || 2, label: 'Resolved', icon: '✅', color: 'from-emerald-500 to-teal-500' },
-            { value: `#12`, label: 'Your Rank', icon: '🏆', color: 'from-amber-500 to-orange-500' },
+            { value: user?.complaintsPosted || 3, label: t('home.posted'), icon: '📝', color: 'from-blue-500 to-indigo-600' },
+            { value: user?.complaintsResolved || 2, label: t('home.resolved'), icon: '✅', color: 'from-emerald-500 to-teal-600' },
+            { value: `#12`, label: t('home.yourRank'), icon: '🏆', color: 'from-amber-500 to-orange-600' },
           ].map((stat, i) => (
             <div
               key={i}

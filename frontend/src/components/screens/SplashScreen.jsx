@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function SplashScreen({ onComplete }) {
   const [progress, setProgress] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Animate progress from 0 to 100
@@ -26,20 +28,20 @@ export default function SplashScreen({ onComplete }) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#0F172A] via-slate-900 to-[#1e3a8a] flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex flex-col items-center justify-center overflow-hidden">
       {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-40">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-          className="absolute top-10 right-10 w-40 h-40 border border-cyan-500/20 rounded-full"
+          className="absolute top-10 right-10 w-40 h-40 border-2 border-blue-200 rounded-full"
         />
         <motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-          className="absolute bottom-20 left-20 w-32 h-32 border border-cyan-400/15 rounded-full"
+          className="absolute bottom-20 left-20 w-32 h-32 border-2 border-purple-200 rounded-full"
         />
-        <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl" />
       </div>
 
       {/* Main Card */}
@@ -51,23 +53,22 @@ export default function SplashScreen({ onComplete }) {
       >
         {/* Glassmorphism Card */}
         <div className="relative w-[380px] md:w-[420px] rounded-3xl overflow-hidden">
-          {/* Card background with cyan glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#06B6D4]/20 via-slate-900/80 to-[#0891B2]/20 backdrop-blur-2xl" />
-          <div className="absolute inset-0 border border-cyan-400/30 rounded-3xl shadow-2xl" style={{
-            boxShadow: '0 0 40px rgba(6, 182, 212, 0.3), inset 0 0 20px rgba(6, 182, 212, 0.1)'
+          {/* Card background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-blue-100/50 backdrop-blur-xl" />
+          <div className="absolute inset-0 border-2 border-white/60 rounded-3xl shadow-2xl" style={{
+            boxShadow: '0 8px 32px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5)'
           }} />
           
           {/* Card content */}
           <div className="relative px-10 py-12">
-            {/* Main Title - Hindi */}
+            {/* Main Title */}
             <motion.h1
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-6xl md:text-7xl font-bold text-center text-white mb-2"
-              style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}
+              className="text-6xl md:text-7xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2"
             >
-              व्यवस्था
+              Vyavastha
             </motion.h1>
 
             {/* Subtitle */}
@@ -75,9 +76,9 @@ export default function SplashScreen({ onComplete }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="text-center text-cyan-300/80 text-sm tracking-[0.2em] uppercase mb-3 font-rajdhani"
+              className="text-center text-gray-600 text-sm tracking-[0.2em] uppercase mb-3 font-rajdhani font-semibold"
             >
-              Citizen Governance Portal
+              {t('splash.subtitle')}
             </motion.p>
 
             {/* Divider */}
@@ -85,17 +86,17 @@ export default function SplashScreen({ onComplete }) {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="h-0.5 w-12 mx-auto mb-8 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+              className="h-1 w-12 mx-auto mb-8 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full"
             />
 
             {/* Progress Bar Container */}
             <div className="mb-4">
-              <div className="h-2.5 bg-slate-700/50 rounded-full overflow-hidden border border-cyan-400/20">
+              <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
                 <motion.div
                   className="h-full rounded-full"
                   style={{
-                    background: 'linear-gradient(90deg, #06B6D4 0%, #0891B2 50%, #06B6D4 100%)',
-                    boxShadow: '0 0 20px rgba(6, 182, 212, 0.8)'
+                    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #3B82F6 100%)',
+                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)'
                   }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
@@ -109,10 +110,10 @@ export default function SplashScreen({ onComplete }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="flex justify-between items-center text-cyan-300/60 text-sm font-medium"
+              className="flex justify-between items-center text-gray-600 text-sm font-medium"
             >
-              <span>Initializing System</span>
-              <span className="font-bold text-cyan-400">{Math.round(progress)}%</span>
+              <span>{t('splash.initializing')}</span>
+              <span className="font-bold text-blue-600">{Math.round(progress)}%</span>
             </motion.div>
           </div>
         </div>
@@ -125,9 +126,9 @@ export default function SplashScreen({ onComplete }) {
         transition={{ delay: 0.9, duration: 0.6 }}
         className="mt-12 relative z-10"
       >
-        <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-cyan-500/10 border border-cyan-400/30 backdrop-blur-sm">
-          <span className="text-cyan-300 font-bold text-xs tracking-wider">🇮🇳</span>
-          <span className="text-cyan-300/80 text-xs tracking-widest uppercase font-medium">Digital India Initiative</span>
+        <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 border border-blue-200 backdrop-blur-sm shadow-lg">
+          <span className="text-2xl">🇮🇳</span>
+          <span className="text-gray-700 text-xs tracking-widest uppercase font-medium">{t('splash.digitalIndia')}</span>
         </div>
       </motion.div>
     </div>
