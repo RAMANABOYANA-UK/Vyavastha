@@ -40,7 +40,7 @@ const faqs = [
 
 const contactCards = [
   { icon: Phone, label: 'Helpline', value: '1800-103-1234', color: 'bg-green-50 border-green-200', iconColor: 'text-green-600', action: () => window.open('tel:18001031234') },
-  { icon: Mail, label: 'Email', value: 'support@praja.gov.in', color: 'bg-blue-50 border-blue-200', iconColor: 'text-blue-600', action: () => window.open('mailto:support@praja.gov.in') },
+  { icon: Mail, label: 'Email', value: 'support@vyavastha.gov.in', color: 'bg-blue-50 border-blue-200', iconColor: 'text-blue-600', action: () => window.open('mailto:support@vyavastha.gov.in') },
   { icon: MessageCircle, label: 'Live Chat', value: 'Mon–Sat, 9am–6pm', color: 'bg-purple-50 border-purple-200', iconColor: 'text-purple-600', action: () => toast('Live chat opening soon!', { icon: '💬' }) },
 ];
 

@@ -231,7 +231,7 @@ export function PublicRatingPage({ serviceId, onClose }) {
         </div>
 
         <p className="text-center text-gray-400 text-sm mt-6">
-          Powered by PRAJA - Citizen Feedback System
+          Powered by VYAVASTHA - Citizen Feedback System
         </p>
       </div>
     </div>
@@ -552,7 +552,7 @@ export default function RateServiceScreen({ onBack }) {
                   Open this page on your PC using your <strong>WiFi IP</strong> instead of localhost:
                 </p>
                 <p className="text-xs font-mono bg-amber-100 px-3 py-2 rounded-lg mt-2 text-amber-900 select-all break-all">
-                  http://{window.__PRAJA_LAN_IP || '<your-wifi-ip>'}:{window.location.port || '5173'}
+                  http://{window.__VYAVASTHA_LAN_IP || '<your-wifi-ip>'}:{window.location.port || '5173'}
                 </p>
                 <p className="text-[11px] text-amber-600 mt-2">
                   To find your IP: open a terminal → run <code className="bg-amber-100 px-1 rounded">ipconfig</code> → look for "IPv4 Address" under your WiFi adapter.

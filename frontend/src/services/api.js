@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
-const LOCAL_USERS_KEY = 'praja_local_users';
+const LOCAL_USERS_KEY = 'vyavastha_local_users';
 
 const isLocalMode = () => {
   const envFlag = String(import.meta.env.VITE_LOCAL_MODE || '').toLowerCase();
   if (envFlag === 'true') return true;
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('praja_local_mode') === 'true';
+    return localStorage.getItem('vyavastha_local_mode') === 'true';
   }
   return false;
 };
@@ -49,7 +49,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('praja_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -66,7 +66,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      localStorage.removeItem('praja_token');
+      localStorage.removeItem('vyavastha_token');
       // Don't redirect, let app handle it
     }
     return Promise.reject(error.response?.data || error);
@@ -103,8 +103,8 @@ export const authAPI = {
 
     const token = makeLocalToken();
     const publicUser = toPublicUser(localUser);
-    localStorage.setItem('praja_token', token);
-    localStorage.setItem('praja_demo_user', JSON.stringify(publicUser));
+    localStorage.setItem('vyavastha_token', token);
+    localStorage.setItem('vyavastha_demo_user', JSON.stringify(publicUser));
     return { success: true, data: { ...publicUser, token } };
   },
 
@@ -127,18 +127,18 @@ export const authAPI = {
 
     const token = makeLocalToken();
     const publicUser = toPublicUser(user);
-    localStorage.setItem('praja_token', token);
-    localStorage.setItem('praja_demo_user', JSON.stringify(publicUser));
+    localStorage.setItem('vyavastha_token', token);
+    localStorage.setItem('vyavastha_demo_user', JSON.stringify(publicUser));
     return { success: true, data: { ...publicUser, token } };
   },
 
   getMe: async () => {
     if (!isLocalMode()) return api.get('/auth/me');
-    const token = localStorage.getItem('token') || localStorage.getItem('praja_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (!token) {
       return Promise.reject({ error: 'Unauthorized' });
     }
-    const saved = localStorage.getItem('praja_demo_user');
+    const saved = localStorage.getItem('vyavastha_demo_user');
     if (!saved) {
       return Promise.reject({ error: 'User not found' });
     }
@@ -147,14 +147,14 @@ export const authAPI = {
 
   updateProfile: async (data) => {
     if (!isLocalMode()) return api.put('/auth/profile', data);
-    const saved = localStorage.getItem('praja_demo_user');
+    const saved = localStorage.getItem('vyavastha_demo_user');
     if (!saved) {
       return Promise.reject({ error: 'User not found' });
     }
 
     const current = JSON.parse(saved);
     const updated = { ...current, ...data };
-    localStorage.setItem('praja_demo_user', JSON.stringify(updated));
+    localStorage.setItem('vyavastha_demo_user', JSON.stringify(updated));
 
     const users = readLocalUsers();
     writeLocalUsers(users.map((u) => (u._id === current._id ? { ...u, ...data } : u)));
@@ -163,7 +163,7 @@ export const authAPI = {
 
   updatePassword: async (data) => {
     if (!isLocalMode()) return api.put('/auth/password', data);
-    const saved = localStorage.getItem('praja_demo_user');
+    const saved = localStorage.getItem('vyavastha_demo_user');
     if (!saved) {
       return Promise.reject({ error: 'User not found' });
     }

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: praja-backend
+    name: vyavastha-backend
     env: node
     region: singapore
     rootDir: backend

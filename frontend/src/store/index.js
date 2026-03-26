@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware';
 import { authAPI, complaintsAPI, usersAPI } from '../services/api';
 
 // ─── Demo / offline helpers (localStorage) ─────────────────────────────────
-const DEMO_NOTIF_KEY      = 'praja_demo_notifications';
-const DEMO_COMPLAINTS_KEY = 'praja_demo_complaints';
+const DEMO_NOTIF_KEY      = 'vyavastha_demo_notifications';
+const DEMO_COMPLAINTS_KEY = 'vyavastha_demo_complaints';
 function loadDemoNotifs()       { try { return JSON.parse(localStorage.getItem(DEMO_NOTIF_KEY)      || '[]'); } catch { return []; } }
 function saveDemoNotifs(list)   { try { localStorage.setItem(DEMO_NOTIF_KEY,      JSON.stringify(list.slice(0, 100))); } catch {} }
 function loadDemoComplaints()   { try { return JSON.parse(localStorage.getItem(DEMO_COMPLAINTS_KEY) || '[]'); } catch { return []; } }
@@ -51,7 +51,7 @@ export const useAuthStore = create(
 
       logout: () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('praja_token');
+        localStorage.removeItem('vyavastha_token');
         set({ user: null, token: null, isAuthenticated: false });
       },
 
@@ -64,14 +64,14 @@ export const useAuthStore = create(
       },
 
       checkAuth: async () => {
-        const token = localStorage.getItem('token') || localStorage.getItem('praja_token');
+        const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
         if (!token) {
           set({ isAuthenticated: false });
           return;
         }
         // Demo mode — restore user from localStorage without hitting the API
         if (token.startsWith('demo_token_')) {
-          const saved = localStorage.getItem('praja_demo_user');
+          const saved = localStorage.getItem('vyavastha_demo_user');
           if (saved) {
             try {
               const demoUser = JSON.parse(saved);
@@ -88,7 +88,7 @@ export const useAuthStore = create(
           return response.data;
         } catch {
           localStorage.removeItem('token');
-          localStorage.removeItem('praja_token');
+          localStorage.removeItem('vyavastha_token');
           set({ user: null, token: null, isAuthenticated: false });
           throw new Error('Auth failed');
         }

@@ -203,7 +203,7 @@ export default function SettingsScreen({ onBack }) {
 
         {/* App Version */}
         <div className="text-center text-xs text-gray-400 mt-4">
-          PRAJA App v1.0.0 · Build 2026.03
+          VYAVASTHA App v1.0.0 · Build 2026.03
         </div>
       </div>
     </div>

@@ -32,7 +32,7 @@ export const getBaseUrl = () => {
     // phones on the same WiFi can reach the dev server.
     // We inject this at build time via VITE_LAN_IP, or fall back to
     // a runtime WebRTC-based detection saved earlier.
-    const lanIp = import.meta.env.VITE_LAN_IP || window.__PRAJA_LAN_IP;
+    const lanIp = import.meta.env.VITE_LAN_IP || window.__VYAVASTHA_LAN_IP;
     if (lanIp) {
       return `http://${lanIp}:${window.location.port || '5173'}`;
     }
@@ -53,7 +53,7 @@ export const getBaseUrl = () => {
 let _detecting = false;
 export const detectLanIp = () => {
   if (_detecting || typeof window === 'undefined') return;
-  if (window.__PRAJA_LAN_IP) return;
+  if (window.__VYAVASTHA_LAN_IP) return;
   _detecting = true;
 
   try {
@@ -68,8 +68,8 @@ export const detectLanIp = () => {
       if (match) {
         const ip = match[0];
         if (ip !== '0.0.0.0' && !ip.startsWith('127.')) {
-          window.__PRAJA_LAN_IP = ip;
-          console.log('[Praja] Detected LAN IP:', ip);
+          window.__VYAVASTHA_LAN_IP = ip;
+          console.log('[Vyavastha] Detected LAN IP:', ip);
         }
       }
       pc.close();

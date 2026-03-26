@@ -20,7 +20,7 @@ const banners = [
     bg: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-500',
     title: 'प्रजा\nसेवा',
     emoji: '🇮🇳',
-    sub: 'PRAJA - Citizen Grievance Portal',
+    sub: 'VYAVASTHA - Citizen Grievance Portal',
     textColor: 'text-white',
   },
 ];

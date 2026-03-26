@@ -1,6 +1,6 @@
-# PRAJA - प्रजा | Citizen Grievance Portal
+# VYAVASTHA - व्यवस्था | Citizen Grievance Portal
 
-PRAJA is an AI-assisted civic complaint platform where citizens report local issues and authorities track, assign, and resolve them with better transparency.
+VYAVASTHA is an AI-assisted civic complaint platform where citizens report local issues and authorities track, assign, and resolve them with better transparency.
 
 ## Features
 
@@ -31,7 +31,7 @@ PRAJA is an AI-assisted civic complaint platform where citizens report local iss
 ## Project Structure
 
 ```
-Praja/
+Vyavastha/
 ├─ backend/          # Express API
 ├─ frontend/         # React app
 ├─ analyze_service/  # Optional Python image analysis service
@@ -61,7 +61,7 @@ Create `backend/.env`:
 
 ```env
 PORT=5001
-MONGODB_URI=mongodb://localhost:27017/praja
+MONGODB_URI=mongodb://localhost:27017/vyavastha
 JWT_SECRET=your_super_secret
 JWT_EXPIRE=30d
 NODE_ENV=development

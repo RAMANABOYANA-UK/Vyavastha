@@ -48,7 +48,7 @@ const quizQuestions = [
   },
   {
     id: 4,
-    question: "Which ministry handles the PRAJA portal?",
+    question: "Which ministry handles the VYAVASTHA portal?",
     options: [
       "Ministry of Urban Development",
       "Ministry of Housing and Urban Affairs",

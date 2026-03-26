@@ -1,4 +1,4 @@
-# PRAJA - प्रजा | Project Requirements
+# VYAVASTHA - व्यवस्था | Project Requirements
 
 ## System Requirements
 
@@ -75,7 +75,7 @@
 ### Backend (`backend/.env`)
 ```env
 PORT=5001
-MONGODB_URI=mongodb://localhost:27017/praja
+MONGODB_URI=mongodb://localhost:27017/vyavastha
 JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRE=30d
 NODE_ENV=development

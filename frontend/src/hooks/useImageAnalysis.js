@@ -1,6 +1,6 @@
 /**
  * useImageAnalysis.js - Calls the local Python CLIP-based analyzer service.
- * Start the Python service before using: Praja/analyze_service/start.bat
+ * Start the Python service before using: Vyavastha/analyze_service/start.bat
  */
 
 import { useState, useCallback } from 'react';
@@ -78,7 +78,7 @@ export function useImageAnalysis() {
         err.message.includes('ECONNREFUSED')
       ) {
         errorMessage =
-          'Cannot connect to the AI service. Please run: Praja/analyze_service/start.bat';
+          'Cannot connect to the AI service. Please run: Vyavastha/analyze_service/start.bat';
       }
 
       setStatus('error');

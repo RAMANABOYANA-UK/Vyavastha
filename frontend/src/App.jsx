@@ -68,7 +68,7 @@ function MainApp() {
     fetchCategories();
     
     // Check if user is already logged in (token can be stored under either key)
-    const token = localStorage.getItem('token') || localStorage.getItem('praja_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (token) {
       checkAuth().then((userData) => {
         // If authenticated, skip to portal and load their complaints
@@ -88,7 +88,7 @@ function MainApp() {
     setShowSplash(false);
     
     // Check if already authenticated (token can be stored under either key)
-    const token = localStorage.getItem('token') || localStorage.getItem('praja_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (token && isAuthenticated) {
       setAppScreen('portal');
     } else {

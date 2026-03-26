@@ -70,9 +70,9 @@ const CHART_COLORS = {
 };
 
 // ─── Shared localStorage helpers ─────────────────────────────────────────────
-const DEMO_NOTIF_KEY      = 'praja_demo_notifications';
-const DEMO_COMPLAINTS_KEY = 'praja_demo_complaints';
-const ADMIN_SETTINGS_KEY  = 'praja_admin_settings';
+const DEMO_NOTIF_KEY      = 'vyavastha_demo_notifications';
+const DEMO_COMPLAINTS_KEY = 'vyavastha_demo_complaints';
+const ADMIN_SETTINGS_KEY  = 'vyavastha_admin_settings';
 function loadDemoNotifs()           { try { return JSON.parse(localStorage.getItem(DEMO_NOTIF_KEY)      || '[]'); } catch { return []; } }
 function loadAdminDemoComplaints()  { try { return JSON.parse(localStorage.getItem(DEMO_COMPLAINTS_KEY) || '[]'); } catch { return []; } }
 function loadAdminSettings()        { try { return JSON.parse(localStorage.getItem(ADMIN_SETTINGS_KEY)  || '{}'); } catch { return {}; } }
@@ -1359,15 +1359,15 @@ export default function AdminPortal({ user, onLogout }) {
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       a.href     = url;
-      a.download = `praja-admin-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `vyavastha-admin-export-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Dashboard data exported!');
     };
 
     const handleClearCache = () => {
-      localStorage.removeItem('praja_demo_complaints');
-      localStorage.removeItem('praja_demo_notifications');
+      localStorage.removeItem('vyavastha_demo_complaints');
+      localStorage.removeItem('vyavastha_demo_notifications');
       setComplaints([]);
       setActivityFeed([]);
       setBellUnread(0);
@@ -1507,7 +1507,7 @@ export default function AdminPortal({ user, onLogout }) {
             </div>
             <div>
               <h1 className="font-bold text-gray-800">Admin Panel</h1>
-              <p className="text-xs text-gray-500">PRAJA Portal</p>
+              <p className="text-xs text-gray-500">VYAVASTHA Portal</p>
             </div>
           </div>
         </div>

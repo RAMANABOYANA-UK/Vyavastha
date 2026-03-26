@@ -41,7 +41,7 @@ export default function ProfileScreen() {
           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-5xl mb-4">
             👤
           </div>
-          <h3 className="font-bold text-lg text-gray-700">Welcome to PRAJA</h3>
+          <h3 className="font-bold text-lg text-gray-700">Welcome to VYAVASTHA</h3>
           <p className="text-gray-500 text-sm text-center mt-2 mb-6">
             Login or register to track your complaints and earn rewards
           </p>
@@ -71,7 +71,7 @@ export default function ProfileScreen() {
               {user?.name || 'Active Citizen'}
             </div>
             <div className="text-gray-500 text-sm">
-              {user?.email || 'citizen@praja.gov.in'}
+              {user?.email || 'citizen@vyavastha.gov.in'}
             </div>
           </div>
         </div>

@@ -15,7 +15,7 @@ export default function NotificationsScreen() {
     const onVisible = () => { if (document.visibilityState === 'visible') fetchNotifications(); };
     document.addEventListener('visibilitychange', onVisible);
     // Re-fetch on localStorage change (official wrote a demo notification in another tab)
-    const onStorage = (e) => { if (e.key === 'praja_demo_notifications') fetchNotifications(); };
+    const onStorage = (e) => { if (e.key === 'vyavastha_demo_notifications') fetchNotifications(); };
     window.addEventListener('storage', onStorage);
     return () => {
       clearInterval(interval);

@@ -1,5 +1,5 @@
 /**
- * LocationMap.jsx - Interactive map component for PRAJA Grievance Portal
+ * LocationMap.jsx - Interactive map component for VYAVASTHA Grievance Portal
  * 
  * Uses OpenStreetMap + Leaflet.js (free, no API key needed)
  * Features:
@@ -80,7 +80,7 @@ const reverseGeocode = async (lat, lng) => {
       {
         headers: {
           'Accept-Language': 'en',
-          'User-Agent': 'PRAJA-Grievance-Portal'
+          'User-Agent': 'VYAVASTHA-Grievance-Portal'
         }
       }
     );
@@ -110,7 +110,7 @@ const searchAddress = async (query) => {
       {
         headers: {
           'Accept-Language': 'en',
-          'User-Agent': 'PRAJA-Grievance-Portal'
+          'User-Agent': 'VYAVASTHA-Grievance-Portal'
         }
       }
     );

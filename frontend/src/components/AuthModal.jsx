@@ -74,7 +74,7 @@ export default function AuthModal({ onClose }) {
           </button>
           <div className="text-2xl mb-1">🇮🇳</div>
           <h2 className="font-bold text-xl">
-            {isLogin ? 'Welcome Back!' : 'Join PRAJA'}
+            {isLogin ? 'Welcome Back!' : 'Join VYAVASTHA'}
           </h2>
           <p className="text-white/80 text-sm mt-1">
             {isLogin

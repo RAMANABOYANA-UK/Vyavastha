@@ -184,7 +184,7 @@ const demoServices = [
 
 const seedDatabase = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/praja';
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/vyavastha';
     console.log('🔄 Connecting to MongoDB...');
     
     await mongoose.connect(mongoUri);

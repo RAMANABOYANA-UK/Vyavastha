@@ -288,7 +288,7 @@ export default function MobileRatingScreen() {
           borderRadius: 14, padding: '14px 24px',
           fontSize: 13, color: '#4ade80', fontWeight: 600
         }}>
-          🇮🇳 PRAJA — प्रजा · Citizen Grievance Portal
+          🇮🇳 VYAVASTHA — व्यवस्था · Citizen Grievance Portal
         </div>
         
         <style>{`
@@ -522,7 +522,7 @@ export default function MobileRatingScreen() {
           {submitting ? '⏳ Submitting...' : '⭐ Submit Rating'}
         </button>
 
-        {/* PRAJA Branding */}
+        {/* VYAVASTHA Branding */}}
         <div style={{ textAlign: 'center', marginTop: 28 }}>
           <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>
             Powered by
@@ -531,7 +531,7 @@ export default function MobileRatingScreen() {
             fontSize: 15, fontWeight: 800,
             color: '#0D4F44', marginBottom: 4
           }}>
-            PRAJA — प्रजा
+            VYAVASTHA — व्यवस्था
           </div>
           <div style={{ fontSize: 11, color: '#9ca3af' }}>
             Citizen Grievance Portal · Digital India 🇮🇳

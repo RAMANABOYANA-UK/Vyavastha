@@ -1,5 +1,5 @@
 /**
- * aiHelpers.js - Advanced AI helper utilities for PRAJA Grievance Portal
+ * aiHelpers.js - Advanced AI helper utilities for VYAVASTHA Grievance Portal
  * 
  * Handles MIME type detection, Base64 conversion, JSON parsing,
  * image quality validation, retry logic, and severity predictions.

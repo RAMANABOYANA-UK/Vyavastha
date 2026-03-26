@@ -150,8 +150,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
             points: 100,
             complaintsPosted: 5,
           };
-          localStorage.setItem('praja_token', 'demo_token_' + Date.now());
-          localStorage.setItem('praja_demo_user', JSON.stringify(mockUser));
+          localStorage.setItem('vyavastha_token', 'demo_token_' + Date.now());
+          localStorage.setItem('vyavastha_demo_user', JSON.stringify(mockUser));
           onSuccess(mockUser);
         } else {
           setStep('details');
@@ -182,7 +182,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
           });
           
           if (loginResponse.success) {
-            localStorage.setItem('praja_token', loginResponse.token);
+            localStorage.setItem('vyavastha_token', loginResponse.token);
             onSuccess(loginResponse.data);
           }
         } else {
@@ -259,7 +259,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
       if (response.success) {
         toast.success('Registration successful!');
         // Token is nested inside response.data for the register endpoint
-        localStorage.setItem('praja_token', response.data.token);
+        localStorage.setItem('vyavastha_token', response.data.token);
         onSuccess(response.data);
       }
     } catch (error) {
@@ -276,8 +276,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
           complaintsPosted: 0,
           location: formData.location,
         };
-        localStorage.setItem('praja_token', demoToken);
-        localStorage.setItem('praja_demo_user', JSON.stringify(demoUser));
+        localStorage.setItem('vyavastha_token', demoToken);
+        localStorage.setItem('vyavastha_demo_user', JSON.stringify(demoUser));
         toast.success('Registration successful! (Demo Mode)');
         onSuccess(demoUser);
       } else {
@@ -303,7 +303,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
           >
             <div className="text-center mb-6">
               <div className="text-4xl mb-3">🏛️</div>
-              <h2 className="text-2xl font-bold text-gray-800">Welcome to PRAJA</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Welcome to VYAVASTHA</h2>
               <p className="text-gray-500 mt-1 text-sm">Citizen Grievance Management</p>
             </div>
 
