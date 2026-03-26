@@ -39,7 +39,7 @@ export default function BottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-around px-2 py-2 pb-4 z-50 shadow-[0_-4px_20px_rgba(79,70,229,0.3)]">
+    <div className="fixed bottom-0 left-0 right-0 bg-gradient-cyan backdrop-blur-md flex items-center justify-around px-2 py-2 pb-4 z-50 shadow-[0_-4px_30px_rgba(6,182,212,0.4)] glow-cyan">
       {/* First two tabs */}
       {tabs.slice(0, 2).map((tab) => {
         const Icon = tab.icon;
@@ -50,19 +50,21 @@ export default function BottomNav() {
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            className={`relative flex flex-col items-center gap-0.5 min-w-[56px] px-2 py-1 transition-all duration-200 border-b-2 ${
-              isActive ? 'text-white border-white' : 'text-white/70 border-transparent'
+            className={`relative flex flex-col items-center gap-0.5 min-w-[56px] px-2 py-2.5 transition-all duration-300 rounded-lg border-b-2 ${
+              isActive 
+                ? 'text-white border-white bg-white/10 animate-bounce-in' 
+                : 'text-white/70 border-transparent hover:bg-white/5'
             }`}
           >
             <div className="relative">
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
               {showBadge && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                <span className="absolute -top-1.5 -right-2 min-w-[18px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 animate-pulse-glow">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-medium">{tab.label}</span>
+            <span className="text-[11px] font-medium font-rajdhani">{tab.label}</span>
           </button>
         );
       })}
@@ -70,9 +72,9 @@ export default function BottomNav() {
       {/* FAB Button */}
       <button
         onClick={handleFabClick}
-        className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-4 border-white text-white flex items-center justify-center shadow-xl -mt-10 transition-all hover:scale-110 active:scale-95"
+        className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border-4 border-white text-white flex items-center justify-center shadow-2xl -mt-10 transition-all hover:scale-110 active:scale-95 animate-float glow-cyan"
       >
-        <Plus size={30} strokeWidth={2.5} />
+        <Plus size={32} strokeWidth={2.5} />
       </button>
 
       {/* Last two tabs */}
@@ -84,12 +86,14 @@ export default function BottomNav() {
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            className={`flex flex-col items-center gap-0.5 min-w-[56px] px-2 py-1 transition-all duration-200 border-b-2 ${
-              isActive ? 'text-white border-white' : 'text-white/70 border-transparent'
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] px-2 py-2.5 transition-all duration-300 rounded-lg border-b-2 ${
+              isActive 
+                ? 'text-white border-white bg-white/10 animate-bounce-in' 
+                : 'text-white/70 border-transparent hover:bg-white/5'
             }`}
           >
-            <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-            <span className="text-[11px] font-medium">{tab.label}</span>
+            <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+            <span className="text-[11px] font-medium font-rajdhani">{tab.label}</span>
           </button>
         );
       })}
