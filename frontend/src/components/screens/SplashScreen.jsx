@@ -28,20 +28,20 @@ export default function SplashScreen({ onComplete }) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-purple-50 via-amber-50 to-teal-50 flex flex-col items-center justify-center overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-40">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-          className="absolute top-10 right-10 w-40 h-40 border-2 border-blue-200 rounded-full"
+          className="absolute top-10 right-10 w-40 h-40 border-2 border-purple-200 rounded-full"
         />
         <motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-          className="absolute bottom-20 left-20 w-32 h-32 border-2 border-purple-200 rounded-full"
+          className="absolute bottom-20 left-20 w-32 h-32 border-2 border-amber-200 rounded-full"
         />
-        <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-purple-200/20 rounded-full blur-3xl" />
       </div>
 
       {/* Main Card */}
@@ -54,9 +54,9 @@ export default function SplashScreen({ onComplete }) {
         {/* Glassmorphism Card */}
         <div className="relative w-[380px] md:w-[420px] rounded-3xl overflow-hidden">
           {/* Card background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-blue-100/50 backdrop-blur-xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-purple-100/50 backdrop-blur-xl" />
           <div className="absolute inset-0 border-2 border-white/60 rounded-3xl shadow-2xl" style={{
-            boxShadow: '0 8px 32px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5)'
+            boxShadow: '0 8px 32px rgba(139, 92, 246, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5)'
           }} />
           
           {/* Card content */}
@@ -66,7 +66,7 @@ export default function SplashScreen({ onComplete }) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-6xl md:text-7xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2"
+              className="text-6xl md:text-7xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-amber-600 mb-2"
             >
               Vyavastha
             </motion.h1>
@@ -86,7 +86,7 @@ export default function SplashScreen({ onComplete }) {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="h-1 w-12 mx-auto mb-8 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full"
+              className="h-1 w-12 mx-auto mb-8 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
             />
 
             {/* Progress Bar Container */}
@@ -95,8 +95,8 @@ export default function SplashScreen({ onComplete }) {
                 <motion.div
                   className="h-full rounded-full"
                   style={{
-                    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #3B82F6 100%)',
-                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)'
+                    background: 'linear-gradient(90deg, #8B5CF6 0%, #F59E0B 50%, #14B8A6 100%)',
+                    boxShadow: '0 0 15px rgba(139, 92, 246, 0.5)'
                   }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
@@ -113,7 +113,7 @@ export default function SplashScreen({ onComplete }) {
               className="flex justify-between items-center text-gray-600 text-sm font-medium"
             >
               <span>{t('splash.initializing')}</span>
-              <span className="font-bold text-blue-600">{Math.round(progress)}%</span>
+              <span className="font-bold text-purple-600">{Math.round(progress)}%</span>
             </motion.div>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function SplashScreen({ onComplete }) {
         transition={{ delay: 0.9, duration: 0.6 }}
         className="mt-12 relative z-10"
       >
-        <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 border border-blue-200 backdrop-blur-sm shadow-lg">
+        <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 border border-purple-200 backdrop-blur-sm shadow-lg">
           <span className="text-2xl">🇮🇳</span>
           <span className="text-gray-700 text-xs tracking-widest uppercase font-medium">{t('splash.digitalIndia')}</span>
         </div>

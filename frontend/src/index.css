@@ -12,7 +12,7 @@
 
 body {
   font-family: 'Inter', 'Rajdhani', 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #F8FAFC 0%, #E0E7FF 50%, #FCE7F3 100%);
+  background: linear-gradient(135deg, #FAF5F0 0%, #F5F3FF 50%, #ECFDF5 100%);
   background-attachment: fixed;
   color: #1F2937;
   min-height: 100vh;
@@ -22,7 +22,7 @@ input,
 textarea,
 select {
   color: #1f2937;
-  caret-color: #3B82F6;
+  caret-color: #8B5CF6;
 }
 
 input::placeholder,
@@ -52,8 +52,8 @@ h1, h2, h3, h4, h5 {
 .vyavastha-bar {
   width: 100vw;
   height: 4px;
-  background: linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #3B82F6 100%);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(90deg, #8B5CF6 0%, #F59E0B 50%, #14B8A6 100%);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
 /* Custom scrollbar */

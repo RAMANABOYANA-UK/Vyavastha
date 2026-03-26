@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useUIStore, useAuthStore } from '../../store';
 import { useTranslation } from 'react-i18next';
 
@@ -30,21 +31,21 @@ export function HomeScreen_getBanners(t) {
 
 const banners = [
   {
-    bg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+    bg: 'bg-gradient-to-br from-purple-400 to-purple-600',
     title: 'Smart City\nSmart Citizens',
     emoji: '🏙️',
     sub: 'Your voice builds better infrastructure',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-500',
+    bg: 'bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600',
     title: 'Report. Track.\nTransform.',
     emoji: '🎯',
     sub: 'AI-powered civic engagement platform',
     textColor: 'text-white',
   },
   {
-    bg: 'bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-500',
+    bg: 'bg-gradient-to-br from-teal-400 via-purple-500 to-amber-500',
     title: 'व्यवस्था\nसेवा',
     emoji: '🇮🇳',
     sub: 'VYAVASTHA - Citizen Grievance Portal',
@@ -57,28 +58,28 @@ const actionCards = [
     icon: '📋', 
     title: 'Post a Complaint', 
     sub: 'AI-powered issue reporting', 
-    gradient: 'from-blue-500 to-indigo-600',
+    gradient: 'from-purple-500 to-purple-600',
     screen: 'category' 
   },
   { 
     icon: '🏛️', 
     title: 'Rate Public Service', 
     sub: 'Rate Toilets, Transport & More', 
-    gradient: 'from-purple-500 to-pink-600',
+    gradient: 'from-amber-500 to-amber-600',
     screen: 'rateToilet' 
   },
   { 
     icon: '👥', 
     title: 'Community Hub', 
     sub: 'Upvote & Support Issues', 
-    gradient: 'from-emerald-500 to-teal-600',
+    gradient: 'from-teal-500 to-teal-600',
     screen: 'community' 
   },
   { 
     icon: '🏆', 
     title: 'Civic Quiz', 
     sub: 'Learn & Earn XP', 
-    gradient: 'from-amber-500 to-orange-600',
+    gradient: 'from-purple-600 to-amber-500',
     screen: 'quiz' 
   },
 ];
@@ -116,7 +117,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-purple-50 via-amber-50 to-teal-50">
       {/* Banner */}
       <div 
         className={`h-72 ${banner.bg} flex flex-col items-center justify-center gap-3 transition-all duration-500 relative px-6 shadow-lg`}
@@ -143,10 +144,10 @@ export default function HomeScreen() {
 
       {/* Greeting Card */}
       <div className="max-w-5xl mx-auto px-4">
-        <div className="mt-5 mb-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <div className="mt-5 mb-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100 animate-fade-in">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-blue-600 font-extrabold text-xl">
+              <div className="text-purple-600 font-extrabold text-xl">
                 {getGreeting()},<br />
                 Welcome {isAuthenticated ? user?.name || t('common.citizen') : t('common.activeCitizen')} 👋
               </div>
@@ -155,22 +156,27 @@ export default function HomeScreen() {
               </div>
             </div>
             {/* XP Badge */}
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 rounded-xl text-white shadow-lg">
+            <motion.div 
+              className="bg-gradient-to-r from-purple-500 to-amber-500 px-4 py-2 rounded-xl text-white shadow-lg"
+              whileHover={{ scale: 1.05 }}
+            >
               <p className="text-xs">{t('home.yourXP')}</p>
               <p className="text-xl font-bold">{user?.points || 850}</p>
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* Action Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4">
           {actionCards.map((card, i) => (
-            <div
+            <motion.div
               key={i}
               onClick={() => handleActionClick(card.screen)}
-              className={`h-[170px] rounded-2xl bg-gradient-to-br ${card.gradient} p-5 text-white flex flex-col justify-between shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl ${
-                card.screen ? 'cursor-pointer' : 'cursor-default'
-              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 * i }}
+              whileHover={{ scale: 1.05, rotateY: 5 }}
+              className={`h-[170px] rounded-2xl bg-gradient-to-br ${card.gradient} p-5 text-white flex flex-col justify-between shadow-lg transition-all cursor-pointer animate-complaint-form-in`}
             >
               <div className="text-4xl">{card.icon}</div>
               <div>
@@ -179,25 +185,29 @@ export default function HomeScreen() {
                 </div>
                 <div className="text-sm opacity-90 mt-1">{card.sub}</div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 pb-6">
           {[
-            { value: user?.complaintsPosted || 3, label: t('home.posted'), icon: '📝', color: 'from-blue-500 to-indigo-600' },
-            { value: user?.complaintsResolved || 2, label: t('home.resolved'), icon: '✅', color: 'from-emerald-500 to-teal-600' },
-            { value: `#12`, label: t('home.yourRank'), icon: '🏆', color: 'from-amber-500 to-orange-600' },
+            { value: user?.complaintsPosted || 3, label: t('home.posted'), icon: '📝', color: 'from-purple-500 to-purple-600' },
+            { value: user?.complaintsResolved || 2, label: t('home.resolved'), icon: '✅', color: 'from-teal-500 to-teal-600' },
+            { value: `#12`, label: t('home.yourRank'), icon: '🏆', color: 'from-amber-500 to-amber-600' },
           ].map((stat, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`bg-gradient-to-br ${stat.color} rounded-2xl p-5 text-white text-center shadow-lg`}
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1 * i }}
+              whileHover={{ scale: 1.05 }}
+              className={`bg-gradient-to-br ${stat.color} rounded-2xl p-5 text-white text-center shadow-lg animate-status-progress`}
             >
               <div className="text-2xl mb-1">{stat.icon}</div>
               <div className="font-bold text-2xl">{stat.value}</div>
               <div className="text-sm opacity-80">{stat.label}</div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

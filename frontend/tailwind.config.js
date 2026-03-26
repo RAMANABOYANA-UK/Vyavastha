@@ -9,10 +9,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light theme colors
-        primary: { DEFAULT: '#3B82F6', dark: '#2563EB', light: '#DBEAFE' },
-        secondary: { DEFAULT: '#8B5CF6', dark: '#7C3AED', light: '#EDE9FE' },
-        accent: { DEFAULT: '#6366F1', dark: '#4F46E5', light: '#E0E7FF' },
+        // Light theme colors - Custom vibrant palette
+        primary: { DEFAULT: '#8B5CF6', dark: '#7C3AED', light: '#EDE9FE' },
+        secondary: { DEFAULT: '#F59E0B', dark: '#D97706', light: '#FEF3C7' },
+        accent: { DEFAULT: '#14B8A6', dark: '#0D9488', light: '#CCFBF1' },
         success: { DEFAULT: '#10B981', dark: '#059669', light: '#D1FAE5' },
         warning: { DEFAULT: '#F59E0B', dark: '#D97706', light: '#FEF3C7' },
         danger: { DEFAULT: '#EF4444', dark: '#DC2626', light: '#FEE2E2' },
@@ -39,6 +39,13 @@ export default {
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 3s ease-in-out infinite',
         'rotate-spin': 'rotateSpin 20s linear infinite',
+        'complaint-form-in': 'complaintFormIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'status-progress': 'statusProgress 1.2s ease-in-out',
+        'upvote-bounce': 'upvoteBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        'category-flip': 'categoryFlip 0.5s ease-in-out',
+        'field-focus': 'fieldFocus 0.4s ease-out',
+        'success-check': 'successCheck 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        'share-pop': 'sharePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
       keyframes: {
         slideUp: {
@@ -59,8 +66,8 @@ export default {
           '100%': { transform: 'scale(1)' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(139, 92, 246, 0.6)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-1000px 0' },
@@ -73,6 +80,39 @@ export default {
         rotateSpin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        // Project-specific keyframes
+        complaintFormIn: {
+          '0%': { transform: 'translateY(20px) scale(0.95)', opacity: '0' },
+          '50%': { opacity: '1' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+        },
+        statusProgress: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        upvoteBounce: {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        categoryFlip: {
+          '0%': { transform: 'rotateY(-90deg)', opacity: '0' },
+          '50%': { opacity: '1' },
+          '100%': { transform: 'rotateY(0)', opacity: '1' },
+        },
+        fieldFocus: {
+          '0%': { boxShadow: '0 0 0 0 rgba(139, 92, 246, 0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(139, 92, 246, 0)' },
+        },
+        successCheck: {
+          '0%': { transform: 'scale(0) rotate(-45deg)', opacity: '0' },
+          '50%': { transform: 'scale(1.2) rotate(0)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        sharePop: {
+          '0%': { transform: 'scale(0) rotate(0deg)', opacity: '0' },
+          '100%': { transform: 'scale(1) rotate(360deg)', opacity: '1' },
         },
       },
     },
