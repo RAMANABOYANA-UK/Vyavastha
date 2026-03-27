@@ -1,214 +1,228 @@
-# VYAVASTHA (व्यवस्था) | Citizen Grievance Portal
+<div align="center">
 
-VYAVASTHA is an AI-powered civic complaint platform where citizens report local issues and authorities track, assign, and resolve them with better transparency built during LovHack Season 2.
+# VYAVASTHA (व्यवस्था)
+### AI-Powered Citizen Grievance Portal
 
-## Features
+**Built during LovHack Season 2 — 7 days, 3 developers, 1 mission**
 
-### Citizen Experience
-- Submit complaints with images and location
-- Track status updates in real time
-- Upvote community complaints
-- Earn points through participation
-- Rate public services through QR flow
+> *"व्यवस्था" means "System" in Hindi — because India needs a better one.*
 
-### Government & Admin Workflows
-- Official dashboard for assigned complaints
-- Complaint assignment and escalation handling
-- Analytics dashboard for departments and trends
-- Notification and ATR (Action Taken Report) support
-- Embedded Miro planning board for department coordination
+[![LovHack Season 2](https://img.shields.io/badge/LovHack-Season%202-blue?style=for-the-badge)](https://lovhack.devpost.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)](https://mongodb.com)
 
-### AI Assistance
-- Optional Python-based CLIP image analyzer (`analyze_service`)
-- Detects likely civic issues and category/severity hints
-- Returns confidence and recommended department information
+[🚀 Live Demo](#) · [🎥 Demo Video](#) · [📋 Devpost](#)
 
-## Tech Stack
+</div>
 
-- Frontend: React 18, Vite, Tailwind CSS, Zustand
-- Backend: Node.js, Express, MongoDB, JWT, OTP, Multer, Socket.io, node-cron
-- AI Service: FastAPI + Transformers (CLIP) + PyTorch
+---
 
-## Project Structure
+## 🔥 The Problem
+
+Every day, millions of citizens across India face:
+- 🕳️ Broken roads and dangerous potholes
+- 🚰 Water supply failures and sewage leaks  
+- ⚡ Power outages with no timeline for resolution
+- 🗑️ Overflowing garbage with no accountability
+
+**Traditional complaint systems are broken.** Paper forms, zero transparency, no follow-up, no accountability.
+
+**VYAVASTHA changes that.**
+
+---
+
+## ✨ What We Built
+
+A full-stack, production-grade civic accountability platform with AI, 
+real-time updates, and government workflow automation — built in 7 days.
+
+### 🧑‍💼 For Citizens
+| Feature | Description |
+|---|---|
+| 📸 Smart Complaint Submission | Upload photos with AI auto-classification |
+| 🔍 Image Authenticity Gate | 3-layer system rejects screenshots & AI-generated images |
+| 🔔 Real-time Notifications | Instant Socket.io popups on status change |
+| 📍 Location Tracking | GPS-tagged complaints on interactive map |
+| ⬆️ Community Upvoting | Collective pressure for faster resolution |
+| 🏆 Points & Rewards | Gamified civic participation |
+
+### 🏛️ For Government Officials
+| Feature | Description |
+|---|---|
+| 📊 Smart Dashboard | Assign, escalate, resolve with full ATR support |
+| 🤖 AI Report Generation | Featherless AI writes professional ATR reports instantly |
+| 📈 Analytics Dashboard | Complaint trends by category, area, and department |
+| 🗺️ Miro Planning Board | Embedded department coordination workspace |
+| ⚠️ Auto Escalation | SLA-based cron job escalates overdue complaints automatically |
+
+---
+
+## 🤖 AI Features (Powered by Featherless AI)
 
 ```
-Vyavastha/
-├─ backend/          # Express API
-├─ frontend/         # React app
-├─ analyze_service/  # Optional Python image analysis service
-└─ REQUIREMENTS.md
+Citizen types complaint
+	   ↓
+Featherless AI LLM analyzes text
+	   ↓
+┌─────────────────────────────────────┐
+│ Category:   Road / Water / Electric │
+│ Department: PWD / Water Board / BBMP│  
+│ Severity:   Low / Medium / High / Urgent
+│ Summary:    1-line professional summary
+│ ATR:        Full resolution report  │
+└─────────────────────────────────────┘
 ```
 
-## Prerequisites
+---
 
-- Docker Desktop (recommended)
-- Docker Compose v2+
-- Node.js 18+ (for local/non-Docker run)
-- npm 9+ (for local/non-Docker run)
-- MongoDB (local or Atlas, for local/non-Docker run)
-- Python 3.10+ (only if using `analyze_service` locally)
+## 🛡️ Image Authenticity Verification (3 Layers)
 
-## Quick Start
+No fake complaints. No AI-generated evidence. Real photos only.
 
-### 1) Run with Docker (recommended)
+```
+Upload Image
+	│
+	▼
+Layer 1: EXIF Metadata Check
+	│  ✓ Camera make, model, GPS coordinates
+	│  ✗ No camera data = screenshot/AI image
+	▼
+Layer 2: Sightengine AI Detection  
+	│  ✓ Real photo confirmed
+	│  ✗ Screenshot / AI-generated = REJECTED
+	▼
+Layer 3: Sanity Check
+	│  ✓ Size 20KB-15MB, min 400x400px
+	│  ✗ Invalid format/size = REJECTED
+	▼
+✅ Verified Real Photo — Complaint Accepted
+```
 
-From repository root:
+---
 
+## ⚡ Real-time Architecture
+
+```
+Official updates complaint status
+		 ↓
+    Socket.io event fired
+		 ↓
+  Citizen's portal receives event
+		 ↓
+  Popup notification appears instantly
+  ✅ "Your complaint has been resolved!"
+```
+
+---
+
+## 🚨 Auto-Escalation System
+
+No complaint falls through the cracks. Ever.
+
+| Severity | Escalates After |
+|---|---|
+| 🔴 Urgent | 1 day |
+| 🟠 High | 3 days |
+| 🟡 Medium | 7 days |
+| 🟢 Low | 14 days |
+
+Runs automatically every midnight via `node-cron`. 
+Citizens notified instantly when complaint is escalated.
+
+---
+
+## 🛠️ Tech Stack
+
+### Sponsor Tools Used
+| Tool | How We Used It |
+|---|---|
+| **Featherless AI** | LLM complaint classification, ATR generation, severity prediction |
+| **Sightengine** | Screenshot and AI-image detection in complaint uploads |
+| **Miro** | Embedded planning board in government admin dashboard |
+| **DevSwarm** | Parallel AI-assisted development across features |
+
+### Core Stack
+```
+Frontend:  React 18 + Vite + Tailwind CSS + Zustand
+Backend:   Node.js + Express + MongoDB + Mongoose
+Auth:      JWT + OTP + Role-based access control
+Realtime:  Socket.io (user-room based notifications)
+Jobs:      node-cron (escalation automation)
+Upload:    Multer + 3-layer image verification
+Deploy:    Docker + Vercel + Render
+```
+
+---
+
+## 🚀 Quick Start
+
+### With Docker (Recommended)
 ```bash
+git clone https://github.com/RAMANABOYANA-UK/Vyavastha.git
+cd Vyavastha
 docker compose up --build -d
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5001/api`
-- AI Analyzer: `http://localhost:8000`
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:5001/api |
+| AI Analyzer | http://localhost:8000 |
 
-Useful commands:
-
+### Without Docker
 ```bash
-docker compose ps
-docker compose logs -f
-docker compose down
-```
+# Install dependencies
+npm install && npm run install:all
 
-### 2) Local run (without Docker)
+# Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your values
 
-#### Install dependencies
-
-```bash
-npm install
-npm run install:all
-```
-
-#### Configure backend environment
-
-Create `backend/.env`:
-
-```env
-PORT=5001
-MONGODB_URI=mongodb://localhost:27017/praja
-JWT_SECRET=your_super_secret
-JWT_EXPIRE=30d
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-MIRO_BOARD_URL=
-```
-
-#### Run frontend + backend
-
-From repository root:
-
-```bash
+# Run
 npm run dev
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5001/api`
-
-#### Configure frontend environment
-
-Create `frontend/.env`:
-
+### Environment Variables
 ```env
+# Backend
+PORT=5001
+MONGODB_URI=mongodb://localhost:27017/vyavastha
+JWT_SECRET=your_secret
+FEATHERLESS_API_KEY=your_key
+SIGHTENGINE_API_USER=your_user
+SIGHTENGINE_API_SECRET=your_secret
+MIRO_BOARD_URL=your_miro_embed_url
+
+# Frontend
 VITE_API_URL=http://localhost:5001/api
-VITE_ANALYZE_URL=http://localhost:8000
-VITE_MIRO_BOARD_URL=your_miro_board_embed_url_here
+VITE_MIRO_BOARD_URL=your_miro_embed_url
 ```
 
-## QR Rating on Any Device (ngrok)
+---
 
-Use this when scanning QR from a phone that is not on your localhost/WiFi network.
+## 👥 Team
 
-1) Start frontend/backend stack normally.
+| Name | Role |
+|---|---|
+| S. Bhaharun Bushra | Backend + AI Integration |
+| Mehajabeen Shaik | Frontend + UI/UX |
+| Ramana Boyana Unnathi Krishna | DevOps + Full Stack |
 
-2) In another terminal, start ngrok for frontend:
+---
 
-```bash
-ngrok http 5173
-```
+## 📄 License
 
-3) Copy the generated HTTPS URL and set it as frontend env:
+MIT — Built with ❤️ for LovHack Season 2
 
-```env
-VITE_NGROK_URL=https://your-id.ngrok-free.app
-```
+<div align="center">
 
-For Docker Compose, you can export `VITE_NGROK_URL` before running compose so QR links use that public URL.
+**One platform. Every complaint. Actual resolution.**
 
-4) Restart frontend (or recreate frontend container). New QR codes will open:
+⭐ Star this repo if you believe citizens deserve better governance
 
-`https://your-id.ngrok-free.app/rate/<serviceId>`
-
-## Optional: Start AI Analyzer Service
-
-If you want image analysis through `useImageAnalysis`, run:
-
-```bash
-cd analyze_service
-start.bat
-```
-
-or manually:
-
-```bash
-cd analyze_service
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Then set frontend environment (optional):
-
-```env
-VITE_ANALYZE_URL=http://localhost:8000
-```
-
-When using Docker, CLIP model files are pre-cached during image build so runtime startup is more reliable.
-
-## Automated Escalation
-
-VYAVASTHA includes a scheduled escalation workflow for unresolved complaints:
-
-- Urgent/Critical: escalates after 1 day
-- High: escalates after 3 days
-- Medium: escalates after 7 days
-- Low: escalates after 14 days
-
-Job schedule:
-
-- Runs every day at midnight using `node-cron`
-- Runs once on backend startup for quick verification
-
-Manual test endpoint (admin/official JWT required):
-
-- `GET /api/admin/escalate-now`
-
-Miro board endpoint (admin JWT required):
-
-- `GET /api/miro/board-url`
-
-## Scripts
-
-### Root
-- `npm run dev` - Run backend + frontend together
-- `npm run build` - Build frontend
-- `npm run start` - Start backend in production mode
-
-### Backend (`backend/`)
-- `npm run dev` - Start backend with watch mode
-- `npm start` - Start backend normally
-
-### Frontend (`frontend/`)
-- `npm run dev` - Start Vite dev server
-- `npm run build` - Build app
-- `npm run preview` - Preview build
-
-## Useful Docs
-
-- `REQUIREMENTS.md` - Detailed dependencies, APIs, and role permissions
-
-## License
-
-MIT
+</div>
 
 
 
