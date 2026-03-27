@@ -52,7 +52,7 @@ export const reverseGeocode = async (latitude, longitude) => {
       {
         headers: {
           'Accept-Language': 'en',
-          'User-Agent': 'PRAJAApp/1.0'
+          'User-Agent': 'VYAVASTHAApp/1.0'
         }
       }
     );

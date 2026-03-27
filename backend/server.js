@@ -103,7 +103,7 @@ app.use('/api/miro', miroRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
-    message: 'PRAJA API is running',
+    message: 'VYAVASTHA API is running',
     timestamp: new Date().toISOString()
   });
 });

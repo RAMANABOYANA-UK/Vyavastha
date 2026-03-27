@@ -1,6 +1,6 @@
 @echo off
 echo ============================================
-echo  PRAJA AI Analyzer - Python Setup
+echo  VYAVASTHA AI Analyzer - Python Setup
 echo ============================================
 
 echo.

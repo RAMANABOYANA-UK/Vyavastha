@@ -1,5 +1,5 @@
 """
-PRAJA Civic Issue Detector — Python AI Service
+VYAVASTHA Civic Issue Detector — Python AI Service
 Uses CLIP (openai/clip-vit-base-patch32) for zero-shot image classification.
 No API keys required. Runs fully offline after first model download (~600 MB).
 
@@ -23,7 +23,7 @@ import torch
 from transformers import CLIPProcessor, CLIPModel
 import threading
 
-app = FastAPI(title="PRAJA Civic Issue Detector")
+app = FastAPI(title="VYAVASTHA Civic Issue Detector")
 
 app.add_middleware(
     CORSMiddleware,
@@ -136,7 +136,7 @@ def clip_probs(image: Image.Image, texts: list[str]) -> list[float]:
 @app.get("/")
 def root():
     return {
-        "service": "PRAJA Civic Issue Detector",
+        "service": "VYAVASTHA Civic Issue Detector",
         "status": "ready" if _model_ready else "initializing",
         "endpoints": {
             "health": "GET /health",

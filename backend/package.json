@@ -1,7 +1,7 @@
 {
-  "name": "swachhata-backend",
+  "name": "vyavastha-backend",
   "version": "1.0.0",
-  "description": "Swachhata App Backend - Clean India Mission",
+  "description": "VYAVASTHA Backend - Citizen Grievance Portal",
   "main": "server.js",
   "type": "module",
   "scripts": {

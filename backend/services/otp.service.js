@@ -85,7 +85,7 @@ export const sendEmailOTP = async (email, otp) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1 style="margin: 0; color: #1a1a1a; font-size: 24px;">🏡️ PRAJA Portal</h1>
+              <h1 style="margin: 0; color: #1a1a1a; font-size: 24px;">🏡️ VYAVASTHA Portal</h1>
               <p style="margin: 10px 0 0; color: #333;">प्रजा - Citizen Grievance Management</p>
             </div>
             <div class="content">
@@ -102,7 +102,7 @@ export const sendEmailOTP = async (email, otp) => {
               </div>
             </div>
             <div class="footer">
-              <p>This is an automated message from PRAJA Portal.</p>
+              <p>This is an automated message from VYAVASTHA Portal.</p>
               <p>स्वच्छ भारत • सुंदर भारत</p>
               <p style="margin-top: 10px;">© 2026 Digital India Initiative</p>
             </div>
@@ -110,7 +110,7 @@ export const sendEmailOTP = async (email, otp) => {
         </body>
         </html>
       `,
-      text: `Your OTP for PRAJA Portal is: ${otp}\n\nThis OTP is valid for 5 minutes.\n\nDo not share this OTP with anyone.`,
+      text: `Your OTP for VYAVASTHA Portal is: ${otp}\n\nThis OTP is valid for 5 minutes.\n\nDo not share this OTP with anyone.`,
     };
     
     await transporter.sendMail(mailOptions);

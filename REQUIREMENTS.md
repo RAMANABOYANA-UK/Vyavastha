@@ -1,4 +1,4 @@
-# PRAJA - प्रजा | Project Requirements
+# VYAVASTHA (व्यवस्था) | Project Requirements
 
 ## System Requirements
 

@@ -141,7 +141,7 @@ export const generateEmailContent = (complaint, aiAnalysis, department) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #2a9d8f; color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0;">🇮🇳 PRAJA Alert</h1>
+          <h1 style="margin: 0;">🇮🇳 VYAVASTHA Alert</h1>
           <p style="margin: 5px 0 0;">प्रजा - Citizen Grievance Portal</p>
         </div>
         
@@ -179,12 +179,12 @@ export const generateEmailContent = (complaint, aiAnalysis, department) => {
         </div>
         
         <div style="background: #2a9d8f; color: white; padding: 15px; text-align: center;">
-          <p style="margin: 0;">PRAJA - Making Citizens Heard</p>
+          <p style="margin: 0;">VYAVASTHA - Making Citizens Heard</p>
         </div>
       </div>
     `,
     text: `
-PRAJA ALERT - ${aiAnalysis.priority.toUpperCase()} PRIORITY
+VYAVASTHA ALERT - ${aiAnalysis.priority.toUpperCase()} PRIORITY
 
 Complaint ID: ${complaint.complaintId}
 Category: ${complaint.categoryLabel}
@@ -198,7 +198,7 @@ AI VERIFICATION:
 
 Please take immediate action.
 
-- PRAJA Portal
+- VYAVASTHA Portal
     `
   };
 };

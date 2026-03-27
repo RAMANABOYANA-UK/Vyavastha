@@ -1,6 +1,6 @@
-# PRAJA - प्रजा | Citizen Grievance Portal
+# VYAVASTHA (व्यवस्था) | Citizen Grievance Portal
 
-PRAJA is an AI-assisted civic complaint platform where citizens report local issues and authorities track, assign, and resolve them with better transparency.
+VYAVASTHA is an AI-powered civic complaint platform where citizens report local issues and authorities track, assign, and resolve them with better transparency built during LovHack Season 2.
 
 ## Features
 
@@ -32,7 +32,7 @@ PRAJA is an AI-assisted civic complaint platform where citizens report local iss
 ## Project Structure
 
 ```
-Praja/
+Vyavastha/
 ├─ backend/          # Express API
 ├─ frontend/         # React app
 ├─ analyze_service/  # Optional Python image analysis service
@@ -166,7 +166,7 @@ When using Docker, CLIP model files are pre-cached during image build so runtime
 
 ## Automated Escalation
 
-PRAJA includes a scheduled escalation workflow for unresolved complaints:
+VYAVASTHA includes a scheduled escalation workflow for unresolved complaints:
 
 - Urgent/Critical: escalates after 1 day
 - High: escalates after 3 days

@@ -1,7 +1,7 @@
 services:
   mongo:
     image: mongo:7
-    container_name: praja-mongo
+    container_name: vyavastha-mongo
     restart: always
     ports:
       - "27017:27017"
@@ -13,7 +13,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: praja-backend
+    container_name: vyavastha-backend
     restart: always
     ports:
       - "5000:5000"
@@ -27,7 +27,7 @@ services:
   analyze:
     build:
       context: ./analyze_service
-    container_name: praja-analyze
+    container_name: vyavastha-analyze
     restart: always
     ports:
       - "8000:8000"
@@ -38,7 +38,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: praja-frontend
+    container_name: vyavastha-frontend
     restart: always
     ports:
       - "5173:5173"
