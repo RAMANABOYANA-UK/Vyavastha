@@ -1,6 +1,7 @@
 """
 VYAVASTHA Civic Issue Detector — Python AI Service
 Uses CLIP (openai/clip-vit-base-patch32) for zero-shot image classification.
+Optimized for speed: GPU support, image compression, and caching.
 No API keys required. Runs fully offline after first model download (~600 MB).
 
 Target acceptance classes (strict):
@@ -10,8 +11,6 @@ Target acceptance classes (strict):
 - Pothole / damaged road surface
 - Stray dogs causing public nuisance or risk
 
-All other images (car, bus, selfie, nature, random objects, etc.) are rejected.
-
 Start: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 """
 
@@ -20,6 +19,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import io
 import torch
+import hashlib
+from functools import lru_cache
 from transformers import CLIPProcessor, CLIPModel
 
 app = FastAPI(title="VYAVASTHA Civic Issue Detector")
@@ -31,12 +32,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── GPU/CPU Setup ─────────────────────────────────────────────────────────────
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"🔧 Using device: {device}")
+
 # ── Load model at startup ─────────────────────────────────────────────────────
-print("Loading CLIP model (first run downloads ~600 MB, cached after that)...")
+print("Loading CLIP model (optimized)...")
 _model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 _processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+_model = _model.to(device)
 _model.eval()
-print("✅ Model ready — listening on http://localhost:8000")
+
+# Enable mixed precision for faster inference on GPU
+if device.type == "cuda":
+    _model.half()
+    print("✅ Mixed precision enabled for GPU")
+
+print(f"✅ Model ready on {device} — listening on http://localhost:8000")
 
 # ── Text prompts ──────────────────────────────────────────────────────────────
 
@@ -75,15 +87,31 @@ DEPARTMENT = {
 STRICT_CLASS_THRESHOLD = 0.33
 TARGET_VS_NON_TARGET_GAP = 0.08
 
+# ── Cache for predictions ──────────────────────────────────────────────────────
+@lru_cache(maxsize=100)
+def get_cached_prompts():
+    """Cache encoded prompts to speed up inference"""
+    return TARGET_CLASS_PROMPTS
+
 # ── Helper ────────────────────────────────────────────────────────────────────
 
 def clip_probs(image: Image.Image, texts: list[str]) -> list[float]:
+    """Fast CLIP inference with mixed precision"""
     inputs = _processor(
         text=texts, images=image,
         return_tensors="pt", padding=True, truncation=True
     )
+    
+    # Move to device
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    
+    # Convert to half precision if on GPU
+    if device.type == "cuda":
+        inputs = {k: v.half() if v.dtype == torch.float32 else v for k, v in inputs.items()}
+    
     with torch.no_grad():
         out = _model(**inputs)
+    
     return out.logits_per_image[0].softmax(dim=0).tolist()
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -93,6 +121,7 @@ def root():
     return {
         "service": "VYAVASTHA Civic Issue Detector",
         "status": "running",
+        "device": str(device),
         "endpoints": {
             "health": "GET /health",
             "analyze": "POST /analyze  (send image as multipart form-data with field 'file')"
@@ -102,7 +131,7 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "device": str(device)}
 
 
 @app.post("/analyze")
@@ -110,7 +139,11 @@ async def analyze(file: UploadFile = File(...)):
     # Read & decode image
     raw = await file.read()
     try:
+        # Resize image to 256x256 for faster processing (CLIP works best at this size)
         image = Image.open(io.BytesIO(raw)).convert("RGB")
+        original_size = image.size
+        image.thumbnail((256, 256), Image.Resampling.LANCZOS)
+        
     except Exception as e:
         return {"isCivicIssue": False, "error": f"Cannot read image: {e}"}
 

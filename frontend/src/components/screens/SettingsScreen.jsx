@@ -1,22 +1,71 @@
 import { useState } from 'react';
-import { Bell, Moon, Globe, Lock, Trash2, ChevronRight, ShieldCheck, Smartphone } from 'lucide-react';
+import { Bell, Moon, Globe, Lock, Trash2, ChevronRight, ShieldCheck, Smartphone, X } from 'lucide-react';
 import TealHeader from '../TealHeader';
 import { useAuthStore, useUIStore } from '../../store';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsScreen({ onBack }) {
-  const { user, updateUser } = useAuthStore();
+  const { user, setUserLanguage } = useAuthStore();
   const { setScreen } = useUIStore();
+  const { i18n } = useTranslation();
 
   const [notifComplaints, setNotifComplaints] = useState(true);
   const [notifUpdates, setNotifUpdates] = useState(true);
   const [notifCommunity, setNotifCommunity] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState('English');
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showChangePwd, setShowChangePwd] = useState(false);
   const [pwdForm, setPwdForm] = useState({ current: '', newPwd: '', confirm: '' });
   const [pwdLoading, setPwdLoading] = useState(false);
+  const [searchLang, setSearchLang] = useState('');
+
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
+    { code: 'ta', name: 'தமிழ்', flag: '🇮🇳' },
+    { code: 'kn', name: 'ಕನ್ನಡ', flag: '🇮🇳' },
+    { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
+    { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
+    { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+    { code: 'pt', name: 'Português', flag: '🇵🇹' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+    { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+    { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
+    { code: 'ko', name: '한국어', flag: '🇰🇷' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
+    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+    { code: 'fil', name: 'Tagalog', flag: '🇵🇭' },
+    { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
+    { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
+    { code: 'he', name: 'עברית', flag: '🇮🇱' },
+    { code: 'uk', name: 'Українська', flag: '🇺🇦' },
+  ];
+
+  const currentLanguage = languages.find(l => l.code === i18n.language) || languages[0];
+  const filteredLanguages = languages.filter(lang =>
+    lang.name.toLowerCase().includes(searchLang.toLowerCase()) ||
+    lang.code.toLowerCase().includes(searchLang.toLowerCase())
+  );
+
+  const handleLanguageChange = async (langCode) => {
+    i18n.changeLanguage(langCode);
+    await setUserLanguage(langCode);
+    setShowLanguageModal(false);
+    setSearchLang('');
+    toast.success(`Language changed to ${languages.find(l => l.code === langCode)?.name}`);
+  };
 
   const handleChangePassword = async () => {
     if (!pwdForm.current || !pwdForm.newPwd) {
@@ -122,11 +171,12 @@ export default function SettingsScreen({ onBack }) {
             label="Language"
             right={
               <div className="flex items-center gap-1 text-gray-400">
-                <span className="text-sm text-gray-500">{language}</span>
+                <span className="text-2xl">{currentLanguage.flag}</span>
+                <span className="text-sm text-gray-500">{currentLanguage.name}</span>
                 <ChevronRight size={16} />
               </div>
             }
-            onClick={() => toast('More languages coming soon!', { icon: '🌐' })}
+            onClick={() => setShowLanguageModal(true)}
           />
         </Section>
 
@@ -206,6 +256,68 @@ export default function SettingsScreen({ onBack }) {
           VYAVASTHA App v1.0.0 · Build 2026.03
         </div>
       </div>
+
+      {/* Language Modal */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl max-h-96 w-80 flex flex-col shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-800">Select Language</h2>
+              <button
+                onClick={() => {
+                  setShowLanguageModal(false);
+                  setSearchLang('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="p-3 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Search language..."
+                value={searchLang}
+                onChange={e => setSearchLang(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal"
+              />
+            </div>
+
+            {/* Languages List */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredLanguages.length === 0 ? (
+                <div className="flex items-center justify-center h-32 text-gray-400">
+                  No languages found
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {filteredLanguages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 active:bg-teal/10 ${
+                        i18n.language === lang.code ? 'bg-teal/10 border-l-4 border-teal' : ''
+                      }`}
+                    >
+                      <span className="text-2xl">{lang.flag}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">{lang.name}</p>
+                        <p className="text-xs text-gray-400">{lang.code.toUpperCase()}</p>
+                      </div>
+                      {i18n.language === lang.code && (
+                        <div className="ml-auto w-2 h-2 bg-teal rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

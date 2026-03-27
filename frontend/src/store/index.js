@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authAPI, complaintsAPI, usersAPI } from '../services/api';
+import { authAPI, complaintsAPI } from '../services/api';
 
 // ─── Demo / offline helpers (localStorage) ─────────────────────────────────
 const DEMO_NOTIF_KEY      = 'vyavastha_demo_notifications';
@@ -20,6 +20,7 @@ export const useAuthStore = create(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      userLanguage: 'en', // Add language preference
 
       login: async (credentials) => {
         set({ isLoading: true, error: null });
@@ -27,7 +28,9 @@ export const useAuthStore = create(
           const response = await authAPI.login(credentials);
           const { token, ...user } = response.data;
           localStorage.setItem('token', token);
-          set({ user, token, isAuthenticated: true, isLoading: false });
+          const userLanguage = user.language || 'en';
+          localStorage.setItem('userLanguage', userLanguage);
+          set({ user, token, isAuthenticated: true, isLoading: false, userLanguage });
           return { success: true };
         } catch (error) {
           set({ isLoading: false, error: error.error || 'Login failed' });
@@ -41,11 +44,26 @@ export const useAuthStore = create(
           const response = await authAPI.register(data);
           const { token, ...user } = response.data;
           localStorage.setItem('token', token);
-          set({ user, token, isAuthenticated: true, isLoading: false });
+          const userLanguage = user.language || 'en';
+          localStorage.setItem('userLanguage', userLanguage);
+          set({ user, token, isAuthenticated: true, isLoading: false, userLanguage });
           return { success: true };
         } catch (error) {
           set({ isLoading: false, error: error.error || 'Registration failed' });
           return { success: false, error: error.error };
+        }
+      },
+
+      // Add method to update user language
+      setUserLanguage: async (languageCode) => {
+        set({ userLanguage: languageCode });
+        localStorage.setItem('userLanguage', languageCode);
+        try {
+          await authAPI.updateProfile({ language: languageCode });
+          const { user: currentUser } = get();
+          set({ user: { ...currentUser, language: languageCode } });
+        } catch (error) {
+          console.error('Failed to save language preference:', error);
         }
       },
 

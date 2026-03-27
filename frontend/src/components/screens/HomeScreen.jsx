@@ -29,66 +29,66 @@ export function HomeScreen_getBanners(t) {
   ];
 }
 
-const banners = [
-  {
-    bg: 'bg-gradient-to-br from-purple-400 to-purple-600',
-    title: 'Smart City\nSmart Citizens',
-    emoji: '🏙️',
-    sub: 'Your voice builds better infrastructure',
-    textColor: 'text-white',
-  },
-  {
-    bg: 'bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600',
-    title: 'Report. Track.\nTransform.',
-    emoji: '🎯',
-    sub: 'AI-powered civic engagement platform',
-    textColor: 'text-white',
-  },
-  {
-    bg: 'bg-gradient-to-br from-teal-400 via-purple-500 to-amber-500',
-    title: 'व्यवस्था\nसेवा',
-    emoji: '🇮🇳',
-    sub: 'VYAVASTHA - Citizen Grievance Portal',
-    textColor: 'text-white',
-  },
-];
-
-const actionCards = [
-  { 
-    icon: '📋', 
-    title: 'Post a Complaint', 
-    sub: 'AI-powered issue reporting', 
-    gradient: 'from-purple-500 to-purple-600',
-    screen: 'category' 
-  },
-  { 
-    icon: '🏛️', 
-    title: 'Rate Public Service', 
-    sub: 'Rate Toilets, Transport & More', 
-    gradient: 'from-amber-500 to-amber-600',
-    screen: 'rateToilet' 
-  },
-  { 
-    icon: '👥', 
-    title: 'Community Hub', 
-    sub: 'Upvote & Support Issues', 
-    gradient: 'from-teal-500 to-teal-600',
-    screen: 'community' 
-  },
-  { 
-    icon: '🏆', 
-    title: 'Civic Quiz', 
-    sub: 'Learn & Earn XP', 
-    gradient: 'from-purple-600 to-amber-500',
-    screen: 'quiz' 
-  },
-];
-
 export default function HomeScreen() {
   const [slide, setSlide] = useState(0);
   const { setScreen, setShowAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
   const { t } = useTranslation();
+
+  const banners = [
+    {
+      bg: 'bg-gradient-to-br from-purple-400 to-purple-600',
+      title: t('home.smartCity') + '\n' + t('common.citizen'),
+      emoji: '🏙️',
+      sub: t('home.buildBetter'),
+      textColor: 'text-white',
+    },
+    {
+      bg: 'bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600',
+      title: t('home.reportTrack'),
+      emoji: '🎯',
+      sub: t('home.aiPowered'),
+      textColor: 'text-white',
+    },
+    {
+      bg: 'bg-gradient-to-br from-teal-400 via-purple-500 to-amber-500',
+      title: t('home.vyavasthaPortal'),
+      emoji: '🇮🇳',
+      sub: t('common.appName'),
+      textColor: 'text-white',
+    },
+  ];
+
+  const actionCards = [
+    { 
+      icon: '📋', 
+      title: t('home.post_complaint'), 
+      sub: t('home.post_complaint_sub'), 
+      gradient: 'from-purple-500 to-purple-600',
+      screen: 'category' 
+    },
+    { 
+      icon: '⭐', 
+      title: t('home.rate_service'), 
+      sub: t('home.rate_service_sub'), 
+      gradient: 'from-amber-500 to-amber-600',
+      screen: 'rateToilet' 
+    },
+    { 
+      icon: '👥', 
+      title: t('home.community'), 
+      sub: t('home.community_sub'), 
+      gradient: 'from-teal-500 to-teal-600',
+      screen: 'community' 
+    },
+    { 
+      icon: '🧠', 
+      title: t('home.quiz'), 
+      sub: t('home.quiz_sub'), 
+      gradient: 'from-purple-600 to-amber-500',
+      screen: 'quiz' 
+    },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => {

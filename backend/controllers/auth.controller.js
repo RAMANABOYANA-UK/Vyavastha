@@ -133,7 +133,7 @@ export const getMe = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const { name, phone, address } = req.body;
+  const { name, phone, address, language } = req.body;
 
   const user = await User.findById(req.user._id);
 
@@ -141,6 +141,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
     user.name = name || user.name;
     user.phone = phone || user.phone;
     user.address = address || user.address;
+    if (language) {
+      user.language = language;
+    }
 
     const updatedUser = await user.save();
 
@@ -152,7 +155,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
         email: updatedUser.email,
         phone: updatedUser.phone,
         address: updatedUser.address,
-        avatar: updatedUser.avatar
+        avatar: updatedUser.avatar,
+        language: updatedUser.language
       }
     });
   } else {

@@ -2,17 +2,12 @@ import { ChevronRight, FileText, Settings, HelpCircle, Info, LogOut, Users } fro
 import TealHeader from '../TealHeader';
 import { useAuthStore, useUIStore } from '../../store';
 import toast from 'react-hot-toast';
-
-const menuItems = [
-  { icon: FileText, label: 'My Complaints', screen: 'complaints' },
-  { icon: Settings, label: 'Settings', screen: 'settings' },
-  { icon: HelpCircle, label: 'Help & Support', screen: 'help' },
-  { icon: Info, label: 'About App', screen: null },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated } = useAuthStore();
   const { setScreen, setActiveTab, setShowAuthModal, requestSwitchRole } = useUIStore();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -26,6 +21,13 @@ export default function ProfileScreen() {
     requestSwitchRole();
   };
 
+  const menuItems = [
+    { icon: FileText, label: t('profile.my_complaints'), screen: 'complaints' },
+    { icon: Settings, label: t('profile.settings'), screen: 'settings' },
+    { icon: HelpCircle, label: t('profile.help_support'), screen: 'help' },
+    { icon: Info, label: t('profile.about_app'), screen: null },
+  ];
+
   const handleMenuClick = (screen) => {
     if (screen) {
       setScreen(screen);
@@ -36,20 +38,20 @@ export default function ProfileScreen() {
   if (!isAuthenticated) {
     return (
       <div className="flex-1 flex flex-col">
-        <TealHeader title="Profile" />
+        <TealHeader title={t('profile.title')} />
         <div className="flex-1 flex flex-col items-center justify-center p-8 pb-20">
           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-5xl mb-4">
             👤
           </div>
-          <h3 className="font-bold text-lg text-gray-700">Welcome to VYAVASTHA</h3>
+          <h3 className="font-bold text-lg text-gray-700">{t('profile.welcome_vyavastha')}</h3>
           <p className="text-gray-500 text-sm text-center mt-2 mb-6">
-            Login or register to track your complaints and earn rewards
+            {t('profile.login_to_track')}
           </p>
           <button
             onClick={() => setShowAuthModal(true, 'login')}
             className="px-8 py-3 bg-teal text-white rounded-full font-semibold hover:bg-teal-600 transition-colors"
           >
-            Login / Register
+            {t('profile.login_register')}
           </button>
         </div>
       </div>
@@ -58,7 +60,7 @@ export default function ProfileScreen() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <TealHeader title="Profile" />
+      <TealHeader title={t('profile.title')} />
 
       <div className="flex-1 p-5 flex flex-col gap-4 pb-20 overflow-y-auto">
         {/* Avatar Card */}
@@ -79,9 +81,9 @@ export default function ProfileScreen() {
         {/* Stats */}
         <div className="flex gap-3">
           {[
-            { value: user?.complaintsPosted || 0, label: 'Complaints\nPosted' },
-            { value: user?.complaintsResolved || 0, label: 'Resolved' },
-            { value: `⭐ ${user?.points || 0}`, label: 'Points' },
+            { value: user?.complaintsPosted || 0, label: t('profile.complaints_posted') },
+            { value: user?.complaintsResolved || 0, label: t('profile.resolved') },
+            { value: `⭐ ${user?.points || 0}`, label: t('profile.points') },
           ].map((stat, i) => (
             <div
               key={i}
@@ -117,7 +119,7 @@ export default function ProfileScreen() {
         >
           <div className="flex items-center gap-3">
             <Users size={20} className="text-blue-500" />
-            <span className="font-semibold text-blue-600">Switch Role</span>
+            <span className="font-semibold text-blue-600">{t('profile.switch_role')}</span>
           </div>
           <ChevronRight size={18} className="text-blue-400" />
         </div>
@@ -129,7 +131,7 @@ export default function ProfileScreen() {
         >
           <div className="flex items-center gap-3">
             <LogOut size={20} className="text-red-400" />
-            <span className="font-semibold text-red-400">Logout</span>
+            <span className="font-semibold text-red-400">{t('profile.logout')}</span>
           </div>
           <ChevronRight size={18} className="text-red-300" />
         </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore, useUIStore, useComplaintsStore } from './store';
 
 // Lazy-load MobileRatingScreen — keeps the /rate/:serviceId bundle tiny
@@ -10,6 +11,7 @@ const MobileRatingScreen = lazy(() => import('./components/screens/MobileRatingS
 
 // Screens
 import SplashScreen from './components/screens/SplashScreen';
+import LanguageSelectionScreen from './components/screens/LanguageSelectionScreen';
 import RoleSelectionScreen from './components/screens/RoleSelectionScreen';
 import OTPAuthScreen from './components/screens/OTPAuthScreen';
 import AdminPortal from './components/screens/AdminPortal';
@@ -32,14 +34,15 @@ import BottomNav from './components/BottomNav';
 
 // Main App Component (handles state-based navigation)
 function MainApp() {
-  const { checkAuth, isAuthenticated, user, setUser, logout } = useAuthStore();
+  const { checkAuth, isAuthenticated, user, setUser, logout, userLanguage } = useAuthStore();
+  const { i18n } = useTranslation();
   const { currentScreen, showAuthModal, setShowAuthModal, switchRoleRequested, clearSwitchRoleRequest } = useUIStore();
   const { fetchCategories, fetchMyComplaints } = useComplaintsStore();
 
   // App flow states
   const [showSplash, setShowSplash] = useState(true);
   const [selectedRole, setSelectedRole] = useState(null);
-  const [appScreen, setAppScreen] = useState('splash'); // splash, roleSelect, auth, portal, publicRating
+  const [appScreen, setAppScreen] = useState('splash'); // splash, languageSelect, roleSelect, auth, portal, publicRating
   const [publicRatingServiceId, setPublicRatingServiceId] = useState(null);
 
   // Check for public rating URL parameter on mount
@@ -74,6 +77,13 @@ function MainApp() {
         // If authenticated, skip to portal and load their complaints
         setShowSplash(false);
         setAppScreen('portal');
+        
+        // Sync language from user profile or localStorage
+        const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
+        if (i18n.language !== userLang) {
+          i18n.changeLanguage(userLang);
+        }
+        
         if (userData?.role === 'citizen' || !userData?.role) {
           fetchMyComplaints({}, userData?._id);
         }
@@ -92,8 +102,13 @@ function MainApp() {
     if (token && isAuthenticated) {
       setAppScreen('portal');
     } else {
-      setAppScreen('roleSelect');
+      setAppScreen('languageSelect');
     }
+  };
+
+  // Handle language selection complete
+  const handleLanguageComplete = () => {
+    setAppScreen('roleSelect');
   };
 
   // Handle role selection
@@ -106,6 +121,13 @@ function MainApp() {
   const handleAuthSuccess = (userData) => {
     setUser(userData);
     setSelectedRole(userData.role);
+    
+    // Sync language from user profile or localStorage
+    const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
+    if (i18n.language !== userLang) {
+      i18n.changeLanguage(userLang);
+    }
+    
     if (userData.role === 'citizen' || !userData.role) {
       // Pass userId so the store can detect a user switch and clear stale data
       fetchMyComplaints({}, userData._id);
@@ -190,6 +212,9 @@ function MainApp() {
     }
 
     switch (appScreen) {
+      case 'languageSelect':
+        return <LanguageSelectionScreen onComplete={handleLanguageComplete} />;
+
       case 'roleSelect':
         return <RoleSelectionScreen onSelectRole={handleRoleSelect} />;
       

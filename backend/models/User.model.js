@@ -72,6 +72,11 @@ const userSchema = new mongoose.Schema({
   },
   pushToken: {
     type: String
+  },
+  language: {
+    type: String,
+    default: 'en',
+    enum: ['en', 'hi', 'ta', 'kn', 'mr', 'bn', 'gu', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'pl', 'nl', 'sv', 'tr', 'zh', 'ja', 'ko', 'ar', 'th', 'id', 'vi', 'fil', 'el', 'cs', 'he', 'uk']
   }
 }, {
   timestamps: true

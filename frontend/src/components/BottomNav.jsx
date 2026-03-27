@@ -2,18 +2,20 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Bell, ClipboardList, User, Plus } from 'lucide-react';
 import { useUIStore, useAuthStore, useNotificationsStore } from '../store';
-
-const tabs = [
-  { id: 'home', icon: Home, label: 'Home' },
-  { id: 'notifications', icon: Bell, label: 'Notifications' },
-  { id: 'complaints', icon: ClipboardList, label: 'Complaints' },
-  { id: 'profile', icon: User, label: 'Profile' },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function BottomNav() {
+  const { t } = useTranslation();
   const { activeTab, setActiveTab, setScreen, setShowAuthModal } = useUIStore();
   const { isAuthenticated } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotificationsStore();
+
+  const tabs = [
+    { id: 'home', icon: Home, label: t('bottomNav.home') },
+    { id: 'notifications', icon: Bell, label: t('bottomNav.notifications') },
+    { id: 'complaints', icon: ClipboardList, label: t('bottomNav.complaints') },
+    { id: 'profile', icon: User, label: t('bottomNav.profile') },
+  ];
 
   // Poll notifications every 15s so the badge stays live
   useEffect(() => {

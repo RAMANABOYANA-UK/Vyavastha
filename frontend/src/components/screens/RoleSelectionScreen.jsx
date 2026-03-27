@@ -1,40 +1,60 @@
 import { motion } from 'framer-motion';
 import { User, Shield, Building2, ChevronRight } from 'lucide-react';
-
-const roles = [
-  {
-    id: 'citizen',
-    title: 'Citizen',
-    subtitle: 'Report & Track Issues',
-    description: 'Submit complaints, track status, and provide feedback',
-    icon: User,
-    color: 'from-blue-500 to-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-  },
-  {
-    id: 'official',
-    title: 'Government Official',
-    subtitle: 'Resolve Complaints',
-    description: 'View assigned complaints and update resolution status',
-    icon: Building2,
-    color: 'from-green-500 to-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-  },
-  {
-    id: 'admin',
-    title: 'Administrator',
-    subtitle: 'Manage Platform',
-    description: 'Assign complaints, manage departments, view analytics',
-    icon: Shield,
-    color: 'from-purple-500 to-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-  },
-];
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function RoleSelectionScreen({ onSelectRole }) {
+  const { t } = useTranslation();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const roles = [
+    {
+      id: 'citizen',
+      title: t('roles.citizen'),
+      subtitle: t('roles.citizenSubtitle'),
+      description: t('roles.citizenDescription'),
+      icon: User,
+      color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+    },
+    {
+      id: 'official',
+      title: t('roles.official'),
+      subtitle: t('roles.officialSubtitle'),
+      description: t('roles.officialDescription'),
+      icon: Building2,
+      color: 'from-green-500 to-green-600',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+    },
+    {
+      id: 'admin',
+      title: t('roles.admin'),
+      subtitle: t('roles.adminSubtitle'),
+      description: t('roles.adminDescription'),
+      icon: Shield,
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+    },
+  ];
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + roles.length) % roles.length);
+      } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % roles.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIndex, onSelectRole]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header with Indian colors */}
@@ -55,9 +75,10 @@ export default function RoleSelectionScreen({ onSelectRole }) {
             <span className="text-3xl">🏛️</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Citizen Grievance Portal
+            {t('common.appSubtitle')}
           </h1>
-          <p className="text-gray-500 mt-1">Select your role to continue</p>
+          <p className="text-gray-500 mt-1">{t('roles.selectRoleToContinue') || 'Select your role to continue'}</p>
+          <p className="text-xs text-gray-400 mt-2">{t('roles.navigationInstructions') || 'Use ↑↓ or Enter to navigate • Click to select'}</p>
         </motion.div>
 
         {/* Role Cards */}
@@ -69,7 +90,11 @@ export default function RoleSelectionScreen({ onSelectRole }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
               onClick={() => onSelectRole(role.id)}
-              className={`w-full p-5 rounded-2xl border-2 ${role.borderColor} ${role.bgColor} text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]`}
+              className={`w-full p-5 rounded-2xl border-2 ${role.borderColor} ${role.bgColor} text-left transition-all ${
+                selectedIndex === index 
+                  ? 'scale-[1.02] shadow-lg ring-2 ring-offset-2 ring-teal-500' 
+                  : 'hover:scale-[1.02] hover:shadow-lg'
+              } active:scale-[0.98]`}
             >
               <div className="flex items-center gap-4">
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${role.color} flex items-center justify-center shadow-md`}>
@@ -96,7 +121,7 @@ export default function RoleSelectionScreen({ onSelectRole }) {
           className="mt-10 text-center"
         >
           <p className="text-xs text-gray-400">
-            A Digital India Initiative
+            {t('splash.digitalIndia') || 'A Digital India Initiative'}
           </p>
           <p className="text-xs text-gray-400 mt-1">
             स्वच्छ भारत अभियान
