@@ -1,7 +1,7 @@
 {
-  "name": "swachhata-app",
+  "name": "vyavastha-app",
   "version": "1.0.0",
-  "description": "Swachhata App - Clean India Mission complaint management system",
+  "description": "VYAVASTHA - AI-Powered Citizen Grievance Portal built for LovHack Season 2",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
@@ -16,11 +16,13 @@
     "concurrently": "^8.2.2"
   },
   "keywords": [
-    "swachhata",
-    "clean india",
-    "complaint management",
-    "civic engagement"
+    "vyavastha",
+    "civic tech",
+    "grievance portal",
+    "AI",
+    "citizen government",
+    "LovHack"
   ],
-  "author": "",
+  "author": "APEX",
   "license": "MIT"
 }

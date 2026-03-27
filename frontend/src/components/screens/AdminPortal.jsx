@@ -14,12 +14,14 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, Area, AreaChart
 } from 'recharts';
 import api, { adminAPI, complaintsAPI } from '../../services/api';
+import MiroBoard from '../MiroBoard';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'complaints', label: 'All Complaints', icon: FileText },
   { id: 'officials', label: 'Manage Officials', icon: Users },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'planning', label: 'Planning Board', icon: Building2 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -1331,6 +1333,19 @@ export default function AdminPortal({ user, onLogout }) {
     );
   };
 
+  const renderPlanningBoard = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <h3 className="text-lg font-semibold text-gray-800">Planning Workspace</h3>
+        <p className="text-sm text-gray-500 mt-1">
+          Use this board to coordinate department ownership, escalation actions, and timeline planning.
+        </p>
+      </div>
+
+      <MiroBoard />
+    </div>
+  );
+
   const renderSettings = () => {
     const Toggle = ({ sKey, label, description }) => (
       <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
@@ -1634,6 +1649,7 @@ export default function AdminPortal({ user, onLogout }) {
               {activeTab === 'complaints' && renderComplaints()}
               {activeTab === 'officials' && renderOfficials()}
               {activeTab === 'analytics' && renderAnalytics()}
+              {activeTab === 'planning' && renderPlanningBoard()}
               {activeTab === 'settings' && renderSettings()}
             </>
           )}

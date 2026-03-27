@@ -4,6 +4,7 @@ import Notification from '../models/Notification.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { analyzeImage } from '../services/ai.service.js';
 import { notifyOfficials } from '../services/notification.service.js';
+import { sendStatusUpdateNotification } from '../services/realtimeNotification.service.js';
 
 // Category mapping for labels
 const categoryMap = {
@@ -382,6 +383,11 @@ export const updateComplaintStatus = asyncHandler(async (req, res) => {
   }
 
   await complaint.save();
+
+  // Send real-time notification to citizen
+  if (status && complaint.user) {
+    await sendStatusUpdateNotification(complaint.user._id || complaint.user, complaint, status);
+  }
 
   // Human-readable status labels
   const statusLabels = {

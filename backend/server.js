@@ -6,15 +6,21 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server as SocketIO } from 'socket.io';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import complaintRoutes from './routes/complaint.routes.js';
 import userRoutes from './routes/user.routes.js';
 import otpRoutes from './routes/otp.routes.js';
 import assignmentRoutes from './routes/assignment.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import serviceRoutes from './routes/service.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import miroRoutes from './routes/miro.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
+import { startEscalationJob } from './jobs/escalationJob.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,8 +93,11 @@ app.use('/api/complaints', complaintRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/otp', otpRoutes);
 app.use('/api/admin', assignmentRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/admin/analytics', analyticsRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/miro', miroRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -105,7 +114,59 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Create HTTP server and wrap with Socket.io
+const server = http.createServer(app);
+const io = new SocketIO(server, {
+  cors: {
+    origin: function(origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      
+      // Allow localhost
+      if (origin.includes('localhost')) return callback(null, true);
+      
+      // Allow ngrok URLs
+      if (origin.includes('ngrok')) return callback(null, true);
+      
+      // Allow Vercel deployments
+      if (origin.includes('vercel.app')) return callback(null, true);
+      
+      // Allow Render deployments
+      if (origin.includes('onrender.com')) return callback(null, true);
+
+      // Allow any configured frontend URL
+      if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+
+      // Allow any origin for compatibility
+      callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST']
+  },
+  transports: ['websocket', 'polling']
+});
+
+// Socket.io connection handling
+io.on('connection', (socket) => {
+  // User joins their personal notification room
+  socket.on('join_user_room', (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`✅ User ${userId} connected to notifications`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`❌ User disconnected from notifications`);
+  });
+});
+
+// Export io instance for use in other files
+export { io };
+
+server.listen(PORT, async () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`📍 API available at http://localhost:${PORT}/api`);
+  console.log(`🔌 Socket.io listening for real-time notifications`);
+  
+  // Start escalation job
+  await startEscalationJob();
 });
