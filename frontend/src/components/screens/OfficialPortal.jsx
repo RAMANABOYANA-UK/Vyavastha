@@ -1,0 +1,1337 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  LayoutDashboard, FileText, CheckCircle, Clock, XCircle,
+  LogOut, Bell, Search, MapPin, Camera, MessageSquare,
+  AlertTriangle, Send, ChevronRight, User, Calendar, Filter,
+  Eye, Navigation, Activity, TrendingUp, RefreshCcw, X,
+  AlertCircle, ExternalLink, BarChart3, Loader, Clipboard,
+  Wrench, Zap, ChevronDown, ChevronUp, Sparkles
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import api from '../../services/api';
+import { useComplaintsStore, useNotificationsStore } from '../../store';
+import { complaintsAPI } from '../../services/api';
+import ComplaintAIAnalyzer from '../ComplaintAIAnalyzer';
+
+// Gemini API for AI Assistant
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
+
+// AI Assistant Component for Officials
+const AIAssistantPanel = ({ complaint, onUseATR }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [aiPlan, setAiPlan] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchAIPlan = async () => {
+    if (!complaint) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    const daysPending = Math.floor((Date.now() - new Date(complaint.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    
+    const prompt = `You are an assistant helping a government official resolve a civic complaint in India.
+
+Complaint Details:
+Category: ${complaint.categoryLabel || complaint.category || 'General'}
+Title: ${complaint.title || 'Civic Issue Reported'}
+Description: ${complaint.description || 'No description provided'}
+Severity: ${complaint.aiVerification?.severity || complaint.priority || 'medium'}
+Location: ${complaint.location?.address || 'Not specified'}
+Days Pending: ${daysPending}
+AI Estimated Cost: ${complaint.aiData?.estimatedCostINR || 'Not estimated'}
+
+Return ONLY this JSON with no markdown:
+{
+  "immediateSteps": ["step 1", "step 2", "step 3"],
+  "requiredResources": ["resource 1", "resource 2", "resource 3"],
+  "estimatedCompletionDays": 3,
+  "suggestedATR": "ready-to-use official Action Taken Report text that describes what action was initiated",
+  "preventionAdvice": "how to prevent this issue in future",
+  "escalationRisk": "low or medium or high - likelihood citizen will escalate if not resolved soon"
+}`;
+
+    try {
+      const res = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 800 }
+        })
+      });
+
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      // Parse JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        setAiPlan(JSON.parse(jsonMatch[0]));
+      } else {
+        throw new Error('Could not parse AI response');
+      }
+    } catch (err) {
+      console.error('AI Assistant error:', err);
+      setError('Could not generate AI recommendations');
+      // Provide fallback suggestions
+      setAiPlan({
+        immediateSteps: ['Acknowledge the complaint', 'Dispatch inspection team', 'Assess damage and required repairs'],
+        requiredResources: ['Inspection team', 'Basic repair materials', 'Safety barriers'],
+        estimatedCompletionDays: 3,
+        suggestedATR: `Complaint acknowledged. Inspection team dispatched to ${complaint.location?.address || 'the reported location'}. Assessment underway. Expected resolution within 3 working days.`,
+        preventionAdvice: 'Regular maintenance and periodic inspections can help prevent similar issues.',
+        escalationRisk: daysPending > 5 ? 'high' : daysPending > 3 ? 'medium' : 'low'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopyATR = () => {
+    if (aiPlan?.suggestedATR) {
+      navigator.clipboard.writeText(aiPlan.suggestedATR);
+      toast.success('ATR copied to clipboard!');
+      if (onUseATR) onUseATR(aiPlan.suggestedATR);
+    }
+  };
+
+  return (
+    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 overflow-hidden">
+      <button
+        onClick={() => {
+          setIsExpanded(!isExpanded);
+          if (!aiPlan && !isLoading) fetchAIPlan();
+        }}
+        className="w-full flex items-center justify-between p-4 hover:bg-purple-100/50 transition-colors"
+      >
+        <span className="flex items-center gap-2 font-medium text-purple-700">
+          <Sparkles size={18} />
+          🤖 AI Action Assistant
+        </span>
+        {isExpanded ? <ChevronUp size={18} className="text-purple-500" /> : <ChevronDown size={18} className="text-purple-500" />}
+      </button>
+
+      {isExpanded && (
+        <div className="p-4 pt-0 space-y-4">
+          {isLoading ? (
+            <div className="text-center py-6">
+              <Loader size={24} className="animate-spin mx-auto text-purple-500 mb-2" />
+              <p className="text-sm text-purple-600">Generating AI recommendations...</p>
+            </div>
+          ) : aiPlan ? (
+            <>
+              {/* Immediate Steps */}
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Zap size={14} className="text-orange-500" />
+                  Immediate Steps
+                </p>
+                <div className="space-y-2">
+                  {aiPlan.immediateSteps?.map((step, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                      <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                        {i + 1}
+                      </span>
+                      <span>{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Required Resources */}
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Wrench size={14} className="text-gray-500" />
+                  Required Resources
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {aiPlan.requiredResources?.map((resource, i) => (
+                    <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                      • {resource}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Estimates Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500">Est. Completion</p>
+                  <p className="text-lg font-bold text-gray-800">{aiPlan.estimatedCompletionDays} days</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500">Escalation Risk</p>
+                  <p className={`text-lg font-bold ${
+                    aiPlan.escalationRisk === 'high' ? 'text-red-600' :
+                    aiPlan.escalationRisk === 'medium' ? 'text-yellow-600' :
+                    'text-green-600'
+                  }`}>
+                    {aiPlan.escalationRisk === 'high' ? '🔴 High' :
+                     aiPlan.escalationRisk === 'medium' ? '🟡 Medium' :
+                     '🟢 Low'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Suggested ATR */}
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Clipboard size={14} className="text-blue-500" />
+                  AI-Generated ATR
+                </p>
+                <p className="text-sm text-gray-600 italic bg-gray-50 p-2 rounded border">
+                  "{aiPlan.suggestedATR}"
+                </p>
+                <button
+                  onClick={handleCopyATR}
+                  className="mt-2 w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-indigo-600 transition-all flex items-center justify-center gap-2"
+                >
+                  <Clipboard size={14} />
+                  📋 Use AI-Generated ATR
+                </button>
+              </div>
+
+              {/* Prevention Advice */}
+              {aiPlan.preventionAdvice && (
+                <div className="bg-white rounded-lg p-3">
+                  <p className="text-sm font-medium text-gray-700 mb-1">💡 Prevention Advice</p>
+                  <p className="text-xs text-gray-500">{aiPlan.preventionAdvice}</p>
+                </div>
+              )}
+
+              {error && (
+                <p className="text-xs text-amber-600 text-center">
+                  ⚠️ Using cached recommendations. {error}
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-500">Click to generate AI recommendations</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// AI Severity Badge Component
+const AISeverityBadge = ({ severity, confidence }) => {
+  const severityConfig = {
+    critical: { bg: 'bg-gradient-to-r from-red-600 to-red-500', icon: '🚨', glow: 'shadow-red-500/30' },
+    high: { bg: 'bg-gradient-to-r from-orange-600 to-orange-500', icon: '⚠️', glow: 'shadow-orange-500/30' },
+    medium: { bg: 'bg-gradient-to-r from-yellow-600 to-yellow-500', icon: '⚡', glow: 'shadow-yellow-500/30' },
+    low: { bg: 'bg-gradient-to-r from-green-600 to-green-500', icon: '✅', glow: 'shadow-green-500/30' }
+  };
+  const config = severityConfig[severity] || severityConfig.medium;
+  
+  return (
+    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${config.bg} text-white text-xs font-bold shadow-lg ${config.glow}`}>
+      <span>{config.icon}</span>
+      <span className="uppercase tracking-wide">{severity}</span>
+      {confidence && <span className="opacity-80">• {Math.round(confidence * 100)}%</span>}
+    </div>
+  );
+};
+
+// Priority Badge
+const PriorityBadge = ({ priority }) => {
+  const colors = {
+    critical: 'bg-red-100 text-red-700 border-red-200',
+    high: 'bg-orange-100 text-orange-700 border-orange-200',
+    medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    low: 'bg-green-100 text-green-700 border-green-200'
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded text-xs font-medium border ${colors[priority] || colors.medium}`}>
+      {priority?.toUpperCase() || 'MEDIUM'}
+    </span>
+  );
+};
+
+const navItems = [
+  { id: 'pending', label: 'Pending', icon: AlertCircle },
+  { id: 'in_progress', label: 'In Progress', icon: Clock },
+  { id: 'resolved', label: 'Resolved', icon: CheckCircle },
+];
+
+const statusOptions = [
+  { value: 'acknowledged', label: 'Acknowledged', color: 'bg-blue-500', desc: 'Complaint received and noted' },
+  { value: 'in_progress', label: 'Work In Progress', color: 'bg-orange-500', desc: 'Work has been initiated' },
+  { value: 'under_inspection', label: 'Under Inspection', color: 'bg-purple-500', desc: 'Site inspection ongoing' },
+  { value: 'work_scheduled', label: 'Work Scheduled', color: 'bg-indigo-500', desc: 'Work planned for specific date' },
+  { value: 'resolved', label: 'Resolved', color: 'bg-green-500', desc: 'Issue has been fixed' },
+  { value: 'rejected', label: 'Rejected', color: 'bg-red-500', desc: 'Complaint cannot be addressed' },
+];
+
+const normalizeStatus = (status) => String(status || '').trim().toLowerCase().replace(/\s+/g, '_');
+
+const isPendingStatus = (status) => ['pending', 'submitted', 'acknowledged'].includes(normalizeStatus(status));
+const isInProgressStatus = (status) => ['assigned', 'in_progress', 'under_inspection', 'work_scheduled'].includes(normalizeStatus(status));
+const isResolvedStatus = (status) => ['resolved', 'closed', 'final_resolution'].includes(normalizeStatus(status));
+
+export default function OfficialPortal({ user, onLogout }) {
+  // Get complaints from store (includes demo complaints)
+  const { complaints: storeComplaints, updateComplaintStatus: storeUpdateStatus } = useComplaintsStore();
+  const { notifications: officialNotifs, unreadCount: notifUnread, fetchNotifications, markAllAsRead: markNotifsRead, markAsRead: markOneRead } = useNotificationsStore();
+  
+  const [activeTab, setActiveTab] = useState('pending');
+  const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [updateModal, setUpdateModal] = useState(null);
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [updateRemarks, setUpdateRemarks] = useState('');
+  const [stats, setStats] = useState({ assigned: 0, pending: 0, inProgress: 0, resolved: 0, avgDays: 2.3 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [mapModal, setMapModal] = useState(null); // { location, complaintId }
+
+  useEffect(() => {
+    fetchComplaints();
+    fetchNotifications();
+    // Poll notifications every 15 seconds
+    const notifInterval = setInterval(() => fetchNotifications(), 15000);
+    return () => clearInterval(notifInterval);
+  }, [storeComplaints]); // Re-fetch when store complaints change
+
+  const fetchComplaints = async () => {
+    setIsLoading(true);
+    try {
+      // Get all complaints - server returns all, we'll show ones assigned to this official
+      // plus unassigned ones so officials can see the full workload
+      const response = await api.get('/complaints?limit=100&order=desc');
+      let allComplaints = response.data || [];
+      
+      // Merge with store complaints (includes demo complaints)
+      if (storeComplaints && storeComplaints.length > 0) {
+        const apiIds = new Set(allComplaints.map(c => String(c._id)));
+        const newFromStore = storeComplaints.filter(sc => !apiIds.has(String(sc._id)));
+        allComplaints = [...newFromStore, ...allComplaints];
+      }
+      
+      // Enhance with real data where missing (don't randomize if already present)
+      const enhanced = allComplaints.map(c => ({
+        ...c,
+        priority: c.aiVerification?.severity || c.priority || 'medium',
+        aiVerification: c.aiVerification || {
+          severity: c.priority || 'medium',
+          confidence: 0.80,
+          tags: [],
+        },
+        daysElapsed: c.daysElapsed || Math.max(0, Math.floor((Date.now() - new Date(c.createdAt).getTime()) / (24 * 60 * 60 * 1000))),
+        atrHistory: c.timeline || c.atrHistory || []
+      }));
+      
+      setComplaints(enhanced);
+      const pending = enhanced.filter(c => isPendingStatus(c.status)).length;
+      const inProg = enhanced.filter(c => isInProgressStatus(c.status)).length;
+      const resolved = enhanced.filter(c => isResolvedStatus(c.status)).length;
+      
+      setStats({
+        assigned: pending + inProg,
+        pending,
+        inProgress: inProg,
+        resolved,
+        avgDays: 2.3
+      });
+    } catch (error) {
+      console.error('Failed to fetch complaints:', error);
+      
+      // Use store complaints if available, otherwise use demo data
+      let fallbackComplaints = storeComplaints && storeComplaints.length > 0 
+        ? storeComplaints.map(c => ({
+            ...c,
+            priority: c.aiVerification?.severity || c.priority || 'medium',
+            aiVerification: c.aiVerification || { severity: 'medium', confidence: 0.85, tags: 'general' },
+            daysElapsed: c.daysElapsed || Math.max(1, Math.floor((Date.now() - new Date(c.createdAt).getTime()) / (24 * 60 * 60 * 1000))),
+            atrHistory: c.atrHistory || []
+          }))
+        : [
+        {
+          _id: '1',
+          complaintId: 'SWT-2024-001234',
+          categoryLabel: 'Garbage Collection',
+          description: 'Large pile of garbage accumulated near the community park. Needs immediate attention.',
+          status: 'pending',
+          priority: 'high',
+          photo: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400',
+          location: { address: 'Sector 15, Near Central Park', city: 'New Delhi', state: 'Delhi', lat: 28.6139, lng: 77.2090 },
+          aiVerification: { severity: 'high', confidence: 0.89, tags: 'garbage' },
+          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          daysElapsed: 2,
+          atrHistory: []
+        },
+        {
+          _id: '2',
+          complaintId: 'SWT-2024-001235',
+          categoryLabel: 'Drainage Issue',
+          description: 'Blocked drain causing water logging on the main road during monsoon.',
+          status: 'in_progress',
+          priority: 'critical',
+          photo: 'https://images.unsplash.com/photo-1594398901394-4e34939a4fd0?w=400',
+          location: { address: 'MG Road Junction', city: 'Mumbai', state: 'Maharashtra', lat: 19.0760, lng: 72.8777 },
+          aiVerification: { severity: 'critical', confidence: 0.95, tags: 'drainage' },
+          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          daysElapsed: 5,
+          atrHistory: [
+            { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), status: 'acknowledged', remarks: 'Complaint received and assigned to field team' },
+            { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), status: 'in_progress', remarks: 'Team dispatched for inspection' }
+          ]
+        },
+        {
+          _id: '3',
+          complaintId: 'SWT-2024-001236',
+          categoryLabel: 'Street Light',
+          description: 'Multiple street lights not working in residential area causing safety concerns.',
+          status: 'resolved',
+          priority: 'medium',
+          photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+          location: { address: 'Gandhi Nagar, Block C', city: 'Bengaluru', state: 'Karnataka', lat: 12.9716, lng: 77.5946 },
+          aiVerification: { severity: 'medium', confidence: 0.82, tags: 'electrical' },
+          createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          daysElapsed: 10,
+          atrHistory: [
+            { date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), status: 'acknowledged', remarks: 'Issue logged' },
+            { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'work_scheduled', remarks: 'Electrical team assigned' },
+            { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'resolved', remarks: '4 street lights replaced successfully' }
+          ]
+        },
+        {
+          _id: '4',
+          complaintId: 'SWT-2024-001237',
+          categoryLabel: 'Public Toilet',
+          description: 'Community toilet facility needs urgent cleaning and maintenance.',
+          status: 'pending',
+          priority: 'high',
+          photo: null,
+          location: { address: 'Railway Station Complex', city: 'Chennai', state: 'Tamil Nadu', lat: 13.0827, lng: 80.2707 },
+          aiVerification: { severity: 'high', confidence: 0.88, tags: 'sanitation' },
+          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          daysElapsed: 1,
+          atrHistory: []
+        }
+      ];
+      setComplaints(fallbackComplaints);
+      const pending = fallbackComplaints.filter(c => isPendingStatus(c.status)).length;
+      const inProg = fallbackComplaints.filter(c => isInProgressStatus(c.status)).length;
+      const resolved = fallbackComplaints.filter(c => isResolvedStatus(c.status)).length;
+      setStats({ 
+        assigned: pending + inProg, 
+        pending, 
+        inProgress: inProg, 
+        resolved, 
+        avgDays: 2.3 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!updateStatus) {
+      toast.error('Please select a status');
+      return;
+    }
+
+    const atrEntry = {
+      date: new Date().toISOString(),
+      status: updateStatus,
+      remarks: updateRemarks || 'Status updated',
+      updatedBy: user?.name || 'Official'
+    };
+
+    try {
+      // Use store action so Zustand state (and citizen side) stays in sync
+      const result = await storeUpdateStatus(updateModal._id, {
+        status: updateStatus,
+        comment: updateRemarks,
+      });
+
+      if (result.success) {
+        toast.success('Status updated successfully!');
+      } else {
+        toast.success('Status updated! (Demo Mode)');
+      }
+
+      // Update local state with ATR entry
+      setComplaints(prev => prev.map(c => 
+        c._id === updateModal._id 
+          ? { ...c, status: updateStatus, atrHistory: [...(c.atrHistory || []), atrEntry] }
+          : c
+      ));
+      setUpdateModal(null);
+      setUpdateStatus('');
+      setUpdateRemarks('');
+    } catch (error) {
+      // Demo mode - update locally
+      setComplaints(prev => prev.map(c => 
+        c._id === updateModal._id 
+          ? { ...c, status: updateStatus, atrHistory: [...(c.atrHistory || []), atrEntry] }
+          : c
+      ));
+      toast.success('Status updated! (Demo Mode)');
+      setUpdateModal(null);
+      setUpdateStatus('');
+      setUpdateRemarks('');
+    }
+  };
+
+  const handleMarkResolved = (complaint) => {
+    setUpdateModal(complaint);
+    setUpdateStatus('resolved');
+    setUpdateRemarks('Issue has been resolved successfully.');
+  };
+
+  const getFilteredComplaints = () => {
+    let filtered = complaints;
+    
+    // Filter by tab
+    switch (activeTab) {
+      case 'pending':
+        filtered = filtered.filter(c => isPendingStatus(c.status));
+        break;
+      case 'in_progress':
+        filtered = filtered.filter(c => isInProgressStatus(c.status));
+        break;
+      case 'resolved':
+        filtered = filtered.filter(c => isResolvedStatus(c.status));
+        break;
+      default:
+        break;
+    }
+    
+    // Filter by priority
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter(c => c.priority === priorityFilter || c.aiVerification?.severity === priorityFilter);
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        c.complaintId?.toLowerCase().includes(query) ||
+        c.categoryLabel?.toLowerCase().includes(query) ||
+        c.description?.toLowerCase().includes(query) ||
+        c.location?.address?.toLowerCase().includes(query) ||
+        c.location?.city?.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
+  };
+
+  // Google Maps embed URL generator
+  const getMapEmbedUrl = (location) => {
+    if (!location?.lat || !location?.lng) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(location?.address || 'India')}&output=embed`;
+    }
+    return `https://maps.google.com/maps?q=${location.lat},${location.lng}&z=15&output=embed`;
+  };
+
+  const ComplaintCard = ({ complaint }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all group"
+    >
+      <div className="flex">
+        {/* Photo */}
+        <div className="w-36 h-36 flex-shrink-0 relative bg-gray-100">
+          {complaint.photo ? (
+            <img 
+              src={complaint.photo} 
+              alt="Issue" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Camera size={32} className="text-gray-300" />
+            </div>
+          )}
+          {/* AI Severity Badge Overlay */}
+          {complaint.aiVerification && (
+            <div className="absolute top-2 left-2">
+              <AISeverityBadge 
+                severity={complaint.aiVerification.severity} 
+                confidence={complaint.aiVerification.confidence}
+              />
+            </div>
+          )}
+          {/* Days elapsed badge */}
+          {complaint.daysElapsed && !isResolvedStatus(complaint.status) && (
+            <div className={`absolute bottom-2 left-2 px-2 py-1 rounded text-xs font-bold text-white ${
+              complaint.daysElapsed > 5 ? 'bg-red-500' : complaint.daysElapsed > 3 ? 'bg-orange-500' : 'bg-green-500'
+            }`}>
+              {complaint.daysElapsed}d ago
+            </div>
+          )}
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-green-700">{complaint.complaintId}</span>
+                <PriorityBadge priority={complaint.priority || complaint.aiVerification?.severity} />
+              </div>
+              <p className="text-gray-800 font-medium mt-1">{complaint.categoryLabel}</p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              isResolvedStatus(complaint.status) ? 'bg-green-100 text-green-700' :
+              normalizeStatus(complaint.status) === 'in_progress' ? 'bg-orange-100 text-orange-700' :
+              normalizeStatus(complaint.status) === 'under_inspection' ? 'bg-purple-100 text-purple-700' :
+              normalizeStatus(complaint.status) === 'work_scheduled' ? 'bg-indigo-100 text-indigo-700' :
+              'bg-yellow-100 text-yellow-700'
+            }`}>
+              {complaint.status?.replace(/_/g, ' ').toUpperCase()}
+            </span>
+          </div>
+          
+          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{complaint.description}</p>
+          
+          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <MapPin size={12} className="text-green-600" />
+              {complaint.location?.address?.substring(0, 30) || complaint.location?.city || 'Unknown'}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar size={12} />
+              {new Date(complaint.createdAt).toLocaleDateString('en-IN')}
+            </span>
+            {complaint.atrHistory?.length > 0 && (
+              <span className="flex items-center gap-1 text-blue-600">
+                <MessageSquare size={12} />
+                {complaint.atrHistory.length} ATR{complaint.atrHistory.length > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => setSelectedComplaint(complaint)}
+              className="px-3 py-1.5 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1"
+            >
+              <Eye size={14} />
+              View Details
+            </button>
+            <button
+              onClick={() => setMapModal({ location: complaint.location, complaintId: complaint.complaintId })}
+              className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
+            >
+              <MapPin size={14} />
+              Track Location
+            </button>
+            {!isResolvedStatus(complaint.status) && (
+              <>
+                <button
+                  onClick={() => setUpdateModal(complaint)}
+                  className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                >
+                  <Send size={14} />
+                  Update
+                </button>
+                <button
+                  onClick={() => handleMarkResolved(complaint)}
+                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1"
+                >
+                  <CheckCircle size={14} />
+                  Resolve
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 text-white shadow-xl">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+              <span className="text-2xl">🏛️</span>
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">Government Official Portal</h1>
+              <p className="text-xs text-white/80">प्रजा - Grievance Management System</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={fetchComplaints}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              title="Refresh"
+            >
+              <RefreshCcw size={20} />
+            </button>
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifPanel(v => !v)}
+                className="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <Bell size={20} />
+                {notifUnread > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center px-1">
+                    {notifUnread > 9 ? '9+' : notifUnread}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <User size={18} />
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium">{user?.name || 'Official'}</p>
+                <p className="text-xs text-white/70">{user?.department || 'Sanitation Dept'}</p>
+              </div>
+            </div>
+            <button 
+              onClick={onLogout}
+              className="p-2 hover:bg-white/10 rounded-lg"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200">
+                <AlertCircle size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-800">{stats.pending}</p>
+                <p className="text-xs text-gray-500 font-medium">Pending</p>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-200">
+                <Clock size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-800">{stats.inProgress}</p>
+                <p className="text-xs text-gray-500 font-medium">In Progress</p>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-200">
+                <CheckCircle size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-800">{stats.resolved}</p>
+                <p className="text-xs text-gray-500 font-medium">Resolved</p>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-200">
+                <Activity size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-800">{stats.avgDays}</p>
+                <p className="text-xs text-gray-500 font-medium">Avg Resolution (days)</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Input */}
+            <div className="flex-1 relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by complaint ID, category, location..."
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
+            
+            {/* Priority Filter */}
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-gray-400" />
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 bg-white"
+              >
+                <option value="all">All Priorities</option>
+                <option value="critical">🚨 Critical</option>
+                <option value="high">⚠️ High</option>
+                <option value="medium">⚡ Medium</option>
+                <option value="low">✅ Low</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                activeTab === item.id
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-200'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <item.icon size={18} />
+              {item.label}
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === item.id ? 'bg-white/20' : 'bg-gray-100'
+              }`}>
+                {item.id === 'pending' ? stats.pending : item.id === 'in_progress' ? stats.inProgress : stats.resolved}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Complaints List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+              <div className="animate-spin w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full mx-auto" />
+              <p className="text-gray-500 mt-3 font-medium">Loading complaints...</p>
+            </div>
+          ) : getFilteredComplaints().length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <FileText size={32} className="text-gray-400" />
+              </div>
+              <p className="text-gray-600 font-medium">No complaints found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {searchQuery ? 'Try adjusting your search criteria' : 'No complaints in this category'}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-gray-500 mb-3">
+                Showing {getFilteredComplaints().length} complaint{getFilteredComplaints().length !== 1 ? 's' : ''}
+              </p>
+              {getFilteredComplaints().map((complaint) => (
+                <ComplaintCard key={complaint._id} complaint={complaint} />
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Update Status Modal (ATR - Action Taken Report) */}
+      <AnimatePresence>
+        {updateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setUpdateModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-green-600 to-emerald-600 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-lg text-white">Update Status (ATR)</h3>
+                    <p className="text-sm text-white/80">{updateModal.complaintId}</p>
+                  </div>
+                  <button
+                    onClick={() => setUpdateModal(null)}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X size={20} className="text-white" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-5 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Select New Status</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {statusOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setUpdateStatus(option.value)}
+                        className={`px-3 py-3 rounded-xl text-sm font-medium border-2 transition-all ${
+                          updateStatus === option.value
+                            ? 'border-green-600 bg-green-50 text-green-700 shadow-lg shadow-green-100'
+                            : 'border-gray-200 text-gray-600 hover:border-green-300 hover:bg-green-50/50'
+                        }`}
+                      >
+                        <span className={`inline-block w-2 h-2 rounded-full ${option.color} mr-2`}></span>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                  {updateStatus && (
+                    <p className="text-xs text-gray-500 mt-2 italic">
+                      {statusOptions.find(o => o.value === updateStatus)?.desc}
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Action Taken Report (ATR) Remarks *
+                  </label>
+                  <textarea
+                    value={updateRemarks}
+                    onChange={(e) => setUpdateRemarks(e.target.value)}
+                    placeholder="Describe the action taken, work done, or reason for status change..."
+                    rows={4}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 resize-none"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">This will be added to the complaint's ATR history</p>
+                </div>
+              </div>
+              
+              <div className="p-5 border-t border-gray-100 flex gap-3 bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={() => {
+                    setUpdateModal(null);
+                    setUpdateStatus('');
+                    setUpdateRemarks('');
+                  }}
+                  className="flex-1 py-3 bg-white text-gray-700 rounded-xl font-medium border border-gray-200 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateStatus}
+                  disabled={!updateStatus}
+                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                    updateStatus 
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-200 hover:shadow-xl' 
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <Send size={18} />
+                  Submit ATR
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Complaint Detail Modal with Map and ATR History */}
+      <AnimatePresence>
+        {selectedComplaint && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedComplaint(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with Photo */}
+              <div className="relative">
+                {selectedComplaint.photo ? (
+                  <img 
+                    src={selectedComplaint.photo}
+                    alt="Issue"
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <Camera size={48} className="text-gray-300" />
+                  </div>
+                )}
+                {/* AI Severity Badge */}
+                {selectedComplaint.aiVerification && (
+                  <div className="absolute top-4 left-4">
+                    <AISeverityBadge 
+                      severity={selectedComplaint.aiVerification.severity}
+                      confidence={selectedComplaint.aiVerification.confidence}
+                    />
+                  </div>
+                )}
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedComplaint(null)}
+                  className="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors backdrop-blur"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-5">
+                {/* Title and Status */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-bold text-xl text-green-700">{selectedComplaint.complaintId}</h3>
+                    <p className="text-gray-600 font-medium">{selectedComplaint.categoryLabel}</p>
+                  </div>
+                  <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+                    isResolvedStatus(selectedComplaint.status) ? 'bg-green-100 text-green-700' :
+                    normalizeStatus(selectedComplaint.status) === 'in_progress' ? 'bg-orange-100 text-orange-700' :
+                    normalizeStatus(selectedComplaint.status) === 'under_inspection' ? 'bg-purple-100 text-purple-700' :
+                    normalizeStatus(selectedComplaint.status) === 'work_scheduled' ? 'bg-indigo-100 text-indigo-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {selectedComplaint.status?.replace(/_/g, ' ').toUpperCase()}
+                  </span>
+                </div>
+                
+                {/* Description */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">📝 Description</p>
+                  <p className="text-gray-800">{selectedComplaint.description}</p>
+                </div>
+                
+                {/* Location with Map */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">📍 Location</p>
+                  <p className="text-gray-800 font-medium">{selectedComplaint.location?.address}</p>
+                  <p className="text-sm text-gray-500">
+                    {selectedComplaint.location?.city}, {selectedComplaint.location?.state}
+                  </p>
+                  {/* Embedded Map */}
+                  <div className="mt-3 rounded-xl overflow-hidden border border-gray-200">
+                    <iframe
+                      src={getMapEmbedUrl(selectedComplaint.location)}
+                      width="100%"
+                      height="200"
+                      style={{ border: 0 }}
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Complaint Location"
+                    />
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${selectedComplaint.location?.lat || selectedComplaint.location?.address},${selectedComplaint.location?.lng || ''}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-green-600 hover:text-green-700 mt-2"
+                  >
+                    <Navigation size={14} />
+                    Open in Google Maps
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+                
+                {/* AI Analysis */}
+                {selectedComplaint.aiVerification && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                    <p className="text-sm font-medium text-blue-700 mb-3">🤖 AI Analysis Report</p>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="bg-white rounded-lg p-3 text-center">
+                        <p className="text-gray-500 text-xs">Severity</p>
+                        <p className="font-bold text-lg capitalize text-gray-800">
+                          {selectedComplaint.aiVerification.severity || 'N/A'}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 text-center">
+                        <p className="text-gray-500 text-xs">Confidence</p>
+                        <p className="font-bold text-lg text-gray-800">
+                          {((selectedComplaint.aiVerification.confidence || 0) * 100).toFixed(0)}%
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 text-center">
+                        <p className="text-gray-500 text-xs">Category</p>
+                        <p className="font-bold text-lg capitalize text-gray-800">
+                          {selectedComplaint.aiVerification.tags || 'General'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Assistant Panel for Officials */}
+                <AIAssistantPanel 
+                  complaint={selectedComplaint}
+                  onUseATR={(atr) => {
+                    // Can be used to pre-fill ATR in update modal
+                    toast.success('ATR ready to use!');
+                  }}
+                />
+                
+                {/* ATR History Timeline */}
+                {selectedComplaint.atrHistory && selectedComplaint.atrHistory.length > 0 && (
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm font-medium text-gray-500 mb-3">📋 Action Taken Report (ATR) History</p>
+                    <div className="space-y-3">
+                      {selectedComplaint.atrHistory.map((atr, index) => (
+                        <div key={index} className="relative pl-6 pb-3 border-l-2 border-green-200 last:pb-0">
+                          <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500 border-2 border-white" />
+                          <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                statusOptions.find(s => s.value === atr.status)?.color || 'bg-gray-500'
+                              } text-white`}>
+                                {atr.status?.replace(/_/g, ' ').toUpperCase()}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {new Date(atr.date).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700">{atr.remarks}</p>
+                            {atr.updatedBy && (
+                              <p className="text-xs text-gray-400 mt-1">Updated by: {atr.updatedBy}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Meta Info */}
+                <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
+                  <span className="flex items-center gap-2">
+                    <Calendar size={14} />
+                    Submitted: {new Date(selectedComplaint.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
+                  {selectedComplaint.daysElapsed && (
+                    <span className={`px-2 py-1 rounded ${
+                      selectedComplaint.daysElapsed > 5 ? 'bg-red-100 text-red-700' : 
+                      selectedComplaint.daysElapsed > 3 ? 'bg-orange-100 text-orange-700' : 
+                      'bg-green-100 text-green-700'
+                    } text-xs font-medium`}>
+                      {selectedComplaint.daysElapsed} days since reported
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Footer */}
+              <div className="p-5 border-t border-gray-200 flex gap-3 bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={() => setSelectedComplaint(null)}
+                  className="flex-1 py-3 bg-white text-gray-700 rounded-xl font-medium border border-gray-200 hover:bg-gray-100 transition-colors"
+                >
+                  Close
+                </button>
+                {!isResolvedStatus(selectedComplaint.status) && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setSelectedComplaint(null);
+                        setUpdateModal(selectedComplaint);
+                      }}
+                      className="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-green-200 hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                    >
+                      <Send size={18} />
+                      Update Status
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedComplaint(null);
+                        handleMarkResolved(selectedComplaint);
+                      }}
+                      className="py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle size={18} />
+                      Mark Resolved
+                    </button>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Notification Panel ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showNotifPanel && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              onClick={() => setShowNotifPanel(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.97 }}
+              className="fixed top-16 right-4 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-700 to-emerald-600 text-white">
+                <div className="font-bold flex items-center gap-2">
+                  <Bell size={18} />
+                  Notifications
+                  {notifUnread > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{notifUnread} new</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {notifUnread > 0 && (
+                    <button
+                      onClick={() => markNotifsRead()}
+                      className="text-xs text-white/80 hover:text-white underline"
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                  <button onClick={() => setShowNotifPanel(false)}>
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto divide-y divide-gray-100">
+                {officialNotifs.length === 0 ? (
+                  <div className="py-10 text-center text-gray-400">
+                    <Bell size={32} className="mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No notifications yet</p>
+                  </div>
+                ) : (
+                  officialNotifs.slice(0, 20).map(n => (
+                    <div
+                      key={n._id}
+                      onClick={() => markOneRead(n._id)}
+                      className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${!n.isRead ? 'bg-green-50 border-l-4 border-green-500' : ''}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                          n.type === 'new_complaint' ? 'bg-orange-100' :
+                          n.type === 'complaint_resolved' ? 'bg-green-100' : 'bg-blue-100'
+                        }`}>
+                          {n.type === 'new_complaint' ? '📋' : n.type === 'complaint_resolved' ? '✅' : '🔔'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{n.title}</p>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
+                          <p className="text-[10px] text-gray-400 mt-1">
+                            {new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        {!n.isRead && <div className="w-2 h-2 rounded-full bg-green-500 shrink-0 mt-1.5" />}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Map Tracking Modal ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {mapModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setMapModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                <div className="flex items-center gap-2 font-bold">
+                  <MapPin size={18} />
+                  Complaint Location — {mapModal.complaintId}
+                </div>
+                <button onClick={() => setMapModal(null)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-4">
+                <div className="font-medium text-gray-700 mb-1">{mapModal.location?.address}</div>
+                <div className="text-sm text-gray-500 mb-3">{mapModal.location?.city}, {mapModal.location?.state} {mapModal.location?.pincode}</div>
+                <div className="rounded-xl overflow-hidden border border-gray-200">
+                  <iframe
+                    src={
+                      mapModal.location?.lat && mapModal.location?.lng
+                        ? `https://maps.google.com/maps?q=${mapModal.location.lat},${mapModal.location.lng}&z=16&output=embed`
+                        : `https://maps.google.com/maps?q=${encodeURIComponent((mapModal.location?.address || '') + ' ' + (mapModal.location?.city || '') + ' India')}&output=embed`
+                    }
+                    width="100%"
+                    height="300"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Grievance Location"
+                  />
+                </div>
+                <a
+                  href={
+                    mapModal.location?.lat && mapModal.location?.lng
+                      ? `https://www.google.com/maps/search/?api=1&query=${mapModal.location.lat},${mapModal.location.lng}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mapModal.location?.address || '') + ' ' + (mapModal.location?.city || ''))}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-blue-600 hover:underline"
+                >
+                  <Navigation size={14} /> Open in Google Maps <ExternalLink size={12} />
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

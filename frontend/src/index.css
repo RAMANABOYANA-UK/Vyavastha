@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Rajdhani', 'Segoe UI', sans-serif;
+  background-color: #0F1F3D;
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+input,
+textarea,
+select {
+  color: #1f2937;
+  caret-color: #1f2937;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.chakra-watermark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 120px;
+  pointer-events: none;
+  background: url('/ashoka-chakra.svg') no-repeat center top;
+  background-size: 80px 80px;
+  opacity: 0.08;
+  z-index: 0;
+}
+
+.tricolor-bar {
+  width: 100vw;
+  height: 5px;
+  background: linear-gradient(90deg, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #138808 66%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Gradient backgrounds */
+.gradient-teal {
+  background: linear-gradient(135deg, #43a89e, #2a9d8f);
+}
+
+.gradient-amber {
+  background: linear-gradient(135deg, #f4b942, #e9a825);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+}
+
+.gradient-pink {
+  background: linear-gradient(135deg, #ef9a9a, #e57373);
+}
+
+/* Animation classes */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Safe area insets for mobile */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
