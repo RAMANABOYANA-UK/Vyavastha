@@ -40,7 +40,9 @@
 | mongoose | ^8.0.0 |
 | morgan | ^1.10.0 |
 | multer | ^1.4.5-lts.1 |
+| node-cron | ^4.2.1 |
 | nodemailer | ^8.0.2 |
+| socket.io | ^4.8.3 |
 
 ### Frontend (`frontend/package.json`)
 | Package | Version |
@@ -76,20 +78,22 @@
 
 ### Backend (`backend/.env`)
 ```env
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb://localhost:27017/praja
 JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRE=30d
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+MIRO_BOARD_URL=
 ```
 
 ### Frontend (`frontend/.env`)
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 VITE_GEMINI_API_KEY=your_gemini_api_key
 VITE_ANALYZE_URL=http://localhost:8000
 VITE_NGROK_URL=https://your-ngrok-url.ngrok-free.app
+VITE_MIRO_BOARD_URL=your_miro_board_embed_url_here
 ```
 
 ---
@@ -142,7 +146,7 @@ start.bat
 
 Default ports:
 - Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+- Backend: `http://localhost:5001`
 - AI Analyzer: `http://localhost:8000`
 
 ---
@@ -218,6 +222,16 @@ Default ports:
 | GET | `/api/admin/analytics/departments` |
 | GET | `/api/admin/analytics/locations` |
 | GET | `/api/admin/analytics/export` |
+
+### Admin Automation
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/admin/escalate-now` |
+
+### Miro
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/miro/board-url` |
 
 ### Services / QR Ratings
 | Method | Endpoint |

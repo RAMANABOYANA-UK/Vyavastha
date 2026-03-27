@@ -264,8 +264,6 @@ complaintSchema.index({ user: 1, createdAt: -1 });
 complaintSchema.index({ status: 1, createdAt: -1 });
 complaintSchema.index({ category: 1, status: 1 });
 complaintSchema.index({ 'location.city': 1, status: 1 });
-complaintSchema.index({ complaintId: 1 });
-complaintSchema.index({ grv_id: 1 });
 complaintSchema.index({ assignedTo: 1, status: 1 });
 complaintSchema.index({ isEscalated: 1, escalationStatus: 1 });
 

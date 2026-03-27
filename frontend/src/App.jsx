@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-rout
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore, useUIStore, useComplaintsStore } from './store';
+import NotificationPopup from './components/NotificationPopup';
 
 // Lazy-load MobileRatingScreen — keeps the /rate/:serviceId bundle tiny
 // so phones scanning QR codes don't need to download the whole app
@@ -235,6 +236,9 @@ function MainApp() {
           },
         }}
       />
+      
+      {/* Real-time Notification Popups */}
+      <NotificationPopup />
       
       <AnimatePresence mode="wait">
         {renderApp()}

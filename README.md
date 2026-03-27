@@ -16,6 +16,7 @@ PRAJA is an AI-assisted civic complaint platform where citizens report local iss
 - Complaint assignment and escalation handling
 - Analytics dashboard for departments and trends
 - Notification and ATR (Action Taken Report) support
+- Embedded Miro planning board for department coordination
 
 ### AI Assistance
 - Optional Python-based CLIP image analyzer (`analyze_service`)
@@ -25,7 +26,7 @@ PRAJA is an AI-assisted civic complaint platform where citizens report local iss
 ## Tech Stack
 
 - Frontend: React 18, Vite, Tailwind CSS, Zustand
-- Backend: Node.js, Express, MongoDB, JWT, OTP, Multer
+- Backend: Node.js, Express, MongoDB, JWT, OTP, Multer, Socket.io, node-cron
 - AI Service: FastAPI + Transformers (CLIP) + PyTorch
 
 ## Project Structure
@@ -58,7 +59,7 @@ docker compose up --build -d
 ```
 
 - Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5000/api`
+- Backend API: `http://localhost:5001/api`
 - AI Analyzer: `http://localhost:8000`
 
 Useful commands:
@@ -83,12 +84,13 @@ npm run install:all
 Create `backend/.env`:
 
 ```env
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb://localhost:27017/praja
 JWT_SECRET=your_super_secret
 JWT_EXPIRE=30d
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+MIRO_BOARD_URL=
 ```
 
 #### Run frontend + backend
@@ -100,7 +102,17 @@ npm run dev
 ```
 
 - Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5000/api`
+- Backend API: `http://localhost:5001/api`
+
+#### Configure frontend environment
+
+Create `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:5001/api
+VITE_ANALYZE_URL=http://localhost:8000
+VITE_MIRO_BOARD_URL=your_miro_board_embed_url_here
+```
 
 ## QR Rating on Any Device (ngrok)
 
@@ -151,6 +163,28 @@ VITE_ANALYZE_URL=http://localhost:8000
 ```
 
 When using Docker, CLIP model files are pre-cached during image build so runtime startup is more reliable.
+
+## Automated Escalation
+
+PRAJA includes a scheduled escalation workflow for unresolved complaints:
+
+- Urgent/Critical: escalates after 1 day
+- High: escalates after 3 days
+- Medium: escalates after 7 days
+- Low: escalates after 14 days
+
+Job schedule:
+
+- Runs every day at midnight using `node-cron`
+- Runs once on backend startup for quick verification
+
+Manual test endpoint (admin/official JWT required):
+
+- `GET /api/admin/escalate-now`
+
+Miro board endpoint (admin JWT required):
+
+- `GET /api/miro/board-url`
 
 ## Scripts
 
