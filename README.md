@@ -3,29 +3,20 @@
 # VYAVASTHA (व्यवस्था)
 ### AI-Powered Citizen Grievance Portal
 
-**Built during LovHack Season 2 — 7 days, 3 developers, 1 mission**
 
-> *"व्यवस्था" means "System" in Hindi — because India needs a better one.*
 
-[![LovHack Season 2](https://img.shields.io/badge/LovHack-Season%202-blue?style=for-the-badge)](https://lovhack.devpost.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js)](https://nodejs.org)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)](https://mongodb.com)
-
-[🚀 Live Demo](#) · [🎥 Demo Video](#) · [📋 Devpost](#)
 
 </div>
 
 ---
 
-## 🔥 The Problem
+##  The Problem
 
 Every day, millions of citizens across India face:
-- 🕳️ Broken roads and dangerous potholes
-- 🚰 Water supply failures and sewage leaks  
-- ⚡ Power outages with no timeline for resolution
-- 🗑️ Overflowing garbage with no accountability
+-  Broken roads and dangerous potholes
+-  Water supply failures and sewage leaks  
+-  Power outages with no timeline for resolution
+-  Overflowing garbage with no accountability
 
 **Traditional complaint systems are broken.** Paper forms, zero transparency, no follow-up, no accountability.
 
@@ -38,28 +29,28 @@ Every day, millions of citizens across India face:
 A full-stack, production-grade civic accountability platform with AI, 
 real-time updates, and government workflow automation — built in 7 days.
 
-### 🧑‍💼 For Citizens
+###  For Citizens
 | Feature | Description |
 |---|---|
-| 📸 Smart Complaint Submission | Upload photos with AI auto-classification |
-| 🔍 Image Authenticity Gate | 3-layer system rejects screenshots & AI-generated images |
-| 🔔 Real-time Notifications | Instant Socket.io popups on status change |
-| 📍 Location Tracking | GPS-tagged complaints on interactive map |
-| ⬆️ Community Upvoting | Collective pressure for faster resolution |
-| 🏆 Points & Rewards | Gamified civic participation |
+|  Smart Complaint Submission | Upload photos with AI auto-classification |
+|  Image Authenticity Gate | 3-layer system rejects screenshots & AI-generated images |
+|  Real-time Notifications | Instant Socket.io popups on status change |
+|  Location Tracking | GPS-tagged complaints on interactive map |
+|  Community Upvoting | Collective pressure for faster resolution |
+|  Points & Rewards | Gamified civic participation |
 
-### 🏛️ For Government Officials
+###  For Government Officials
 | Feature | Description |
 |---|---|
-| 📊 Smart Dashboard | Assign, escalate, resolve with full ATR support |
-| 🤖 AI Report Generation | Featherless AI writes professional ATR reports instantly |
-| 📈 Analytics Dashboard | Complaint trends by category, area, and department |
-| 🗺️ Miro Planning Board | Embedded department coordination workspace |
-| ⚠️ Auto Escalation | SLA-based cron job escalates overdue complaints automatically |
+|  Smart Dashboard | Assign, escalate, resolve with full ATR support |
+|  AI Report Generation | Featherless AI writes professional ATR reports instantly |
+|  Analytics Dashboard | Complaint trends by category, area, and department |
+|  Miro Planning Board | Embedded department coordination workspace |
+|  Auto Escalation | SLA-based cron job escalates overdue complaints automatically |
 
 ---
 
-## 🤖 AI Features (Powered by Featherless AI)
+##  AI Features (Powered by Featherless AI)
 
 ```
 Citizen types complaint
@@ -77,7 +68,7 @@ Featherless AI LLM analyzes text
 
 ---
 
-## 🛡️ Image Authenticity Verification (3 Layers)
+##  Image Authenticity Verification (3 Layers)
 
 No fake complaints. No AI-generated evidence. Real photos only.
 
@@ -112,12 +103,12 @@ Official updates complaint status
   Citizen's portal receives event
 		 ↓
   Popup notification appears instantly
-  ✅ "Your complaint has been resolved!"
+   "Your complaint has been resolved!"
 ```
 
 ---
 
-## 🚨 Auto-Escalation System
+##  Auto-Escalation System
 
 No complaint falls through the cracks. Ever.
 
@@ -156,7 +147,7 @@ Deploy:    Docker + Vercel + Render
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### With Docker (Recommended)
 ```bash
@@ -202,23 +193,7 @@ VITE_MIRO_BOARD_URL=your_miro_embed_url
 
 ---
 
-## 👥 Team
 
-| Name | Role |
-|---|---|
-| S. Bhaharun Bushra | Backend + AI Integration |
-| Mehajabeen Shaik | Frontend + UI/UX |
-| Ramana Boyana Unnathi Krishna | DevOps + Full Stack |
-
----
-
-## 📄 License
-
-MIT — Built with ❤️ for LovHack Season 2
-
-<div align="center">
-
-**One platform. Every complaint. Actual resolution.**
 
 ⭐ Star this repo if you believe citizens deserve better governance
 
