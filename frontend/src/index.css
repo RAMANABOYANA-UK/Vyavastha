@@ -321,3 +321,202 @@ h1, h2, h3, h4, h5 {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(199, 210, 254, 0.5);
 }
+
+/* ===== EXTRAORDINARY SPLASH SCREEN ANIMATIONS ===== */
+
+@keyframes magneticPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(245, 158, 11, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(245, 158, 11, 0.3);
+  }
+}
+
+@keyframes textGlitch {
+  0% {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+  }
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-30px) translateX(30px) scale(1.2);
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes orbitPath {
+  0% {
+    transform: rotate(0deg) translateX(100px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+  }
+}
+
+@keyframes borderGradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glassReflection {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes radiusShift {
+  0%, 100% {
+    border-radius: 30px;
+  }
+  50% {
+    border-radius: 20px;
+  }
+}
+
+@keyframes titleShimmer {
+  0% {
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.3));
+  }
+}
+
+@keyframes floatingUp {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Animation utility classes */
+.animate-magnetic-pulse {
+  animation: magneticPulse 3s ease-in-out infinite;
+}
+
+.animate-text-glitch {
+  animation: textGlitch 3s ease-in-out infinite;
+}
+
+.animate-particle-float {
+  animation: particleFloat 4s ease-in-out infinite;
+}
+
+.animate-orbit-path {
+  animation: orbitPath 20s linear infinite;
+}
+
+.animate-border-flow {
+  animation: borderGradientFlow 5s ease-in-out infinite;
+}
+
+.animate-glass-reflection {
+  animation: glassReflection 3s ease-in-out infinite;
+}
+
+.animate-radius-shift {
+  animation: radiusShift 4s ease-in-out infinite;
+}
+
+.animate-title-shimmer {
+  animation: titleShimmer 2s ease-in-out infinite;
+}
+
+.animate-floating-up {
+  animation: floatingUp 2s ease-out infinite;
+}
+
+/* Splash screen specific styles */
+.splash-background {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #292450, #1a1f3a);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.splash-card-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.splash-card-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: glassReflection 3s infinite;
+}
+
+/* Responsive animations */
+@media (max-width: 768px) {
+  @keyframes orbitPath {
+    0% {
+      transform: rotate(0deg) translateX(60px) rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg) translateX(60px) rotate(-360deg);
+    }
+  }
+}
+
+/* Performance optimization */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
