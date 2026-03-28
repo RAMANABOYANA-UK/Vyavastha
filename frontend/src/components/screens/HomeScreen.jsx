@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useUIStore, useAuthStore } from '../../store';
 
 export function HomeScreen_getBanners() {
@@ -29,6 +30,7 @@ export function HomeScreen_getBanners() {
 }
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const [slide, setSlide] = useState(0);
   const { setScreen, setShowAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
@@ -36,23 +38,23 @@ export default function HomeScreen() {
   const banners = [
     {
       bg: 'bg-gradient-to-br from-purple-400 to-purple-600',
-      title: 'Smart City, Smart Citizens\nCitizen',
+      title: `${t('home.smartCity')}\n${t('common.citizen')}`,
       emoji: '🏙️',
-      sub: 'Your voice builds better infrastructure',
+      sub: t('home.buildBetter'),
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600',
-      title: 'Report. Track. Transform.',
+      title: t('home.reportTrack'),
       emoji: '🎯',
-      sub: 'AI-powered civic engagement',
+      sub: t('home.aiPowered'),
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-teal-400 via-purple-500 to-amber-500',
-      title: 'VYAVASTHA - Citizen Grievance Portal',
+      title: t('home.vyavasthaPortal'),
       emoji: '🇮🇳',
-      sub: 'Vyavastha',
+      sub: t('common.appName'),
       textColor: 'text-white',
     },
   ];
@@ -60,29 +62,29 @@ export default function HomeScreen() {
   const actionCards = [
     { 
       icon: '📋', 
-      title: 'Post a Complaint', 
-      sub: 'AI-powered issue reporting', 
+      title: t('home.post_complaint'), 
+      sub: t('home.post_complaint_sub'), 
       gradient: 'from-purple-500 to-purple-600',
       screen: 'category' 
     },
     { 
       icon: '⭐', 
-      title: 'Rate Public Service', 
-      sub: 'Rate Toilets, Transport & More', 
+      title: t('home.rate_service'), 
+      sub: t('home.rate_service_sub'), 
       gradient: 'from-amber-500 to-amber-600',
       screen: 'rateToilet' 
     },
     { 
       icon: '👥', 
-      title: 'Community Hub', 
-      sub: 'Upvote & Support Issues', 
+      title: t('home.community'), 
+      sub: t('home.community_sub'), 
       gradient: 'from-teal-500 to-teal-600',
       screen: 'community' 
     },
     { 
       icon: '🧠', 
-      title: 'Civic Quiz', 
-      sub: 'Learn & Earn XP', 
+      title: t('home.quiz'), 
+      sub: t('home.quiz_sub'), 
       gradient: 'from-purple-600 to-amber-500',
       screen: 'quiz' 
     },
@@ -109,9 +111,9 @@ export default function HomeScreen() {
   // Get greeting based on time
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('home.greeting');
+    if (hour < 17) return t('home.greeting_afternoon');
+    return t('home.greeting_evening');
   };
 
   return (
@@ -147,10 +149,10 @@ export default function HomeScreen() {
             <div>
               <div className="text-purple-600 font-extrabold text-xl">
                 {getGreeting()},<br />
-                Welcome {isAuthenticated ? user?.name || 'Citizen' : 'Active Citizen'} 👋
+                {t('common.welcome')} {isAuthenticated ? user?.name || t('common.citizen') : t('common.activeCitizen')} 👋
               </div>
               <div className="text-gray-500 text-sm mt-1">
-                Here are today's actions for you
+                {t('home.todayActions')}
               </div>
             </div>
             {/* XP Badge */}
@@ -158,7 +160,7 @@ export default function HomeScreen() {
               className="bg-gradient-to-r from-purple-500 to-amber-500 px-4 py-2 rounded-xl text-white shadow-lg"
               whileHover={{ scale: 1.05 }}
             >
-              <p className="text-xs">Your XP</p>
+              <p className="text-xs">{t('home.yourXP')}</p>
               <p className="text-xl font-bold">{user?.points || 850}</p>
             </motion.div>
           </div>
@@ -190,9 +192,9 @@ export default function HomeScreen() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 pb-6">
           {[
-            { value: user?.complaintsPosted || 3, label: 'Posted', icon: '📝', color: 'from-purple-500 to-purple-600' },
-            { value: user?.complaintsResolved || 2, label: 'Resolved', icon: '✅', color: 'from-teal-500 to-teal-600' },
-            { value: `#12`, label: 'Your Rank', icon: '🏆', color: 'from-amber-500 to-amber-600' },
+            { value: user?.complaintsPosted || 3, label: t('home.posted'), icon: '📝', color: 'from-purple-500 to-purple-600' },
+            { value: user?.complaintsResolved || 2, label: t('complaint.resolved'), icon: '✅', color: 'from-teal-500 to-teal-600' },
+            { value: `#12`, label: t('home.yourRank'), icon: '🏆', color: 'from-amber-500 to-amber-600' },
           ].map((stat, i) => (
             <motion.div
               key={i}

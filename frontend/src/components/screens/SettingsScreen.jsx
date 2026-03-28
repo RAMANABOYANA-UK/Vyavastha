@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Bell, Moon, Lock, Trash2, ChevronRight, ShieldCheck, Smartphone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import TealHeader from '../TealHeader';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 export default function SettingsScreen({ onBack }) {
+  const { t } = useTranslation();
   const [notifComplaints, setNotifComplaints] = useState(true);
   const [notifUpdates, setNotifUpdates] = useState(true);
   const [notifCommunity, setNotifCommunity] = useState(false);
@@ -14,25 +16,25 @@ export default function SettingsScreen({ onBack }) {
 
   const handleChangePassword = async () => {
     if (!pwdForm.current || !pwdForm.newPwd) {
-      toast.error('Please fill all password fields');
+      toast.error(t('common.error'));
       return;
     }
     if (pwdForm.newPwd.length < 6) {
-      toast.error('New password must be at least 6 characters');
+      toast.error(t('auth.invalidPassword'));
       return;
     }
     if (pwdForm.newPwd !== pwdForm.confirm) {
-      toast.error('Passwords do not match');
+      toast.error(t('auth.passwordMismatch'));
       return;
     }
     setPwdLoading(true);
     try {
       await api.put('/auth/password', { currentPassword: pwdForm.current, newPassword: pwdForm.newPwd });
-      toast.success('Password changed successfully!');
+      toast.success(t('common.success'));
       setShowChangePwd(false);
       setPwdForm({ current: '', newPwd: '', confirm: '' });
     } catch (err) {
-      toast.error(err?.error || 'Failed to change password');
+      toast.error(err?.error || t('common.error'));
     } finally {
       setPwdLoading(false);
     }
@@ -71,79 +73,79 @@ export default function SettingsScreen({ onBack }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
-      <TealHeader title="Settings" onBack={onBack} />
+      <TealHeader title={t('profile.settings')} onBack={onBack} />
 
       <div className="flex-1 overflow-y-auto p-4 pb-24">
 
         {/* Notifications */}
-        <Section title="Notifications">
+        <Section title={t('notifications.title')}>
           <Row
             icon={Bell}
             iconColor="text-teal"
-            label="Complaint Updates"
+            label={t('complaints.title')}
             right={<Toggle value={notifComplaints} onChange={setNotifComplaints} />}
           />
           <Row
             icon={Bell}
             iconColor="text-blue-500"
-            label="Status Updates"
+            label={t('complaint.status')}
             right={<Toggle value={notifUpdates} onChange={setNotifUpdates} />}
           />
           <Row
             icon={Bell}
             iconColor="text-purple-500"
-            label="Community Activity"
+            label={t('home.community', { defaultValue: 'Community Activity' })}
             right={<Toggle value={notifCommunity} onChange={setNotifCommunity} />}
           />
         </Section>
 
         {/* Appearance */}
-        <Section title="Appearance">
+        <Section title={t('settings.appearance')}>
           <Row
             icon={Moon}
             iconColor="text-indigo-500"
-            label="Dark Mode"
+            label={t('settings.darkMode')}
             right={
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">Coming soon</span>
-                <Toggle value={darkMode} onChange={() => toast('Dark mode coming soon!', { icon: '🌙' })} />
+                <span className="text-xs text-gray-400">{t('settings.comingSoon')}</span>
+                <Toggle value={darkMode} onChange={() => toast(t('settings.darkModeComingSoon'), { icon: '🌙' })} />
               </div>
             }
           />
         </Section>
 
         {/* Security */}
-        <Section title="Security">
+        <Section title={t('settings.security')}>
           <Row
             icon={Lock}
             iconColor="text-orange-500"
-            label="Change Password"
+            label={t('auth.password')}
             right={<ChevronRight size={16} className="text-gray-400" />}
             onClick={() => setShowChangePwd(v => !v)}
           />
           <Row
             icon={ShieldCheck}
             iconColor="text-green-500"
-            label="Two-Factor Authentication"
-            right={<span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Coming soon</span>}
+            label={t('settings.twoFactor')}
+            right={<span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t('settings.comingSoon')}</span>}
           />
           <Row
             icon={Smartphone}
             iconColor="text-blue-500"
-            label="Active Sessions"
+            label={t('settings.activeSessions')}
             right={<ChevronRight size={16} className="text-gray-400" />}
-            onClick={() => toast('1 active session on this device', { icon: '📱' })}
+            onClick={() => toast(t('settings.activeSessionMessage'), { icon: '📱' })}
           />
         </Section>
 
         {/* Change Password Form */}
         {showChangePwd && (
           <div className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-teal/30">
-            <p className="text-sm font-bold text-gray-700 mb-3">Change Password</p>
+            <p className="text-sm font-bold text-gray-700 mb-3">{t('settings.changePassword')}</p>
             {[
-              { key: 'current', placeholder: 'Current password' },
-              { key: 'newPwd', placeholder: 'New password (min 6 chars)' },
-              { key: 'confirm', placeholder: 'Confirm new password' },
+              { key: 'current', placeholder: t('settings.currentPassword') },
+              { key: 'newPwd', placeholder: t('settings.newPassword') },
+              { key: 'confirm', placeholder: t('auth.confirm_password') },
             ].map(({ key, placeholder }) => (
               <input
                 key={key}
@@ -159,27 +161,27 @@ export default function SettingsScreen({ onBack }) {
                 onClick={() => setShowChangePwd(false)}
                 className="flex-1 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleChangePassword}
                 disabled={pwdLoading}
                 className="flex-1 py-2 rounded-lg bg-teal text-white text-sm font-semibold disabled:opacity-60"
               >
-                {pwdLoading ? 'Saving...' : 'Save'}
+                {pwdLoading ? `${t('common.loading')}...` : t('common.save')}
               </button>
             </div>
           </div>
         )}
 
         {/* Danger Zone */}
-        <Section title="Account">
+        <Section title={t('settings.account')}>
           <Row
             icon={Trash2}
             iconColor="text-red-400"
-            label="Delete Account"
+            label={t('common.delete')}
             right={<ChevronRight size={16} className="text-gray-400" />}
-            onClick={() => toast.error('Please contact support to delete your account.')}
+            onClick={() => toast.error(t('common.error'))}
           />
         </Section>
 

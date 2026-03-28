@@ -1,0 +1,258 @@
+{
+  "nav": {
+    "home": "Home",
+    "complaints": "Complaints",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
+  "complaint": {
+    "title": "Submit Complaint",
+    "description": "Describe the issue",
+    "category": "Category",
+    "location": "Location",
+    "photo": "Add Photo",
+    "submit": "Submit",
+    "status": "Status",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "resolved": "Resolved",
+    "escalated": "Escalated"
+  },
+  "category": {
+    "road": "Road",
+    "water": "Water",
+    "electricity": "Electricity",
+    "sanitation": "Sanitation",
+    "publicSafety": "Public Safety",
+    "other": "Other",
+    "dirtySpot": "Dirty Spot",
+    "garbageDump": "Garbage Dump",
+    "garbageVehicle": "Garbage Vehicle",
+    "burningGarbage": "Burning Garbage",
+    "sweepingNotDone": "Sweeping Not Done",
+    "dustbinsNotCleaned": "Dustbins Not Cleaned",
+    "openDefecation": "Open Defecation"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "phone": "Phone Number"
+  },
+  "general": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success",
+    "noData": "No data found",
+    "back": "Back"
+  },
+  "home": {
+    "title": "VYAVASTHA",
+    "subtitle": "Citizen Grievance Portal",
+    "welcome": "Welcome",
+    "recentComplaints": "Recent Complaints",
+    "submitNew": "Submit New Complaint",
+    "trackStatus": "Track Status"
+  },
+  "ai": {
+    "analyzing": "Analyzing image...",
+    "validIssue": "Valid Issue",
+    "notCivicIssue": "Not a Civic Issue",
+    "category": "Category",
+    "severity": "Severity",
+    "confidence": "Confidence",
+    "department": "Department"
+  },
+  "notification": {
+    "title": "Notifications",
+    "noNotifications": "No notifications yet",
+    "markRead": "Mark as read",
+    "complaintAssigned": "Complaint Assigned",
+    "complaintResolved": "Complaint Resolved",
+    "complaintEscalated": "Complaint Escalated"
+  },
+  "language": {
+    "title": "Choose Your Language",
+    "subtitle": "Pick a language for the app experience",
+    "searchPlaceholder": "Search language",
+    "continue": "Continue"
+  },
+  "settings": {
+    "appearance": "Appearance",
+    "darkMode": "Dark Mode",
+    "comingSoon": "Coming Soon",
+    "darkModeComingSoon": "Dark mode is coming soon",
+    "security": "Security",
+    "twoFactor": "Two-Factor Authentication",
+    "activeSessions": "Active Sessions",
+    "activeSessionMessage": "Session management coming soon",
+    "account": "Account",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password"
+  },
+  "help": {
+    "faq": "FAQs",
+    "statusGuide": "Status Guide",
+    "contactUs": "Contact Us",
+    "tapQuestion": "Tap a question to view the answer",
+    "understandingStatus": "Understanding complaint statuses",
+    "tip": "Tip",
+    "tipText": "You will receive a push notification every time your complaint status changes. Check the Notifications tab regularly.",
+    "chooseReach": "Choose how you would like to reach support",
+    "reportIssue": "Report an Issue",
+    "describeProblem": "Describe your problem",
+    "reportSubmitted": "Support request submitted successfully",
+    "submitReport": "Submit Report",
+    "supportHours": "Support available Monday to Saturday, 9:00 AM to 6:00 PM",
+    "helpline": "Helpline",
+    "email": "Email",
+    "liveChat": "Live Chat",
+    "liveChatHours": "Mon-Sat, 9am-6pm",
+    "liveChatSoon": "Live chat opening soon",
+    "statusDesc": {
+      "pending": "Your complaint has been submitted and is awaiting review.",
+      "acknowledged": "An official has acknowledged your complaint.",
+      "inProgress": "Work has been initiated to resolve the issue.",
+      "underInspection": "Officials are inspecting the site.",
+      "workScheduled": "A resolution date has been scheduled.",
+      "resolved": "The issue has been fixed. You can leave feedback.",
+      "rejected": "The complaint could not be addressed. Check the official note."
+    },
+    "faqItems": {
+      "submitComplaint": {
+        "q": "How do I submit a complaint?",
+        "a": "Tap the plus button at the bottom, select a category, add a photo, description, and location, then submit. AI verifies and forwards your complaint to the right department."
+      },
+      "resolveTime": {
+        "q": "How long does it take to resolve a complaint?",
+        "a": "Most complaints are acknowledged within 24 hours and resolved in 3-7 working days depending on category and priority."
+      },
+      "trackStatus": {
+        "q": "How do I track my complaint status?",
+        "a": "Open the Complaints tab to see all submitted complaints and their latest status updates."
+      },
+      "points": {
+        "q": "What are Points and how do I earn them?",
+        "a": "You earn points for reporting complaints, supporting valid issues, and completing civic actions like quizzes and feedback."
+      },
+      "anonymous": {
+        "q": "Can I submit a complaint anonymously?",
+        "a": "Yes, you can choose anonymous submission while filing a complaint and still track progress in your account."
+      },
+      "rejected": {
+        "q": "What if my complaint is rejected?",
+        "a": "Rejected complaints include a reason. You can update details or evidence and submit again."
+      },
+      "notifications": {
+        "q": "How do notifications work?",
+        "a": "You get notifications when complaint status changes, including acknowledgement, progress, and resolution."
+      },
+      "rateService": {
+        "q": "How do I rate a public service?",
+        "a": "Use the Rate Service option on Home, then rate a nearby service location and submit your feedback."
+      }
+    }
+  },
+  "community": {
+    "subtitle": "Support issues that matter to you",
+    "trending": "Trending",
+    "nearby": "Nearby",
+    "leaders": "Leaders",
+    "allIssues": "All Issues",
+    "supportAdded": "+5 XP for supporting",
+    "supportRemoved": "Support removed",
+    "yourRank": "Your Rank",
+    "totalXp": "Total XP",
+    "reachNextLevel": "150 XP to reach Active Citizen level",
+    "leaderboardTitle": "Civic Heroes Leaderboard",
+    "topContributors": "Top contributors this month",
+    "howToEarnXp": "How to Earn XP",
+    "description": "Description",
+    "reported": "Reported",
+    "upvotes": "Upvotes",
+    "comments": "Comments",
+    "views": "Views",
+    "supported": "Supported",
+    "supportIssue": "Support This Issue",
+    "similarIssueNearby": "Similar Issue Nearby",
+    "similarIssueText": "2 similar complaints found within 100m radius. Consider supporting existing reports instead of creating duplicates.",
+    "urgent": "Urgent",
+    "ai": "AI",
+    "details": "Details",
+    "reports": "reports",
+    "xp": "XP",
+    "aiAnalysis": "AI Analysis",
+    "category": "Category",
+    "severity": "Severity",
+    "earn": {
+      "reportComplaint": "Report a complaint",
+      "rateService": "Rate a public service",
+      "upvoteIssue": "Upvote an issue",
+      "resolvedComplaint": "Complaint gets resolved",
+      "completeQuiz": "Complete civic quiz"
+    }
+  },
+  "quiz": {
+    "subtitle": "Test your civic knowledge and earn points",
+    "earnUpTo": "Earn up to 60 XP",
+    "answerCorrectly": "Answer correctly to maximize points",
+    "streakBonuses": "Streak Bonuses",
+    "streakRule": "Get 3+ in a row for bonus XP",
+    "multipleChoice": "Multiple choice questions",
+    "start": "Start Quiz",
+    "questionOf": "Question {{current}} of {{total}}",
+    "streak": "streak",
+    "streakBonus": "streak bonus",
+    "worth": "Worth",
+    "complete": "Quiz Complete",
+    "grade": "Grade",
+    "correct": "Correct",
+    "xpEarned": "XP Earned",
+    "totalXp": "Total XP",
+    "playAgain": "Play Again",
+    "learnEarn": "Learn and earn civic XP",
+    "messageOutstanding": "Outstanding performance. Keep it up!",
+    "messageGreat": "Great job. You are doing well!",
+    "messageGood": "Good effort. Keep learning!",
+    "messagePractice": "Keep practicing. You will improve quickly!",
+    "totalQuestions": "{{count}} Questions",
+    "questions": {
+      "q1": {
+        "category": "Civic Knowledge",
+        "question": "What does SBM stand for in India's sanitation initiative?",
+        "options": ["Swachh Bharat Mission", "Sanitation Board of Ministry", "Safe Building Movement", "State Bathroom Management"]
+      },
+      "q2": {
+        "category": "Constitutional Rights",
+        "question": "Which Article of the Indian Constitution guarantees the Right to a clean environment?",
+        "options": ["Article 14", "Article 19", "Article 21", "Article 32"]
+      },
+      "q3": {
+        "category": "Civic Services",
+        "question": "What is the toll-free number for filing complaints in India?",
+        "options": ["100", "1800-111-555", "181", "112"]
+      },
+      "q4": {
+        "category": "Government Structure",
+        "question": "Which ministry handles the VYAVASTHA portal?",
+        "options": ["Ministry of Urban Development", "Ministry of Housing and Urban Affairs", "Ministry of Environment", "Ministry of Health"]
+      },
+      "q5": {
+        "category": "Waste Management",
+        "question": "What percentage of solid waste should be segregated at source as per guidelines?",
+        "options": ["50%", "75%", "100%", "25%"]
+      }
+    }
+  }
+}

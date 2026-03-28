@@ -47,9 +47,9 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
     try {
       const locationData = await getLocationWithAddress();
       setFormData((prev) => ({ ...prev, location: locationData }));
-      toast.success('Location detected!', { icon: '📍' });
+      toast.success(t('common.success'), { icon: '📍' });
     } catch (error) {
-      toast.error(error.message || 'Could not detect location');
+      toast.error(error.message || t('common.error'));
     } finally {
       setIsLocating(false);
     }
@@ -57,15 +57,15 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
 
   const handleSendOTP = async () => {
     if (!identifier.trim()) {
-      toast.error(`Please enter your ${authType === 'phone' ? 'phone number' : 'email'}`);
+      toast.error(t('auth.phoneOrEmail'));
       return;
     }
     if (authType === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
-      toast.error('Please enter a valid email address');
+      toast.error(t('common.error'));
       return;
     }
     if (authType === 'phone' && !/^[6-9]\d{9}$/.test(identifier)) {
-      toast.error('Please enter a valid 10-digit Indian mobile number');
+      toast.error(t('common.error'));
       return;
     }
 
@@ -77,12 +77,12 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
       if (response.success) {
         // Validate intent vs actual account status
         if (isLogin && !response.userExists) {
-          toast.error('No account found. Please Create an Account first.', { duration: 4000 });
+          toast.error(t('common.error'), { duration: 4000 });
           setIsLoading(false);
           return;
         }
         if (!isLogin && response.userExists) {
-          toast.error('Account already exists. Please Login instead.', { duration: 4000 });
+          toast.error(t('common.error'), { duration: 4000 });
           setIsLoading(false);
           return;
         }
@@ -90,7 +90,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
         if (response.devOtp) {
           toast.success(`OTP: ${response.devOtp}`, { duration: 15000, icon: '🔐' });
         } else {
-          toast.success(`OTP sent to your ${authType === 'phone' ? 'mobile number' : 'email'}!`);
+          toast.success(t('common.success'));
         }
         setStep('otp');
         setTimer(60);
@@ -141,7 +141,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
     if (isDemoMode) {
       await new Promise(resolve => setTimeout(resolve, 800));
       if (otpValue === demoOTP) {
-        toast.success('OTP verified!');
+        toast.success(t('common.success'));
         if (isLogin) {
           const mockUser = {
             _id: 'demo_' + Date.now(),
@@ -193,7 +193,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
         }
       }
     } catch (error) {
-      toast.error(error.error || 'Invalid OTP');
+      toast.error(error.error || t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -220,12 +220,12 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
       if (response.devOtp) {
         toast.success(`New OTP: ${response.devOtp}`, { duration: 15000, icon: '🔐' });
       } else {
-        toast.success('New OTP sent!');
+        toast.success(t('common.success'));
       }
       setTimer(60);
       setOtp(['', '', '', '', '', '']);
     } catch (error) {
-      toast.error('Failed to resend OTP');
+      toast.error(t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -233,19 +233,19 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
 
   const handleRegister = async () => {
     if (!formData.name.trim()) {
-      toast.error('Please enter your name');
+      toast.error(t('auth.name'));
       return;
     }
     if (formData.name.trim().length < 2) {
-      toast.error('Name must be at least 2 characters');
+      toast.error(t('common.error'));
       return;
     }
     if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('common.error'));
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('common.error'));
       return;
     }
 
@@ -263,7 +263,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
       const response = await api.post('/auth/register', registerData);
 
       if (response.success) {
-        toast.success('Registration successful!');
+        toast.success(t('common.success'));
         // Token is nested inside response.data for the register endpoint
         localStorage.setItem('vyavastha_token', response.data.token);
         onSuccess(response.data);
@@ -284,13 +284,13 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
         };
         localStorage.setItem('vyavastha_token', demoToken);
         localStorage.setItem('vyavastha_demo_user', JSON.stringify(demoUser));
-        toast.success('Registration successful! (Demo Mode)');
+        toast.success(t('common.success'));
         onSuccess(demoUser);
       } else {
         const validationMessage = Array.isArray(error?.errors) && error.errors.length > 0
           ? error.errors[0]?.message
           : null;
-        toast.error(validationMessage || error?.error || error?.message || 'Registration failed');
+        toast.error(validationMessage || error?.error || error?.message || t('common.error'));
       }
     } finally {
       setIsLoading(false);
@@ -568,7 +568,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                     {isLocating ? 'Detecting...' : formData.location?.formatted || formData.location?.city || 'Not detected'}
                   </span>
                   <button onClick={detectLocation} disabled={isLocating} className="text-xs text-teal font-semibold">
-                    Refresh
+                    {t('common.next', { defaultValue: 'Refresh' })}
                   </button>
                 </div>
               </div>
@@ -588,7 +588,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 mb-1 block">Confirm Password</label>
+                <label className="text-sm text-gray-500 mb-1 block">{t('auth.confirm_password')}</label>
                 <div className="flex items-center gap-3 border-2 border-gray-200 rounded-xl px-4 py-3 focus-within:border-teal">
                   <Lock size={20} className="text-gray-400" />
                   <input
@@ -642,7 +642,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
         {/* Role badge */}
         <div className="text-center mb-6">
           <span className="px-4 py-1.5 bg-teal-100 text-teal rounded-full text-sm font-semibold">
-            {role === 'citizen' ? '👤 Citizen' : role === 'official' ? '🏛️ Government Official' : '⚙️ Administrator'}
+            {role === 'citizen' ? `👤 ${t('roles.citizen')}` : role === 'official' ? `🏛️ ${t('roles.official')}` : `⚙️ ${t('roles.admin')}`}
           </span>
         </div>
 

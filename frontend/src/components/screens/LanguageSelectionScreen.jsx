@@ -1,136 +1,150 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+const LANGUAGE_OPTIONS = [
+  { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' },
+  { code: 'hi', name: 'Hindi', native: 'हिंदी', flag: '🇮🇳' },
+  { code: 'ta', name: 'Tamil', native: 'தமிழ்', flag: '🇮🇳' },
+  { code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ', flag: '🇮🇳' },
+  { code: 'mr', name: 'Marathi', native: 'मराठी', flag: '🇮🇳' },
+  { code: 'bn', name: 'Bengali', native: 'বাংলা', flag: '🇮🇳' },
+  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી', flag: '🇮🇳' },
+  { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', name: 'Italian', native: 'Italiano', flag: '🇮🇹' },
+  { code: 'pt', name: 'Portuguese', native: 'Português', flag: '🇵🇹' },
+  { code: 'ru', name: 'Russian', native: 'Русский', flag: '🇷🇺' },
+  { code: 'pl', name: 'Polish', native: 'Polski', flag: '🇵🇱' },
+  { code: 'nl', name: 'Dutch', native: 'Nederlands', flag: '🇳🇱' },
+  { code: 'sv', name: 'Swedish', native: 'Svenska', flag: '🇸🇪' },
+  { code: 'tr', name: 'Turkish', native: 'Türkçe', flag: '🇹🇷' },
+  { code: 'zh', name: 'Chinese', native: '中文', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', native: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', native: '한국어', flag: '🇰🇷' },
+  { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇸🇦' },
+  { code: 'th', name: 'Thai', native: 'ไทย', flag: '🇹🇭' },
+  { code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'vi', name: 'Vietnamese', native: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'fil', name: 'Filipino', native: 'Tagalog', flag: '🇵🇭' }
+];
 
 const LanguageSelectionScreen = ({ onComplete }) => {
-  const { i18n } = useTranslation();
-  const [selectedLang, setSelectedLang] = useState(i18n.language);
+  const { i18n, t } = useTranslation();
+  const [query, setQuery] = useState('');
+  const [selectedLang, setSelectedLang] = useState(localStorage.getItem('userLanguage') || i18n.resolvedLanguage || 'en');
 
-  const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸', native: 'English' },
-    { code: 'hi', name: 'हिंदी', flag: '🇮🇳', native: 'हिंदी' },
-    { code: 'ta', name: 'தமிழ்', flag: '🇮🇳', native: 'தமிழ்' },
-    { code: 'kn', name: 'ಕನ್ನಡ', flag: '🇮🇳', native: 'ಕನ್ನಡ' },
-    { code: 'mr', name: 'मराठी', flag: '🇮🇳', native: 'मराठी' },
-    { code: 'bn', name: 'বাংলা', flag: '🇮🇳', native: 'বাংলা' },
-    { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳', native: 'ગુજરાતી' },
-    { code: 'es', name: 'Español', flag: '🇪🇸', native: 'Español' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷', native: 'Français' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪', native: 'Deutsch' },
-    { code: 'it', name: 'Italiano', flag: '🇮🇹', native: 'Italiano' },
-    { code: 'pt', name: 'Português', flag: '🇵🇹', native: 'Português' },
-    { code: 'ru', name: 'Русский', flag: '🇷🇺', native: 'Русский' },
-    { code: 'pl', name: 'Polski', flag: '🇵🇱', native: 'Polski' },
-    { code: 'nl', name: 'Nederlands', flag: '🇳🇱', native: 'Nederlands' },
-    { code: 'sv', name: 'Svenska', flag: '🇸🇪', native: 'Svenska' },
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷', native: 'Türkçe' },
-    { code: 'zh', name: '中文', flag: '🇨🇳', native: '中文' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵', native: '日本語' },
-    { code: 'ko', name: '한국어', flag: '🇰🇷', native: '한국어' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦', native: 'العربية' },
-    { code: 'th', name: 'ไทย', flag: '🇹🇭', native: 'ไทย' },
-    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩', native: 'Bahasa Indonesia' },
-    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', native: 'Tiếng Việt' },
-    { code: 'fil', name: 'Tagalog', flag: '🇵🇭', native: 'Tagalog' },
-    { code: 'el', name: 'Ελληνικά', flag: '🇬🇷', native: 'Ελληνικά' },
-    { code: 'cs', name: 'Čeština', flag: '🇨🇿', native: 'Čeština' },
-    { code: 'he', name: 'עברית', flag: '🇮🇱', native: 'עברית' },
-    { code: 'uk', name: 'Українська', flag: '🇺🇦', native: 'Українська' },
-  ];
+  const filteredLanguages = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return LANGUAGE_OPTIONS;
+    return LANGUAGE_OPTIONS.filter((lang) =>
+      lang.name.toLowerCase().includes(q) ||
+      lang.native.toLowerCase().includes(q) ||
+      lang.code.toLowerCase().includes(q)
+    );
+  }, [query]);
 
-  const handleLanguageSelect = (langCode) => {
+  const handleLanguageSelect = async (langCode) => {
     setSelectedLang(langCode);
-    i18n.changeLanguage(langCode);
     localStorage.setItem('userLanguage', langCode);
-    
-    // If not authenticated yet, don't call setUserLanguage as it won't work
-    // It will be called after login/registration in the auth store
+    await i18n.changeLanguage(langCode);
   };
 
-  const handleContinue = () => {
-    i18n.changeLanguage(selectedLang);
-    localStorage.setItem('userLanguage', selectedLang);
-    // Language will be synced to user profile during login/registration
+  const handleContinue = async () => {
+    const lang = selectedLang || 'en';
+    localStorage.setItem('userLanguage', lang);
+    await i18n.changeLanguage(lang);
     onComplete();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-12"
-      >
-        <div className="text-6xl mb-4">🌍</div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Select Your Language
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Choose your preferred language to continue
-        </p>
-      </motion.div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-blue-50 px-4 py-8 md:py-12">
+      <div className="mx-auto w-full max-w-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-8 text-center"
+        >
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-3xl shadow-md">🌐</div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">{t('common.language')}</h1>
+          <p className="mt-2 text-sm text-slate-600 md:text-base">{t('common.appSubtitle')}</p>
+        </motion.div>
 
-      {/* Language Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="w-full max-w-4xl mb-8"
-      >
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {languages.map((lang, index) => (
-            <motion.button
-              key={lang.code}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.03 }}
-              onClick={() => handleLanguageSelect(lang.code)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 ${
-                selectedLang === lang.code
-                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white scale-105 shadow-lg ring-2 ring-blue-600'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg'
-              }`}
-              whileHover={{ scale: selectedLang === lang.code ? 1.1 : 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-3xl mb-2">{lang.flag}</span>
-              <span className="text-xs font-semibold text-center leading-tight">
-                {lang.code === selectedLang ? lang.native : lang.name}
-              </span>
-              {selectedLang === lang.code && (
-                <span className="text-lg mt-1">✓</span>
-              )}
-            </motion.button>
-          ))}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.05 }}
+          className="mb-5"
+        >
+          <div className="relative">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('common.language')}
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredLanguages.map((lang, index) => {
+            const isSelected = selectedLang === lang.code;
+            return (
+              <motion.button
+                key={lang.code}
+                type="button"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: index * 0.01 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => handleLanguageSelect(lang.code)}
+                className={`rounded-2xl border bg-white px-4 py-4 text-left transition-all ${
+                  isSelected
+                    ? 'border-blue-500 ring-2 ring-blue-100 shadow-md'
+                    : 'border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{lang.flag}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-900">{lang.native}</p>
+                    <p className="truncate text-xs text-slate-500">{lang.name}</p>
+                  </div>
+                  <div className={`h-2.5 w-2.5 rounded-full ${isSelected ? 'bg-blue-600' : 'bg-slate-200'}`} />
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
-      </motion.div>
 
-      {/* Continue Button */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        onClick={handleContinue}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
-      >
-        Continue
-        <ArrowRight size={24} />
-      </motion.button>
+        {filteredLanguages.length === 0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-center text-sm text-slate-500">
+            {t('common.error')}
+          </div>
+        )}
 
-      {/* Footer */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-12 text-gray-500 text-sm"
-      >
-        You can change your language anytime in the settings
-      </motion.p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mt-8 flex justify-center"
+        >
+          <button
+            type="button"
+            onClick={handleContinue}
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-base font-semibold text-white shadow-md transition hover:bg-blue-700"
+          >
+            {t('common.next')}
+            <ArrowRight size={18} />
+          </button>
+        </motion.div>
+      </div>
     </div>
   );
 };

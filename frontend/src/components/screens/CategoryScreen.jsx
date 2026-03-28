@@ -1,23 +1,25 @@
 import TealHeader from '../TealHeader';
 import { useUIStore, useComplaintsStore } from '../../store';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 export default function CategoryScreen() {
+  const { t } = useTranslation();
   const { setScreen, setSelectedCategory, setActiveTab } = useUIStore();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const categories = [
-    { id: 'dirty_spot', icon: '🗑️', label: 'Dirty Spot' },
-    { id: 'garbage_dump', icon: '🏔️', label: 'Garbage Dump' },
-    { id: 'garbage_vehicle', icon: '🚛', label: 'Garbage Vehicle' },
-    { id: 'burning_garbage', icon: '🔥', label: 'Burning Garbage' },
-    { id: 'sweeping_not_done', icon: '🧹', label: 'Sweeping Not Done' },
-    { id: 'dustbins_not_cleaned', icon: '🗑️', label: 'Dustbins Not Cleaned' },
-    { id: 'open_defecation', icon: '🚽', label: 'Open Defecation' },
-    { id: 'sewerage_overflow', icon: '💧', label: 'Sewerage Overflow' },
-    { id: 'stagnant_water', icon: '🌊', label: 'Stagnant Water' },
-    { id: 'slum_not_clean', icon: '🏚️', label: 'Slum Not Clean' },
-    { id: 'overgrown_vegetation', icon: '🌿', label: 'Overgrown Vegetation' },
-    { id: 'stray_animals', icon: '🐄', label: 'Stray Animals' },
+    { id: 'dirty_spot', icon: '🗑️', label: t('category.dirtySpot') },
+    { id: 'garbage_dump', icon: '🏔️', label: t('category.garbageDump') },
+    { id: 'garbage_vehicle', icon: '🚛', label: t('category.garbageVehicle') },
+    { id: 'burning_garbage', icon: '🔥', label: t('category.burningGarbage') },
+    { id: 'sweeping_not_done', icon: '🧹', label: t('category.sweepingNotDone') },
+    { id: 'dustbins_not_cleaned', icon: '🗑️', label: t('category.dustbinsNotCleaned') },
+    { id: 'open_defecation', icon: '🚽', label: t('category.openDefecation') },
+    { id: 'sewerage_overflow', icon: '💧', label: t('category.sewerageOverflow', { defaultValue: 'Sewerage Overflow' }) },
+    { id: 'stagnant_water', icon: '🌊', label: t('category.stagnantWater', { defaultValue: 'Stagnant Water' }) },
+    { id: 'slum_not_clean', icon: '🏚️', label: t('category.slumNotClean', { defaultValue: 'Slum Not Clean' }) },
+    { id: 'overgrown_vegetation', icon: '🌿', label: t('category.overgrownVegetation', { defaultValue: 'Overgrown Vegetation' }) },
+    { id: 'stray_animals', icon: '🐄', label: t('category.strayAnimals', { defaultValue: 'Stray Animals' }) },
   ];
 
   const handleBack = () => {
@@ -50,7 +52,7 @@ export default function CategoryScreen() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <TealHeader title='Choose Category' onBack={handleBack} />
+      <TealHeader title={t('category.title')} onBack={handleBack} />
       
       <div className="flex-1 overflow-y-auto pb-20">
         <div className="py-2">
@@ -85,7 +87,7 @@ export default function CategoryScreen() {
           ))}
         </div>
         <div className="px-5 py-4 text-center text-xs text-gray-400 bg-gray-50 border-t">
-          ↑↓ or Enter to Navigate • Click to Select • Esc Back
+          ↑↓ or Enter to Navigate • Click to Select • Esc {t('common.back')}
         </div>
       </div>
     </div>

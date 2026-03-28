@@ -46,6 +46,8 @@ function MainApp() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [appScreen, setAppScreen] = useState('splash'); // splash, languageSelect, roleSelect, auth, portal, publicRating
   const [publicRatingServiceId, setPublicRatingServiceId] = useState(null);
+  const [hasValidSession, setHasValidSession] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Check for public rating URL parameter on mount
   useEffect(() => {
@@ -81,9 +83,8 @@ function MainApp() {
     const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (token) {
       checkAuth().then((userData) => {
-        // If authenticated, skip to portal and load their complaints
-        setShowSplash(false);
-        setAppScreen('portal');
+        // Keep splash/onboarding sequence intact; route decision happens after splash.
+        setHasValidSession(true);
         
         // Sync language from user profile or localStorage
         const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
@@ -95,22 +96,22 @@ function MainApp() {
           fetchMyComplaints({}, userData?._id);
         }
       }).catch(() => {
-        // Token invalid, show splash
+        // Token invalid, continue with onboarding.
+        setHasValidSession(false);
+      }).finally(() => {
+        setAuthChecked(true);
       });
+    } else {
+      setAuthChecked(true);
     }
   }, []);
 
   // Handle splash complete
   const handleSplashComplete = () => {
     setShowSplash(false);
-    
-    // Check if already authenticated (token can be stored under either key)
-    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
-    if (token && isAuthenticated) {
-      setAppScreen('portal');
-    } else {
-      setAppScreen('languageSelect');
-    }
+    // Always go to language selection first — this is the mandatory onboarding step
+    // Role selection comes after language selection
+    setAppScreen('languageSelect');
   };
 
   // Handle language selection complete
@@ -121,7 +122,14 @@ function MainApp() {
   // Handle role selection
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
-    setAppScreen('auth');
+    
+    // If we have a valid session with a token, skip OTP and go directly to portal
+    if (hasValidSession) {
+      setAppScreen('portal');
+    } else {
+      // Otherwise show OTP auth screen
+      setAppScreen('auth');
+    }
   };
 
   // Handle auth success

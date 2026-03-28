@@ -9,7 +9,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run build 2>/dev/null || true
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine
@@ -18,16 +18,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install dumb-init and serve
-RUN apk add --no-cache dumb-init
+# Install dumb-init and a lightweight static file server
+RUN apk add --no-cache dumb-init && npm install -g serve
 
-COPY package*.json ./
-
-RUN npm ci --only=production && npm cache clean --force
-
-COPY . .
-
-COPY --from=builder /app/dist ./dist 2>/dev/null || true
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 5173
 
@@ -37,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ENTRYPOINT ["dumb-init", "--"]
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["serve", "-s", "dist", "-l", "5173"]

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, MapPin, Info, Check, Crosshair, Loader, Shield, AlertTriangle, Building, Sparkles, XCircle, Eye, Clock, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import TealHeader from '../TealHeader';
 import { useUIStore, useComplaintsStore, useAuthStore } from '../../store';
@@ -9,6 +10,7 @@ import LocationMap from '../LocationMap';
 import api from '../../services/api';
 
 export default function ComplaintFormScreen() {
+  const { t } = useTranslation();
   const { selectedCategory, setScreen, setActiveTab } = useUIStore();
   const { createComplaint, isLoading } = useComplaintsStore();
   const { updateUser, user } = useAuthStore();
@@ -153,7 +155,7 @@ export default function ComplaintFormScreen() {
       reader.readAsDataURL(file);
       
       // AI image validation — enforce civic/sanitation images or screenshots
-      toast.loading('Verifying image...', { id: 'ai-analysis' });
+      toast.loading(t('common.loading'), { id: 'ai-analysis' });
       const result = await analyzeImage(file);
       toast.dismiss('ai-analysis');
         
@@ -194,11 +196,11 @@ export default function ComplaintFormScreen() {
 
   const handleSubmit = async () => {
     if (!description.trim()) {
-      toast.error('Please add a description');
+      toast.error(t('complaint.stepDescribeIssue'));
       return;
     }
     if (!photo) {
-      toast.error('Please add a photo');
+      toast.error(t('complaint.stepUploadImage'));
       return;
     }
 
@@ -458,7 +460,7 @@ export default function ComplaintFormScreen() {
           {/* Location */}
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">
-              Your Location (auto-detected)
+              {t('complaint.stepSelectLocation')}
             </label>
             <div className="flex gap-2.5 items-start">
               {isLocating ? (
@@ -491,7 +493,7 @@ export default function ComplaintFormScreen() {
           {/* Description */}
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">
-              Please provide a brief description about the complaint
+              {t('complaint.stepDescribeIssue')}
             </label>
             <div className="flex gap-2.5 items-start">
               <Info size={20} className="text-teal mt-2.5 shrink-0" />
@@ -511,7 +513,7 @@ export default function ComplaintFormScreen() {
           {/* Photo */}
           <div>
             <label className="text-sm text-gray-500 mb-2 block">
-              Add a photo
+              {t('complaint.stepUploadImage')}
             </label>
             <div className="flex gap-4 items-start">
               <div
@@ -527,7 +529,7 @@ export default function ComplaintFormScreen() {
                 ) : (
                   <>
                     <Camera size={32} />
-                    <span className="text-[11px] opacity-80 mt-1">+ Add Photo</span>
+                      <span className="text-[11px] opacity-80 mt-1">+ {t('complaint.stepUploadImage')}</span>
                   </>
                 )}
                 {isAnalyzing && (
@@ -542,14 +544,14 @@ export default function ComplaintFormScreen() {
                 <div className="flex-1 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles size={16} className="text-indigo-600" />
-                    <span className="text-sm font-bold text-indigo-800">AI Analysis</span>
+                    <span className="text-sm font-bold text-indigo-800">AI</span>
                     {aiVisionResult.isCivicIssue ? (
                       <span className="ml-auto px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                        ✓ Valid Issue
+                        ✓ {t('ai.validIssue')}
                       </span>
                     ) : (
                       <span className="ml-auto px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-medium">
-                        ✗ Not Civic Issue
+                        ✗ {t('ai.notCivicIssue')}
                       </span>
                     )}
                   </div>
@@ -557,11 +559,11 @@ export default function ComplaintFormScreen() {
                   {aiVisionResult.isCivicIssue ? (
                     <div className="space-y-1.5 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Category:</span>
+                        <span className="text-gray-500">{t('ai.category')}:</span>
                         <span className="font-medium text-gray-800">{aiVisionResult.category}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Severity:</span>
+                        <span className="text-gray-500">{t('ai.severity')}:</span>
                         <span className={`font-bold ${
                           aiVisionResult.severity === 'Critical' ? 'text-red-600' :
                           aiVisionResult.severity === 'High' ? 'text-orange-600' :
@@ -571,11 +573,11 @@ export default function ComplaintFormScreen() {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Confidence:</span>
+                        <span className="text-gray-500">{t('ai.confidence')}:</span>
                         <span className="font-medium text-indigo-700">{aiVisionResult.confidence}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Department:</span>
+                        <span className="text-gray-500">{t('ai.department')}:</span>
                         <span className="font-medium text-gray-800">{aiVisionResult.department}</span>
                       </div>
                       {aiVisionResult.title && (
@@ -586,7 +588,7 @@ export default function ComplaintFormScreen() {
                     </div>
                   ) : (
                     <p className="text-xs text-gray-600">
-                      This image doesn't appear to show a civic issue. Please upload a photo of the actual problem.
+                      {t('ai.notCivicIssue')}
                     </p>
                   )}
                 </div>
@@ -636,14 +638,14 @@ export default function ComplaintFormScreen() {
 
           {!isValid && !imageRejected && !isAnalyzing && (
             <div className="text-sm text-gray-500 italic">
-              Add a description and photo to submit your complaint.
+              {t('complaint.stepDescribeIssue')} + {t('complaint.stepUploadImage')}
             </div>
           )}
 
           {isAnalyzing && (
             <div className="flex items-center gap-2 text-sm text-indigo-600 font-medium">
               <Loader size={16} className="animate-spin" />
-              Verifying image with AI...
+              {t('common.loading')}
             </div>
           )}
 
@@ -662,7 +664,7 @@ export default function ComplaintFormScreen() {
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {isLoading ? 'Submitting...' : isAnalyzing ? 'Verifying Image...' : 'Submit'}
+            {isLoading ? `${t('common.loading')}...` : isAnalyzing ? t('common.loading') : t('complaint.submitComplaint')}
           </button>
         </div>
       </div>

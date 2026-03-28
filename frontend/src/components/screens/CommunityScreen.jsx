@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft, ThumbsUp, MapPin, Clock, AlertTriangle, CheckCircle2, 
   Flame, Trophy, Medal, Star, TrendingUp, Users, Filter, ChevronRight,
@@ -100,6 +101,7 @@ const leaderboardData = [
 ];
 
 export default function CommunityScreen({ onBack }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('trending'); // trending, nearby, leaderboard
   const [complaints, setComplaints] = useState(demoComplaints);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -110,7 +112,7 @@ export default function CommunityScreen({ onBack }) {
     setComplaints(prev => prev.map(c => {
       if (c.id === id) {
         const newUpvoted = !c.hasUpvoted;
-        toast.success(newUpvoted ? '+5 XP for supporting!' : 'Support removed');
+        toast.success(newUpvoted ? t('community.supportAdded') : t('community.supportRemoved'));
         return {
           ...c,
           hasUpvoted: newUpvoted,
@@ -131,6 +133,15 @@ export default function CommunityScreen({ onBack }) {
     ? sortedComplaints 
     : sortedComplaints.filter(c => c.status === filter);
 
+  const getStatusLabel = (status) => {
+    const map = {
+      pending: t('complaints.pending'),
+      'in-progress': t('complaints.inProgress'),
+      resolved: t('complaints.resolved'),
+    };
+    return map[status] || status;
+  };
+
   // Status badge
   const StatusBadge = ({ status }) => {
     const styles = {
@@ -145,7 +156,7 @@ export default function CommunityScreen({ onBack }) {
     };
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 border ${styles[status]}`}>
-        {icons[status]} {status.replace('-', ' ')}
+        {icons[status]} {getStatusLabel(status)}
       </span>
     );
   };
@@ -159,7 +170,7 @@ export default function CommunityScreen({ onBack }) {
     };
     return priority === 'high' ? (
       <span className={`flex items-center gap-1 text-xs font-medium ${styles[priority]}`}>
-        <Flame size={14} /> Urgent
+        <Flame size={14} /> {t('community.urgent')}
       </span>
     ) : null;
   };
@@ -181,7 +192,7 @@ export default function CommunityScreen({ onBack }) {
         </div>
         {/* AI Tag */}
         <div className="absolute bottom-3 left-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1">
-          <Zap size={12} className="text-yellow-400" /> AI: {complaint.aiSeverity}
+          <Zap size={12} className="text-yellow-400" /> {t('community.ai')}: {complaint.aiSeverity}
         </div>
       </div>
 
@@ -223,7 +234,7 @@ export default function CommunityScreen({ onBack }) {
             onClick={() => setSelectedComplaint(complaint)}
             className="text-indigo-600 font-medium text-sm flex items-center gap-1 hover:underline"
           >
-            Details <ChevronRight size={16} />
+            {t('community.details')} <ChevronRight size={16} />
           </button>
         </div>
       </div>
@@ -237,18 +248,18 @@ export default function CommunityScreen({ onBack }) {
       <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-5 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white/70">Your Rank</p>
+            <p className="text-sm text-white/70">{t('community.yourRank')}</p>
             <p className="text-3xl font-bold">#12</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-white/70">Total XP</p>
+            <p className="text-sm text-white/70">{t('community.totalXp')}</p>
             <p className="text-3xl font-bold">850</p>
           </div>
         </div>
         <div className="mt-4 bg-white/20 rounded-full h-2">
           <div className="bg-white rounded-full h-2 w-3/4"></div>
         </div>
-        <p className="text-xs text-white/70 mt-2">150 XP to reach Active Citizen level</p>
+        <p className="text-xs text-white/70 mt-2">{t('community.reachNextLevel')}</p>
       </div>
 
       {/* Leaderboard list */}
@@ -256,9 +267,9 @@ export default function CommunityScreen({ onBack }) {
         <div className="p-4 border-b bg-gradient-to-r from-amber-50 to-orange-50">
           <h3 className="font-bold text-gray-800 flex items-center gap-2">
             <Trophy className="text-amber-500" size={20} />
-            Civic Heroes Leaderboard
+            {t('community.leaderboardTitle')}
           </h3>
-          <p className="text-sm text-gray-500">Top contributors this month</p>
+          <p className="text-sm text-gray-500">{t('community.topContributors')}</p>
         </div>
         
         <div className="divide-y">
@@ -275,12 +286,12 @@ export default function CommunityScreen({ onBack }) {
               
               <div className="flex-1">
                 <p className="font-semibold text-gray-800">{user.name}</p>
-                <p className="text-xs text-gray-500">{user.level} • {user.complaints} reports</p>
+                <p className="text-xs text-gray-500">{user.level} • {user.complaints} {t('community.reports')}</p>
               </div>
               
               <div className="text-right">
                 <p className="font-bold text-indigo-600">{user.xp.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">XP</p>
+                <p className="text-xs text-gray-500">{t('community.xp')}</p>
               </div>
             </div>
           ))}
@@ -289,13 +300,13 @@ export default function CommunityScreen({ onBack }) {
 
       {/* How to earn XP */}
       <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100">
-        <h4 className="font-bold text-emerald-800 mb-3">💡 How to Earn XP</h4>
+        <h4 className="font-bold text-emerald-800 mb-3">💡 {t('community.howToEarnXp')}</h4>
         <div className="space-y-2 text-sm text-emerald-700">
-          <div className="flex justify-between"><span>Report a complaint</span><span className="font-bold">+20 XP</span></div>
-          <div className="flex justify-between"><span>Rate a public service</span><span className="font-bold">+10 XP</span></div>
-          <div className="flex justify-between"><span>Upvote an issue</span><span className="font-bold">+5 XP</span></div>
-          <div className="flex justify-between"><span>Complaint gets resolved</span><span className="font-bold">+50 XP</span></div>
-          <div className="flex justify-between"><span>Complete civic quiz</span><span className="font-bold">+15 XP</span></div>
+          <div className="flex justify-between"><span>{t('community.earn.reportComplaint')}</span><span className="font-bold">+20 XP</span></div>
+          <div className="flex justify-between"><span>{t('community.earn.rateService')}</span><span className="font-bold">+10 XP</span></div>
+          <div className="flex justify-between"><span>{t('community.earn.upvoteIssue')}</span><span className="font-bold">+5 XP</span></div>
+          <div className="flex justify-between"><span>{t('community.earn.resolvedComplaint')}</span><span className="font-bold">+50 XP</span></div>
+          <div className="flex justify-between"><span>{t('community.earn.completeQuiz')}</span><span className="font-bold">+15 XP</span></div>
         </div>
       </div>
     </div>
@@ -337,15 +348,15 @@ export default function CommunityScreen({ onBack }) {
         {/* AI Analysis */}
         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
           <h4 className="font-semibold text-purple-800 flex items-center gap-2">
-            <Zap className="text-purple-500" size={18} /> AI Analysis
+            <Zap className="text-purple-500" size={18} /> {t('community.aiAnalysis')}
           </h4>
           <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
             <div>
-              <span className="text-gray-500">Category:</span>
+              <span className="text-gray-500">{t('community.category')}:</span>
               <p className="font-medium text-gray-800">{selectedComplaint.aiCategory}</p>
             </div>
             <div>
-              <span className="text-gray-500">Severity:</span>
+              <span className="text-gray-500">{t('community.severity')}:</span>
               <p className={`font-medium ${
                 selectedComplaint.aiSeverity === 'Critical' ? 'text-red-600' :
                 selectedComplaint.aiSeverity === 'High' ? 'text-orange-600' :
@@ -357,7 +368,7 @@ export default function CommunityScreen({ onBack }) {
 
         {/* Description */}
         <div>
-          <h4 className="font-semibold text-gray-800 mb-2">Description</h4>
+          <h4 className="font-semibold text-gray-800 mb-2">{t('community.description')}</h4>
           <p className="text-gray-600">{selectedComplaint.description}</p>
         </div>
 
@@ -368,7 +379,7 @@ export default function CommunityScreen({ onBack }) {
           </div>
           <div>
             <p className="font-semibold text-gray-800">{selectedComplaint.reportedBy}</p>
-            <p className="text-sm text-gray-500">Reported {selectedComplaint.reportedAt}</p>
+            <p className="text-sm text-gray-500">{t('community.reported')} {selectedComplaint.reportedAt}</p>
           </div>
         </div>
 
@@ -376,15 +387,15 @@ export default function CommunityScreen({ onBack }) {
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-gray-50 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-indigo-600">{selectedComplaint.upvotes}</p>
-            <p className="text-xs text-gray-500">Upvotes</p>
+            <p className="text-xs text-gray-500">{t('community.upvotes')}</p>
           </div>
           <div className="bg-gray-50 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-gray-600">{selectedComplaint.comments}</p>
-            <p className="text-xs text-gray-500">Comments</p>
+            <p className="text-xs text-gray-500">{t('community.comments')}</p>
           </div>
           <div className="bg-gray-50 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-gray-600">{selectedComplaint.views}</p>
-            <p className="text-xs text-gray-500">Views</p>
+            <p className="text-xs text-gray-500">{t('community.views')}</p>
           </div>
         </div>
 
@@ -399,7 +410,7 @@ export default function CommunityScreen({ onBack }) {
             }`}
           >
             <ThumbsUp size={20} className={selectedComplaint.hasUpvoted ? 'fill-white' : ''} />
-            {selectedComplaint.hasUpvoted ? 'Supported' : 'Support This Issue'}
+            {selectedComplaint.hasUpvoted ? t('community.supported') : t('community.supportIssue')}
           </button>
           <button className="px-4 py-3 bg-gray-100 rounded-xl text-gray-600">
             <Share2 size={20} />
@@ -409,10 +420,10 @@ export default function CommunityScreen({ onBack }) {
         {/* Duplicate warning demo */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <h4 className="font-semibold text-amber-800 flex items-center gap-2">
-            <AlertTriangle size={18} /> Similar Issue Nearby
+            <AlertTriangle size={18} /> {t('community.similarIssueNearby')}
           </h4>
           <p className="text-sm text-amber-700 mt-1">
-            2 similar complaints found within 100m radius. Consider supporting existing reports instead of creating duplicates.
+            {t('community.similarIssueText')}
           </p>
         </div>
       </div>
@@ -431,17 +442,17 @@ export default function CommunityScreen({ onBack }) {
             <ArrowLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-bold">Community Hub</h1>
-            <p className="text-xs text-white/70">Support issues that matter to you</p>
+            <h1 className="text-xl font-bold">{t('home.community')}</h1>
+            <p className="text-xs text-white/70">{t('community.subtitle')}</p>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-2">
           {[
-            { id: 'trending', label: 'Trending', icon: TrendingUp },
-            { id: 'nearby', label: 'Nearby', icon: MapPin },
-            { id: 'leaderboard', label: 'Leaders', icon: Trophy },
+            { id: 'trending', label: t('community.trending'), icon: TrendingUp },
+            { id: 'nearby', label: t('community.nearby'), icon: MapPin },
+            { id: 'leaderboard', label: t('community.leaders'), icon: Trophy },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -477,7 +488,7 @@ export default function CommunityScreen({ onBack }) {
                       : 'bg-white text-gray-600 border hover:bg-gray-50'
                   }`}
                 >
-                  {f === 'all' ? 'All Issues' : f.replace('-', ' ')}
+                  {f === 'all' ? t('community.allIssues') : getStatusLabel(f)}
                 </button>
               ))}
             </div>
