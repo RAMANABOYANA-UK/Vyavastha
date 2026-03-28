@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-
 export default function SplashScreen({ onComplete }) {
   const [progress, setProgress] = useState(0);
-  const { t } = useTranslation();
 
   useEffect(() => {
     // Animate progress from 0 to 100
@@ -78,7 +75,7 @@ export default function SplashScreen({ onComplete }) {
               transition={{ delay: 0.5, duration: 0.6 }}
               className="text-center text-gray-600 text-sm tracking-[0.2em] uppercase mb-3 font-rajdhani font-semibold"
             >
-              {t('splash.subtitle')}
+              Citizen Governance Portal
             </motion.p>
 
             {/* Divider */}
@@ -112,7 +109,7 @@ export default function SplashScreen({ onComplete }) {
               transition={{ delay: 0.7 }}
               className="flex justify-between items-center text-gray-600 text-sm font-medium"
             >
-              <span>{t('splash.initializing')}</span>
+              <span>Initializing System</span>
               <span className="font-bold text-purple-600">{Math.round(progress)}%</span>
             </motion.div>
           </div>
@@ -128,7 +125,7 @@ export default function SplashScreen({ onComplete }) {
       >
         <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 border border-purple-200 backdrop-blur-sm shadow-lg">
           <span className="text-2xl">🇮🇳</span>
-          <span className="text-gray-700 text-xs tracking-widest uppercase font-medium">{t('splash.digitalIndia')}</span>
+          <span className="text-gray-700 text-xs tracking-widest uppercase font-medium">Digital India Initiative</span>
         </div>
       </motion.div>
     </div>

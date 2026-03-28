@@ -2,7 +2,6 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { useAuthStore, useUIStore, useComplaintsStore } from './store';
 import NotificationPopup from './components/NotificationPopup';
 
@@ -12,7 +11,6 @@ const MobileRatingScreen = lazy(() => import('./components/screens/MobileRatingS
 
 // Screens
 import SplashScreen from './components/screens/SplashScreen';
-import LanguageSelectionScreen from './components/screens/LanguageSelectionScreen';
 import RoleSelectionScreen from './components/screens/RoleSelectionScreen';
 import OTPAuthScreen from './components/screens/OTPAuthScreen';
 const AdminPortal = lazy(() => import('./components/screens/AdminPortal'));
@@ -35,15 +33,14 @@ import BottomNav from './components/BottomNav';
 
 // Main App Component (handles state-based navigation)
 function MainApp() {
-  const { checkAuth, isAuthenticated, user, setUser, logout, userLanguage } = useAuthStore();
-  const { i18n } = useTranslation();
+  const { checkAuth, isAuthenticated, user, setUser, logout } = useAuthStore();
   const { currentScreen, showAuthModal, setShowAuthModal, switchRoleRequested, clearSwitchRoleRequest } = useUIStore();
   const { fetchCategories, fetchMyComplaints } = useComplaintsStore();
 
   // App flow states
   const [showSplash, setShowSplash] = useState(true);
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [appScreen, setAppScreen] = useState('splash'); // splash, languageSelect, roleSelect, auth, portal, publicRating
+  const [selectedRole, setSelectedRole] = useState(() => localStorage.getItem('selectedRole'));
+  const [appScreen, setAppScreen] = useState('splash'); // splash, roleSelect, auth, portal, publicRating
   const [publicRatingServiceId, setPublicRatingServiceId] = useState(null);
 
   // Check for public rating URL parameter on mount
@@ -75,15 +72,9 @@ function MainApp() {
     const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
     if (token) {
       checkAuth().then((userData) => {
-        // If authenticated, skip to portal and load their complaints
-        setShowSplash(false);
-        setAppScreen('portal');
-        
-        // Sync language from user profile or localStorage
-        const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
-        if (i18n.language !== userLang) {
-          i18n.changeLanguage(userLang);
-        }
+        // Preload authenticated user context; actual screen flow is handled after splash.
+        const roleFromAuth = userData?.role || localStorage.getItem('selectedRole') || 'citizen';
+        setSelectedRole(roleFromAuth);
         
         if (userData?.role === 'citizen' || !userData?.role) {
           fetchMyComplaints({}, userData?._id);
@@ -97,37 +88,30 @@ function MainApp() {
   // Handle splash complete
   const handleSplashComplete = () => {
     setShowSplash(false);
-    
-    // Check if already authenticated (token can be stored under either key)
-    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
-    if (token && isAuthenticated) {
-      setAppScreen('portal');
-    } else {
-      setAppScreen('languageSelect');
-    }
-  };
-
-  // Handle language selection complete
-  const handleLanguageComplete = () => {
     setAppScreen('roleSelect');
   };
 
   // Handle role selection
   const handleRoleSelect = (role) => {
+    localStorage.setItem('selectedRole', role);
     setSelectedRole(role);
+
+    // If user is already authenticated, go straight to the selected role portal.
+    const token = localStorage.getItem('token') || localStorage.getItem('vyavastha_token');
+    if (token && isAuthenticated) {
+      setAppScreen('portal');
+      return;
+    }
+
     setAppScreen('auth');
   };
 
   // Handle auth success
   const handleAuthSuccess = (userData) => {
     setUser(userData);
-    setSelectedRole(userData.role);
-    
-    // Sync language from user profile or localStorage
-    const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
-    if (i18n.language !== userLang) {
-      i18n.changeLanguage(userLang);
-    }
+    const roleFromAuth = userData?.role || selectedRole || localStorage.getItem('selectedRole') || 'citizen';
+    localStorage.setItem('selectedRole', roleFromAuth);
+    setSelectedRole(roleFromAuth);
     
     if (userData.role === 'citizen' || !userData.role) {
       // Pass userId so the store can detect a user switch and clear stale data
@@ -213,11 +197,8 @@ function MainApp() {
     }
 
     switch (appScreen) {
-      case 'languageSelect':
-        return <LanguageSelectionScreen onComplete={handleLanguageComplete} />;
-
       case 'roleSelect':
-        return <RoleSelectionScreen onSelectRole={handleRoleSelect} />;
+        return <RoleSelectionScreen onSelectRole={handleRoleSelect} initialRole={selectedRole} />;
       
       case 'auth':
         return (
@@ -230,7 +211,7 @@ function MainApp() {
       
       case 'portal':
         // Render portal based on user role
-        const role = user?.role || selectedRole || 'citizen';
+        const role = user?.role || selectedRole || localStorage.getItem('selectedRole') || 'citizen';
         
         if (role === 'admin') {
           return (
@@ -252,7 +233,7 @@ function MainApp() {
         return renderCitizenPortal();
       
       default:
-        return <RoleSelectionScreen onSelectRole={handleRoleSelect} />;
+        return <RoleSelectionScreen onSelectRole={handleRoleSelect} initialRole={selectedRole} />;
     }
   };
 

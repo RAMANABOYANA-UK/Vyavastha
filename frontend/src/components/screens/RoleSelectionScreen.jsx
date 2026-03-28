@@ -1,18 +1,15 @@
 import { motion } from 'framer-motion';
 import { User, Shield, Building2, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-
-export default function RoleSelectionScreen({ onSelectRole }) {
-  const { t } = useTranslation();
+export default function RoleSelectionScreen({ onSelectRole, initialRole }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const roles = [
     {
       id: 'citizen',
-      title: t('roles.citizen'),
-      subtitle: t('roles.citizenSubtitle'),
-      description: t('roles.citizenDescription'),
+      title: 'Citizen',
+      subtitle: 'Report & Track Issues',
+      description: 'Submit complaints, track status, and provide feedback',
       icon: User,
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
@@ -20,9 +17,9 @@ export default function RoleSelectionScreen({ onSelectRole }) {
     },
     {
       id: 'official',
-      title: t('roles.official'),
-      subtitle: t('roles.officialSubtitle'),
-      description: t('roles.officialDescription'),
+      title: 'Government Official',
+      subtitle: 'Resolve Complaints',
+      description: 'View assigned complaints and update resolution status',
       icon: Building2,
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
@@ -30,15 +27,21 @@ export default function RoleSelectionScreen({ onSelectRole }) {
     },
     {
       id: 'admin',
-      title: t('roles.admin'),
-      subtitle: t('roles.adminSubtitle'),
-      description: t('roles.adminDescription'),
+      title: 'Administrator',
+      subtitle: 'Manage Platform',
+      description: 'Assign complaints, manage departments, view analytics',
       icon: Shield,
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200',
     },
   ];
+
+  useEffect(() => {
+    if (!initialRole) return;
+    const index = roles.findIndex((role) => role.id === initialRole);
+    if (index >= 0) setSelectedIndex(index);
+  }, [initialRole]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -75,10 +78,10 @@ export default function RoleSelectionScreen({ onSelectRole }) {
             <span className="text-3xl">🏛️</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">
-            {t('common.appSubtitle')}
+            Citizen Grievance Portal
           </h1>
-          <p className="text-gray-500 mt-1">{t('roles.selectRoleToContinue') || 'Select your role to continue'}</p>
-          <p className="text-xs text-gray-400 mt-2">{t('roles.navigationInstructions') || 'Use ↑↓ or Enter to navigate • Click to select'}</p>
+          <p className="text-gray-500 mt-1">Select your role to continue</p>
+          <p className="text-xs text-gray-400 mt-2">Use ↑↓ or Enter to navigate • Click to select</p>
         </motion.div>
 
         {/* Role Cards */}
@@ -121,7 +124,7 @@ export default function RoleSelectionScreen({ onSelectRole }) {
           className="mt-10 text-center"
         >
           <p className="text-xs text-gray-400">
-            {t('splash.digitalIndia') || 'A Digital India Initiative'}
+            Digital India Initiative
           </p>
           <p className="text-xs text-gray-400 mt-1">
             स्वच्छ भारत अभियान
