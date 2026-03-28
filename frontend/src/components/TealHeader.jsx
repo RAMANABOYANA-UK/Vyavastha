@@ -1,5 +1,4 @@
 import { ChevronLeft } from 'lucide-react';
-import LanguageSelector from './LanguageSelector';
 
 export default function TealHeader({ title, onBack }) {
   return (
@@ -17,7 +16,7 @@ export default function TealHeader({ title, onBack }) {
         )}
         <span className="font-bold text-lg font-rajdhani animate-fade-in">{title}</span>
       </div>
-      <LanguageSelector />
+      <div className="w-10" />
     </div>
   );
 }

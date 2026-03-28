@@ -1,29 +1,28 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useUIStore, useAuthStore } from '../../store';
-import { useTranslation } from 'react-i18next';
 
-export function HomeScreen_getBanners(t) {
+export function HomeScreen_getBanners() {
   return [
     {
       bg: 'bg-gradient-to-br from-blue-400 to-indigo-500',
-      title: t('home.smartCity'),
+      title: 'Smart City, Smart Citizens',
       emoji: '🏙️',
-      sub: t('home.buildBetter'),
+      sub: 'Your voice builds better infrastructure',
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-500',
-      title: t('home.reportTrack'),
+      title: 'Report. Track. Transform.',
       emoji: '🎯',
-      sub: t('home.aiPowered'),
+      sub: 'AI-powered civic engagement',
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-500',
-      title: 'व्यवस्था\nसेवा',
+      title: 'Vyavastha\nService',
       emoji: '🇮🇳',
-      sub: t('home.vyavasthaPortal'),
+      sub: 'VYAVASTHA - Citizen Grievance Portal',
       textColor: 'text-white',
     },
   ];
@@ -33,28 +32,27 @@ export default function HomeScreen() {
   const [slide, setSlide] = useState(0);
   const { setScreen, setShowAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
-  const { t } = useTranslation();
 
   const banners = [
     {
       bg: 'bg-gradient-to-br from-purple-400 to-purple-600',
-      title: t('home.smartCity') + '\n' + t('common.citizen'),
+      title: 'Smart City, Smart Citizens\nCitizen',
       emoji: '🏙️',
-      sub: t('home.buildBetter'),
+      sub: 'Your voice builds better infrastructure',
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-amber-400 via-amber-500 to-purple-600',
-      title: t('home.reportTrack'),
+      title: 'Report. Track. Transform.',
       emoji: '🎯',
-      sub: t('home.aiPowered'),
+      sub: 'AI-powered civic engagement',
       textColor: 'text-white',
     },
     {
       bg: 'bg-gradient-to-br from-teal-400 via-purple-500 to-amber-500',
-      title: t('home.vyavasthaPortal'),
+      title: 'VYAVASTHA - Citizen Grievance Portal',
       emoji: '🇮🇳',
-      sub: t('common.appName'),
+      sub: 'Vyavastha',
       textColor: 'text-white',
     },
   ];
@@ -62,29 +60,29 @@ export default function HomeScreen() {
   const actionCards = [
     { 
       icon: '📋', 
-      title: t('home.post_complaint'), 
-      sub: t('home.post_complaint_sub'), 
+      title: 'Post a Complaint', 
+      sub: 'AI-powered issue reporting', 
       gradient: 'from-purple-500 to-purple-600',
       screen: 'category' 
     },
     { 
       icon: '⭐', 
-      title: t('home.rate_service'), 
-      sub: t('home.rate_service_sub'), 
+      title: 'Rate Public Service', 
+      sub: 'Rate Toilets, Transport & More', 
       gradient: 'from-amber-500 to-amber-600',
       screen: 'rateToilet' 
     },
     { 
       icon: '👥', 
-      title: t('home.community'), 
-      sub: t('home.community_sub'), 
+      title: 'Community Hub', 
+      sub: 'Upvote & Support Issues', 
       gradient: 'from-teal-500 to-teal-600',
       screen: 'community' 
     },
     { 
       icon: '🧠', 
-      title: t('home.quiz'), 
-      sub: t('home.quiz_sub'), 
+      title: 'Civic Quiz', 
+      sub: 'Learn & Earn XP', 
       gradient: 'from-purple-600 to-amber-500',
       screen: 'quiz' 
     },
@@ -111,9 +109,9 @@ export default function HomeScreen() {
   // Get greeting based on time
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return t('common.goodMorning');
-    if (hour < 17) return t('common.goodAfternoon');
-    return t('common.goodEvening');
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
   };
 
   return (
@@ -149,10 +147,10 @@ export default function HomeScreen() {
             <div>
               <div className="text-purple-600 font-extrabold text-xl">
                 {getGreeting()},<br />
-                Welcome {isAuthenticated ? user?.name || t('common.citizen') : t('common.activeCitizen')} 👋
+                Welcome {isAuthenticated ? user?.name || 'Citizen' : 'Active Citizen'} 👋
               </div>
               <div className="text-gray-500 text-sm mt-1">
-                {t('home.todayActions')}
+                Here are today's actions for you
               </div>
             </div>
             {/* XP Badge */}
@@ -160,7 +158,7 @@ export default function HomeScreen() {
               className="bg-gradient-to-r from-purple-500 to-amber-500 px-4 py-2 rounded-xl text-white shadow-lg"
               whileHover={{ scale: 1.05 }}
             >
-              <p className="text-xs">{t('home.yourXP')}</p>
+              <p className="text-xs">Your XP</p>
               <p className="text-xl font-bold">{user?.points || 850}</p>
             </motion.div>
           </div>
@@ -192,9 +190,9 @@ export default function HomeScreen() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 pb-6">
           {[
-            { value: user?.complaintsPosted || 3, label: t('home.posted'), icon: '📝', color: 'from-purple-500 to-purple-600' },
-            { value: user?.complaintsResolved || 2, label: t('home.resolved'), icon: '✅', color: 'from-teal-500 to-teal-600' },
-            { value: `#12`, label: t('home.yourRank'), icon: '🏆', color: 'from-amber-500 to-amber-600' },
+            { value: user?.complaintsPosted || 3, label: 'Posted', icon: '📝', color: 'from-purple-500 to-purple-600' },
+            { value: user?.complaintsResolved || 2, label: 'Resolved', icon: '✅', color: 'from-teal-500 to-teal-600' },
+            { value: `#12`, label: 'Your Rank', icon: '🏆', color: 'from-amber-500 to-amber-600' },
           ].map((stat, i) => (
             <motion.div
               key={i}
