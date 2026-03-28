@@ -52,15 +52,19 @@
   },
   "category": {
     "title": "பிரிவு தேர்ந்தெடுக்கவும்",
-    "sanitation": "சுகாதாரம்",
-    "roads": "சாலைகள்",
-    "water": "நீர் விநியோகம்",
-    "drains": "வாய்க்கால்",
-    "toilets": "கழிப்பிடம்",
-    "electricity": "மின்சாரம்",
-    "health": "ஆரோக்கியம்",
+    "dirtySpot": "அழுக்கான இடம்",
+    "garbageDump": "குப்பைக் கொட்டை",
+    "garbageVehicle": "குப்பை வாகனம் வராதது",
+    "burningGarbage": "திறந்த இடத்தில் குப்பை எரிப்பு",
+    "sweepingNotDone": "தூப்பு செய்யப்படாதது",
+    "dustbinsNotCleaned": "குப்பைப்பெட்டிகள் சுத்தம் செய்யப்படாதவை",
+    "openDefecation": "திறந்த வெளியில் மலம் கழிப்பு",
+    "sewerageOverflow": "பாதாள நீர் அல்லது புயல் நீர் வழிச்சல்",
+    "stagnantWater": "சாலையில் நிற்கும் நீர்",
+    "slumNotClean": "பழுதைப் பகுதி சுத்தமாக இல்லை",
+    "overgrownVegetation": "சாலையில் வளர்ந்த தாவரங்கள்",
     "strayAnimals": "அலையும் விலங்குகள்",
-    "other": "பிற"
+    "navigateInstructions": "↑↓ அல்லது Enter நகர்த்த • தேர்வு செய்ய கிளிக் செய்யவும் • பின்னோக்கி செல்ல Esc"
   },
   "complaint": {
     "fileComplaint": "புகார் தாக்கல் செய்யவும்",

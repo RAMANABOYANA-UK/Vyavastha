@@ -48,15 +48,19 @@
   },
   "category": {
     "title": "ವರ್ಗವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
-    "sanitation": "ನೈರ್ಮಲ್ಯ",
-    "roads": "ರಸ್ತೆಗಳು",
-    "water": "ನೀರಿನ ಪೂರೈಕೆ",
-    "drains": "ಪರಿವಾಹಿತಬಲ",
-    "toilets": "ಸರ್ವಜನಿಕ ಶೌಚಾಲಯ",
-    "electricity": "ವಿದ್ಯುತ್",
-    "health": "ಆರೋಗ್ಯ ಮತ್ತು ಸುರಕ್ಷೆ",
+    "dirtySpot": "ಅಪರಿಚ್ಛನ್ನ ತುಂಡು",
+    "garbageDump": "ಕೊಳೆತ ರಿನ ರಾಶಿ",
+    "garbageVehicle": "ಕೊಳೆತ ರ ವಾಹನ ಬರುತ್ತಿಲ್ಲ",
+    "burningGarbage": "ತೆರೆದ ಸ್ಥಳದಲ್ಲಿ ಕೊಳೆತ ರ ಸುಡುವಿಕೆ",
+    "sweepingNotDone": "ಝಾಡೆ ಫೆಕ್ಕುವಿಕೆ ಮಾಡಿಕೊಂಡಿಲ್ಲ",
+    "dustbinsNotCleaned": "ಕೊಳೆತ ಹಡಿಕೆಗಳು ಸ್ವಚ್ಛಗೊಳಿಸಿಕೊಂಡಿಲ್ಲ",
+    "openDefecation": "ತೆರೆದ ವೀಚ್ಮಂಥನದಲ್ಲಿ ಮಳಿಗೆ",
+    "sewerageOverflow": "ಮಾಲಿನ್ಯ/ಚಂಡ ವಾರಿ ವರ್ಜನೆ",
+    "stagnantWater": "ರಸ್ತೆಯಿಂದ ನಿಶ್ಚಲ ನೀರು",
+    "slumNotClean": "ಪ್ರವೃತ್ತಿ ಪ್ರದೇಶ ನೈರ್ಮಲ್ಯವಿಲ್ಲ",
+    "overgrownVegetation": "ರಸ್ತೆಯಿಂದ ಬೆಳೆದ ಸಸ್ಯಗಳು",
     "strayAnimals": "ಕಾಡುಮೃಗಗಳು",
-    "other": "ಇತರೆ"
+    "navigateInstructions": "↑↓ ಅಥವಾ ಎಂಟರ್ ನೇವಿಗೇಟ್ ಮಾಡಿ • ಆಯ್ಕೆ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ • ಹಿಂದಕ್ಕೆ ಹೋಗಲು Esc"
   },
   "complaint": {
     "fileComplaint": "ದೂರುವಾಣ ಸಲ್ಲಿಸಿ",

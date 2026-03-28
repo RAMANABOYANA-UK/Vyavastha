@@ -48,15 +48,19 @@
   },
   "category": {
     "title": "বিভাগ নির্বাচন করুন",
-    "sanitation": "স্বাস্থ্যবিধি",
-    "roads": "রাস্তা",
-    "water": "জল সরবরাহ",
-    "drains": "নর্দমা",
-    "toilets": "জনসাধারণের শৌচালয়",
-    "electricity": "বিদ্যুৎ",
-    "health": "স্বাস্থ্য এবং নিরাপত্তা",
+    "dirtySpot": "নোংরা স্থান",
+    "garbageDump": "আবর্জনা স্তূপ",
+    "garbageVehicle": "আবর্জনা গাড়ি আসে না",
+    "burningGarbage": "খোলা জায়গায় আবর্জনা পোড়ানো",
+    "sweepingNotDone": "ঝাড়ু দেওয়া হয়নি",
+    "dustbinsNotCleaned": "ডাস্টবিন পরিষ্কার করা হয়নি",
+    "openDefecation": "খোলা স্থানে মানুষের মল",
+    "sewerageOverflow": "নর্দমা/ঝড়ের জল উপচে পড়া",
+    "stagnantWater": "রাস্তায় জমে থাকা পানি",
+    "slumNotClean": "বস্তি এলাকা পরিষ্কার নয়",
+    "overgrownVegetation": "রাস্তায় উগ্র জন্মে থাকা গাছপালা",
     "strayAnimals": "ভবঘুরে প্রাণী",
-    "other": "অন্যান্য"
+    "navigateInstructions": "↑↓ বা এন্টার দিয়ে নেভিগেট করুন • নির্বাচনের জন্য ক্লিক করুন • পিছনে যেতে Esc চাপুন"
   },
   "complaint": {
     "fileComplaint": "অভিযোগ জমা দিন",

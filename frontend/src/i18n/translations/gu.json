@@ -48,15 +48,19 @@
   },
   "category": {
     "title": "શ્રેણી પસંદ કરો",
-    "sanitation": "લવચ્ છતા",
-    "roads": "રસ્તાઓ",
-    "water": "જળ પુરવઠો",
-    "drains": "ગટરો",
-    "toilets": "જાહેર શૌચાલય",
-    "electricity": "વિદ્યુત",
-    "health": "આરોગ્ય અને સુરક્ષા",
+    "dirtySpot": "ગંદું સ્થાન",
+    "garbageDump": "કચરાનો ઢગલો",
+    "garbageVehicle": "કચરાની ગાડી આવતી નથી",
+    "burningGarbage": "ખુલ્લી જગ્યાએ કચરો સળગાવવો",
+    "sweepingNotDone": "ઝાડું પૂર્ણ કરાયું નથી",
+    "dustbinsNotCleaned": "કચરાની ટોપીઓ સાફ કરવામાં આવી નથી",
+    "openDefecation": "ખુલ્લી જગ્યાએ શૌચ",
+    "sewerageOverflow": "નાલી/તોફાન જલ વાહિની",
+    "stagnantWater": "રસ્તા પર થોભતું પાણી",
+    "slumNotClean": "ઝોપી વિસ્તાર સાફ નથી",
+    "overgrownVegetation": "રસ્તા પર વધેલી વનસ્પતિ",
     "strayAnimals": "ભટકતા પ્રાણીઓ",
-    "other": "અન્ય"
+    "navigateInstructions": "નેવિગેટ કરવા માટે ↑↓ અથવા Enter • પસંદ કરવા માટે ક્લિક કરો • પાછળ જવા માટે Esc ને દબાવો"
   },
   "complaint": {
     "fileComplaint": "ફરિયાદ દર્જ કરો",

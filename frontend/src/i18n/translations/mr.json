@@ -48,15 +48,19 @@
   },
   "category": {
     "title": "श्रेणी निवडा",
-    "sanitation": "स्वच्छता",
-    "roads": "रस्ते",
-    "water": "जलापुरवठा",
-    "drains": "नाले",
-    "toilets": "सार्वजनिक शौचालय",
-    "electricity": "विद्युत",
-    "health": "आरोग्य आणि सुरक्षा",
+    "dirtySpot": "गोवाळी जागा",
+    "garbageDump": "कचऱ्याचा ढीग",
+    "garbageVehicle": "कचरा वाहन येत नाही",
+    "burningGarbage": "खुल्या जागेत कचऱ्याचे ज्वलन",
+    "sweepingNotDone": "सफाई केली जात नाही",
+    "dustbinsNotCleaned": "कचऱ्याच्या टोप्या स्वच्छ केल्या जात नाहीत",
+    "openDefecation": "खुल्या जागेत मलत्याग",
+    "sewerageOverflow": "गटर/तूफान जल वाहिनी",
+    "stagnantWater": "रस्त्यावर उभा पाणी",
+    "slumNotClean": "झोपडपट्टी क्षेत्र स्वच्छ नाही",
+    "overgrownVegetation": "रस्त्यावर वाढलेली वनस्पती",
     "strayAnimals": "भटक्या प्राणी",
-    "other": "इतर"
+    "navigateInstructions": "नॅव्हिगेट करण्यासाठी ↑↓ किंवा Enter • निवड करण्यासाठी क्लिक करा • मागे जाण्यासाठी Esc"
   },
   "complaint": {
     "fileComplaint": "तक्रार दाखल करा",
