@@ -151,15 +151,34 @@
   },
   "notifications": {
     "title": "सूचनाएं",
-    "no_notifications": "कोई सूचना नहीं",
-    "complaint_status": "शिकायत स्थिति अपडेट",
-    "new_reply": "नई प्रतिक्रिया",
-    "urgent": "तुरंत!"
+    "unread": "अपढ़",
+    "read": "पहले पढ़ी गई",
+    "markAllRead": "सभी को पढ़ा गया चिह्नित करें",
+    "noNotifications": "कोई सूचना नहीं",
+    "complaintResolved": "शिकायत समाधान किया गया",
+    "complaintUpdate": "शिकायत अपडेट"
   },
   "complaints": {
     "title": "शिकायतें",
-    "my_complaints": "मेरी शिकायतें",
-    "post_new": "नई शिकायत दर्ज करें"
+    "myComplaints": "मेरी शिकायतें",
+    "postNew": "नई शिकायत पोस्ट करें",
+    "noComplaints": "अभी तक कोई शिकायत नहीं",
+    "startReporting": "समस्याओं की रिपोर्ट करना शुरू करें",
+    "status": "स्थिति",
+    "pending": "लंबित",
+    "acknowledged": "स्वीकृत",
+    "inProgress": "प्रगति में",
+    "underInspection": "निरीक्षण के तहत",
+    "workScheduled": "काम निर्धारित",
+    "resolved": "समाधान किया गया",
+    "rejected": "अस्वीकृत",
+    "closed": "बंद",
+    "complaintFiled": "शिकायत दर्ज की गई",
+    "acknowledgedByOfficial": "अधिकारी द्वारा स्वीकृत",
+    "workInProgress": "काम प्रगति में है",
+    "date": "तारीख",
+    "location": "स्थान",
+    "postedComplaints": "पोस्ट की गई शिकायतें"
   },
   "bottomNav": {
     "home": "होम",

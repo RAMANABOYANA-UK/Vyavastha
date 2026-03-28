@@ -151,15 +151,34 @@
   },
   "notifications": {
     "title": "Notifications",
-    "no_notifications": "No notifications",
-    "complaint_status": "Complaint Status Update",
-    "new_reply": "New Reply",
-    "urgent": "Urgent!"
+    "unread": "Unread",
+    "read": "Previously read",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "complaintResolved": "Complaint Resolved",
+    "complaintUpdate": "Complaint Update"
   },
   "complaints": {
     "title": "Complaints",
-    "my_complaints": "My Complaints",
-    "post_new": "Post New Complaint"
+    "myComplaints": "My Complaints",
+    "postNew": "Post New Complaint",
+    "noComplaints": "No complaints yet",
+    "startReporting": "Start reporting issues",
+    "status": "Status",
+    "pending": "Pending",
+    "acknowledged": "Acknowledged",
+    "inProgress": "In Progress",
+    "underInspection": "Under Inspection",
+    "workScheduled": "Work Scheduled",
+    "resolved": "Resolved",
+    "rejected": "Rejected",
+    "closed": "Closed",
+    "complaintFiled": "Complaint Filed",
+    "acknowledgedByOfficial": "Acknowledged by Official",
+    "workInProgress": "Work In Progress",
+    "date": "Date",
+    "location": "Location",
+    "postedComplaints": "Posted Complaints"
   },
   "bottomNav": {
     "home": "Home",

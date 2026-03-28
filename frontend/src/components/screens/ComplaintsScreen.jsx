@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { Package, Clock, CheckCircle, XCircle, AlertCircle, Search, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import TealHeader from '../TealHeader';
 import { useComplaintsStore, useUIStore, useAuthStore } from '../../store';
 
@@ -101,9 +102,25 @@ function StatusStepper({ status }) {
 }
 
 export default function ComplaintsScreen() {
+  const { t } = useTranslation();
   const { myComplaints, fetchMyComplaints, isLoading } = useComplaintsStore();
   const { setScreen } = useUIStore();
   const { user } = useAuthStore();
+
+  // Status to translation key mapping
+  const getStatusLabel = (status) => {
+    const statusKeyMap = {
+      pending: 'pending',
+      acknowledged: 'acknowledged',
+      in_progress: 'inProgress',
+      under_inspection: 'underInspection',
+      work_scheduled: 'workScheduled',
+      resolved: 'resolved',
+      rejected: 'rejected',
+      closed: 'closed'
+    };
+    return t(`complaints.${statusKeyMap[status] || 'pending'}`);
+  };
 
   // Only poll if the logged-in user is a citizen (prevents official's token
   // from hitting /complaints/my and returning an empty list that overwrites
@@ -138,7 +155,7 @@ export default function ComplaintsScreen() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <TealHeader title="Posted Complaints" />
+      <TealHeader title={t('complaints.postedComplaints')} />
 
       {isLoading && myComplaints.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
@@ -171,7 +188,7 @@ export default function ComplaintsScreen() {
                   </div>
                   <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${status.color}`}>
                     <StatusIcon size={12} />
-                    {status.label}
+                    {getStatusLabel(complaint.status)}
                   </div>
                 </div>
 

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FileText, CheckCircle, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import TealHeader from '../TealHeader';
 import { useNotificationsStore } from '../../store';
 
 export default function NotificationsScreen() {
   const [tab, setTab] = useState('unread');
+  const { t } = useTranslation();
   const { notifications, unreadCount, fetchNotifications, isLoading, markAllAsRead, markAsRead } = useNotificationsStore();
 
   useEffect(() => {
@@ -53,19 +55,19 @@ export default function NotificationsScreen() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <TealHeader title="Notifications" />
+      <TealHeader title={t('notifications.title')} />
 
       {/* Tabs */}
       <div className="flex bg-gray-100 p-1.5 gap-1.5 mx-3.5 mt-2.5 rounded-xl">
-        {['unread', 'read'].map((t) => (
+        {['unread', 'read'].map((tabName) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabName}
+            onClick={() => setTab(tabName)}
             className={`flex-1 py-2.5 rounded-lg border-none font-semibold text-sm cursor-pointer transition-all ${
-              tab === t ? 'bg-teal text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'
+              tab === tabName ? 'bg-teal text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'
             }`}
           >
-            {t === 'unread' ? `Unread${unreadCount > 0 ? ` (${unreadCount})` : ''}` : 'Previously read'}
+            {tabName === 'unread' ? `${t('notifications.unread')}${unreadCount > 0 ? ` (${unreadCount})` : ''}` : t('notifications.read')}
           </button>
         ))}
       </div>
@@ -76,7 +78,7 @@ export default function NotificationsScreen() {
           onClick={handleMarkAllRead}
           className="mx-3.5 mt-2 text-sm text-teal font-semibold text-right hover:underline"
         >
-          Mark all as read
+          {t('notifications.markAllRead')}
         </button>
       )}
 
@@ -126,7 +128,7 @@ export default function NotificationsScreen() {
         <div className="flex-1 flex flex-col items-center justify-center gap-3.5 text-gray-400 pb-20">
           <div className="text-7xl opacity-40">📄</div>
           <div className="text-[15px] font-semibold text-gray-400">
-            No {tab === 'unread' ? 'unread ' : ''}notifications
+            {tab === 'unread' ? `${t('notifications.unread')} ${t('notifications.noNotifications')}` : t('notifications.noNotifications')}
           </div>
         </div>
       )}
