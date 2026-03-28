@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Bell, ClipboardList, User, Plus } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useUIStore, useAuthStore, useNotificationsStore } from '../store';
 
 export default function BottomNav() {

@@ -234,5 +234,30 @@
     "korean": "한국어",
     "portuguese": "Português",
     "arabic": "العربية"
+  },
+  "ai": {
+    "analyzing": "Analyzing image...",
+    "validIssue": "Valid Issue",
+    "notCivicIssue": "Not a Civic Issue",
+    "category": "Category",
+    "severity": "Severity",
+    "confidence": "Confidence",
+    "department": "Department",
+    "title": "Issue Summary",
+    "description": "Description",
+    "visualEvidence": "Visual Evidence",
+    "estimatedImpact": "Estimated Impact",
+    "aiRecommendations": "AI Recommendations",
+    "locationClues": "Location Information",
+    "peopleAffected": "People Affected",
+    "urgencyDays": "Resolution Target",
+    "safetyRisk": "Safety Risk",
+    "trafficImpact": "Traffic Impact",
+    "immediateAction": "Immediate Action",
+    "permanentFix": "Permanent Fix",
+    "estimatedRepairTime": "Estimated Repair Time",
+    "estimatedCostINR": "Estimated Cost (INR)",
+    "requiredResources": "Required Resources",
+    "suggestedATR": "Suggested Report"
   }
 }

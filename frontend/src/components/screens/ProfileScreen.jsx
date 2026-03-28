@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import TealHeader from '../TealHeader';
 import { useAuthStore, useUIStore } from '../../store';
 import toast from 'react-hot-toast';
+
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { user, logout, isAuthenticated } = useAuthStore();
@@ -10,13 +11,13 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     logout();
-    toast.success(t('common.success'));
+    toast.success(t('profile.loggedOutSuccessfully'));
     requestSwitchRole(); // Go back to role selection
   };
 
   const handleSwitchRole = () => {
     logout();
-    toast(t('profile.switch_role'), { icon: '🔄' });
+    toast(t('profile.switchingRole'), { icon: '🔄' });
     requestSwitchRole();
   };
 
@@ -69,10 +70,10 @@ export default function ProfileScreen() {
           </div>
           <div>
             <div className="font-extrabold text-[17px] text-gray-800">
-              {user?.name || t('common.activeCitizen')}
+              {user?.name || t('profile.activeCitizen')}
             </div>
             <div className="text-gray-500 text-sm">
-              {user?.email || 'citizen@vyavastha.gov.in'}
+              {user?.email || t('profile.citizen')}
             </div>
           </div>
         </div>

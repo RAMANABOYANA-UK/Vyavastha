@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, MapPin, Info, Check, Crosshair, Loader, Shield, AlertTriangle, Building, Sparkles, XCircle, Eye, Clock, Users } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import TealHeader from '../TealHeader';
 import { useUIStore, useComplaintsStore, useAuthStore } from '../../store';

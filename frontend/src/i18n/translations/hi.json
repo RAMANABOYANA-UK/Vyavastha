@@ -234,5 +234,30 @@
     "korean": "한국어",
     "portuguese": "Português",
     "arabic": "العربية"
+  },
+  "ai": {
+    "analyzing": "छवि विश्लेषण जारी है...",
+    "validIssue": "मान्य समस्या",
+    "notCivicIssue": "नागरिक समस्या नहीं",
+    "category": "Category",
+    "severity": "Severity",
+    "confidence": "Confidence",
+    "department": "Department",
+    "title": "समस्या सारांश",
+    "description": "विवरण",
+    "visualEvidence": "दृश्य साक्ष्य",
+    "estimatedImpact": "अनुमानित प्रभाव",
+    "aiRecommendations": "AI सिफारिशें",
+    "locationClues": "स्थान जानकारी",
+    "peopleAffected": "प्रभावित लोग",
+    "urgencyDays": "समाधान लक्ष्य",
+    "safetyRisk": "सुरक्षा जोखिम",
+    "trafficImpact": "ट्रैफिक प्रभाव",
+    "immediateAction": "तत्काल कार्रवाई",
+    "permanentFix": "स्थायी समाधान",
+    "estimatedRepairTime": "अनुमानित मरम्मत समय",
+    "estimatedCostINR": "अनुमानित लागत (INR)",
+    "requiredResources": "आवश्यक संसाधन",
+    "suggestedATR": "सुझाए गए रिपोर्ट"
   }
 }

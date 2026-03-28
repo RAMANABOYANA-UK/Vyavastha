@@ -123,13 +123,9 @@ function MainApp() {
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
     
-    // If we have a valid session with a token, skip OTP and go directly to portal
-    if (hasValidSession) {
-      setAppScreen('portal');
-    } else {
-      // Otherwise show OTP auth screen
-      setAppScreen('auth');
-    }
+    // Always show OTP auth screen for security — even if we have a valid session,
+    // users should confirm their identity each session
+    setAppScreen('auth');
   };
 
   // Handle auth success

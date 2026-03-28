@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import TealHeader from '../TealHeader';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+
 export default function SettingsScreen({ onBack }) {
   const { t } = useTranslation();
   const [notifComplaints, setNotifComplaints] = useState(true);
@@ -16,25 +17,25 @@ export default function SettingsScreen({ onBack }) {
 
   const handleChangePassword = async () => {
     if (!pwdForm.current || !pwdForm.newPwd) {
-      toast.error(t('common.error'));
+      toast.error(t('settings.fillAllFields'));
       return;
     }
     if (pwdForm.newPwd.length < 6) {
-      toast.error(t('auth.invalidPassword'));
+      toast.error(t('settings.passwordMinLength'));
       return;
     }
     if (pwdForm.newPwd !== pwdForm.confirm) {
-      toast.error(t('auth.passwordMismatch'));
+      toast.error(t('settings.passwordsMustMatch'));
       return;
     }
     setPwdLoading(true);
     try {
       await api.put('/auth/password', { currentPassword: pwdForm.current, newPassword: pwdForm.newPwd });
-      toast.success(t('common.success'));
+      toast.success(t('settings.passwordChangedSuccessfully'));
       setShowChangePwd(false);
       setPwdForm({ current: '', newPwd: '', confirm: '' });
     } catch (err) {
-      toast.error(err?.error || t('common.error'));
+      toast.error(err?.error || t('settings.failedToChangePassword'));
     } finally {
       setPwdLoading(false);
     }
@@ -73,28 +74,28 @@ export default function SettingsScreen({ onBack }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
-      <TealHeader title={t('profile.settings')} onBack={onBack} />
+      <TealHeader title={t('settings.title')} onBack={onBack} />
 
       <div className="flex-1 overflow-y-auto p-4 pb-24">
 
         {/* Notifications */}
-        <Section title={t('notifications.title')}>
+        <Section title={t('settings.notifications')}>
           <Row
             icon={Bell}
             iconColor="text-teal"
-            label={t('complaints.title')}
+            label={t('settings.complaintUpdates')}
             right={<Toggle value={notifComplaints} onChange={setNotifComplaints} />}
           />
           <Row
             icon={Bell}
             iconColor="text-blue-500"
-            label={t('complaint.status')}
+            label={t('settings.statusUpdates')}
             right={<Toggle value={notifUpdates} onChange={setNotifUpdates} />}
           />
           <Row
             icon={Bell}
             iconColor="text-purple-500"
-            label={t('home.community', { defaultValue: 'Community Activity' })}
+            label={t('settings.communityActivity')}
             right={<Toggle value={notifCommunity} onChange={setNotifCommunity} />}
           />
         </Section>
@@ -108,7 +109,7 @@ export default function SettingsScreen({ onBack }) {
             right={
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">{t('settings.comingSoon')}</span>
-                <Toggle value={darkMode} onChange={() => toast(t('settings.darkModeComingSoon'), { icon: '🌙' })} />
+                <Toggle value={darkMode} onChange={() => toast(t('settings.darkMode') + ' ' + t('settings.comingSoon') + '!', { icon: '🌙' })} />
               </div>
             }
           />
@@ -119,14 +120,14 @@ export default function SettingsScreen({ onBack }) {
           <Row
             icon={Lock}
             iconColor="text-orange-500"
-            label={t('auth.password')}
+            label={t('settings.changePassword')}
             right={<ChevronRight size={16} className="text-gray-400" />}
             onClick={() => setShowChangePwd(v => !v)}
           />
           <Row
             icon={ShieldCheck}
             iconColor="text-green-500"
-            label={t('settings.twoFactor')}
+            label={t('settings.twoFactorAuth')}
             right={<span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t('settings.comingSoon')}</span>}
           />
           <Row
@@ -141,11 +142,11 @@ export default function SettingsScreen({ onBack }) {
         {/* Change Password Form */}
         {showChangePwd && (
           <div className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-teal/30">
-            <p className="text-sm font-bold text-gray-700 mb-3">{t('settings.changePassword')}</p>
+            <p className="text-sm font-bold text-gray-700 mb-3">{t('settings.changePasswordForm')}</p>
             {[
               { key: 'current', placeholder: t('settings.currentPassword') },
               { key: 'newPwd', placeholder: t('settings.newPassword') },
-              { key: 'confirm', placeholder: t('auth.confirm_password') },
+              { key: 'confirm', placeholder: t('settings.confirmPassword') },
             ].map(({ key, placeholder }) => (
               <input
                 key={key}
@@ -168,7 +169,7 @@ export default function SettingsScreen({ onBack }) {
                 disabled={pwdLoading}
                 className="flex-1 py-2 rounded-lg bg-teal text-white text-sm font-semibold disabled:opacity-60"
               >
-                {pwdLoading ? `${t('common.loading')}...` : t('common.save')}
+                {pwdLoading ? 'Saving...' : t('common.save')}
               </button>
             </div>
           </div>
