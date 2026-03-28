@@ -4,7 +4,8 @@ import React, { useState, useRef } from 'react';
  * ImageUpload Component
  * 
  * A drag-and-drop image upload component with real-time verification.
- * Rejects screenshots, AI-generated images, and invalid formats.
+ * Accepts real camera photos and screenshots.
+ * Rejects AI-generated and animated images.
  * 
  * Props:
  *   - onImageVerified(file, metadata) - Callback when image is verified
@@ -24,11 +25,9 @@ const ImageUpload = ({ onImageVerified, onImageRejected, maxSize = 15 }) => {
 
   // Error messages with icons
   const errorMessages = {
-    SCREENSHOT: '📱 Screenshots are not accepted. Please take a real photo.',
-    AI_GENERATED: '🤖 AI-generated images are not accepted as evidence.',
-    NO_EXIF: '📷 Please upload an original photo taken from your camera.',
-    ANIMATED: '📹 Animated images are not accepted. Please upload a still photo.',
-    INVALID_FORMAT: '❌ Invalid file format. Only JPG, PNG, WebP allowed.',
+    AI_GENERATED: '🤖 AI generated images are not accepted as evidence. Please upload a real photo.',
+    ANIMATED: '🎨 Animated images are not accepted.',
+    INVALID_FORMAT: '❌ Only JPG, PNG, WebP allowed.',
     FILE_TOO_LARGE: `📦 File too large. Maximum size is ${maxSize}MB.`,
     FILE_TOO_SMALL: '📦 File too small. Minimum size is 100KB.',
     VERIFICATION_ERROR: '⚠️ Verification failed. Please try again.',
@@ -263,7 +262,7 @@ const ImageUpload = ({ onImageVerified, onImageRejected, maxSize = 15 }) => {
           {/* Success state */}
           {success && !loading && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-700 font-medium">✅ Photo verified as real image</p>
+              <p className="text-green-700 font-medium">✅ Image verified — real photo or screenshot accepted</p>
               <p className="text-xs text-green-600 mt-1">
                 This image has passed authenticity verification
               </p>

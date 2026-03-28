@@ -19,6 +19,7 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import serviceRoutes from './routes/service.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import miroRoutes from './routes/miro.routes.js';
+import aiRoutes from './routes/ai.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 import { startEscalationJob } from './jobs/escalationJob.js';
 
@@ -98,6 +99,7 @@ app.use('/api/admin/analytics', analyticsRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/miro', miroRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

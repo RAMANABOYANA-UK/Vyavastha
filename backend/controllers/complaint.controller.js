@@ -3,6 +3,7 @@ import User from '../models/User.model.js';
 import Notification from '../models/Notification.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { analyzeImage } from '../services/ai.service.js';
+import { classifyComplaint } from '../services/aiService.js';
 import { notifyOfficials } from '../services/notification.service.js';
 import { sendStatusUpdateNotification } from '../services/realtimeNotification.service.js';
 
@@ -154,6 +155,9 @@ export const createComplaint = asyncHandler(async (req, res) => {
   console.log(`   Priority: ${aiAnalysis.priority}, Severity: ${aiAnalysis.severity}`);
   console.log(`   Department: ${aiAnalysis.department}`);
 
+  // LLM complaint classification (text + optional image notes)
+  const aiTextClassification = await classifyComplaint(description, aiAnalysis?.aiNotes || '');
+
   const complaint = await Complaint.create({
     user: req.user._id,
     category,
@@ -171,6 +175,10 @@ export const createComplaint = asyncHandler(async (req, res) => {
     isAnonymous: isAnonymous || false,
     priority: aiAnalysis.priority,
     department: aiAnalysis.department,
+    aiCategory: aiTextClassification.category,
+    aiDepartment: aiTextClassification.department,
+    aiSeverity: aiTextClassification.severity,
+    aiSummary: aiTextClassification.summary,
     aiVerification: {
       isVerified: aiAnalysis.isValid,
       confidence: aiAnalysis.confidence,

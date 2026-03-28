@@ -11,37 +11,34 @@ const SIGHTENGINE_API_SECRET = process.env.SIGHTENGINE_API_SECRET;
 
 /**
  * Layer 1: Check EXIF metadata for camera information
+ * Note: Screenshots won't have EXIF data, so we don't reject them here.
+ * AI detection happens in Layer 2 (Sightengine).
  */
 const checkEXIF = async (filePath) => {
   try {
     const exifData = await exifr.parse(filePath);
 
-    if (!exifData) {
-      return {
-        passed: false,
-        reason: 'No EXIF metadata found. Real photos contain camera information.',
-        confidence: 0
-      };
+    // If EXIF exists and has camera metadata, it's a real photo
+    if (exifData) {
+      const hasCamera = exifData.Make || exifData.Model;
+      
+      if (hasCamera) {
+        return {
+          passed: true,
+          reason: 'Camera metadata detected',
+          confidence: 0.9,
+          cameraModel: exifData.Model || exifData.Make,
+          hasGPS: exifData.latitude && exifData.longitude
+        };
+      }
     }
 
-    const hasCamera = exifData.Make || exifData.Model;
-    const hasDateTime = exifData.DateTime;
-    const hasGPS = exifData.latitude && exifData.longitude;
-
-    if (hasCamera) {
-      return {
-        passed: true,
-        reason: 'Camera metadata detected',
-        confidence: 0.9,
-        cameraModel: exifData.Model || exifData.Make,
-        hasGPS
-      };
-    }
-
+    // No EXIF data found — don't reject, continue to Layer 2
+    // Screenshots won't have EXIF, but may be accepted by Layer 2
     return {
-      passed: false,
-      reason: 'No camera model or make found in metadata',
-      confidence: 0
+      passed: null,
+      reason: 'No EXIF metadata found, continuing to Layer 2 for further analysis',
+      skipped: true
     };
   } catch (error) {
     console.error('EXIF check error:', error.message);
@@ -55,7 +52,9 @@ const checkEXIF = async (filePath) => {
 };
 
 /**
- * Layer 2: Use Sightengine API to detect screenshots and AI-generated images
+ * Layer 2: Use Sightengine API to detect AI-generated and animated images
+ * ACCEPT: Real camera photos, screenshots
+ * REJECT: AI-generated images, animated images
  */
 const checkSightengine = async (filePath) => {
   try {
@@ -86,36 +85,39 @@ const checkSightengine = async (filePath) => {
 
     const { type, ai_generated } = response.data;
 
-    // Check for screenshot
-    if (type?.screenshot > 0.5) {
+    // AI-generated check must run first (REJECT if > 0.6 confidence)
+    if (ai_generated?.probability > 0.6) {
       return {
         passed: false,
-        reason: 'Screenshot detected. Please upload an original photo.',
-        detectedType: 'screenshot'
-      };
-    }
-
-    // Check for animated image
-    if (type?.animated > 0.5) {
-      return {
-        passed: false,
-        reason: 'Animated images are not accepted. Please upload a still photo.',
-        detectedType: 'animated'
-      };
-    }
-
-    // Check for AI-generated image
-    if (ai_generated?.probability > 0.5) {
-      return {
-        passed: false,
-        reason: 'AI-generated image detected. Please upload a real camera photo.',
+        reason: 'AI generated images are not accepted as evidence',
+        code: 'AI_GENERATED',
         detectedType: 'ai_generated'
       };
     }
 
+    // Check for screenshot (ACCEPT - do not reject)
+    if (type?.screenshot > 0.5) {
+      return {
+        passed: true,
+        reason: 'Screenshot verified as acceptable evidence',
+        detectedType: 'screenshot'
+      };
+    }
+
+    // Check for animated image (REJECT)
+    if (type?.animated > 0.5) {
+      return {
+        passed: false,
+        reason: 'Animated images not accepted',
+        code: 'ANIMATED',
+        detectedType: 'animated'
+      };
+    }
+
+    // Everything else: real photo or other valid image type (ACCEPT)
     return {
       passed: true,
-      reason: 'Image type verified',
+      reason: 'Image verified - real photo or screenshot accepted',
       detectedType: 'real_photo'
     };
   } catch (error) {
@@ -246,15 +248,10 @@ export const verifyImage = async (filePath) => {
     const sightengineResult = await checkSightengine(filePath);
 
     if (sightengineResult.passed === false) {
-      const codeMap = {
-        screenshot: 'SCREENSHOT',
-        animated: 'ANIMATED',
-        ai_generated: 'AI_GENERATED'
-      };
       return {
         verified: false,
         message: sightengineResult.reason,
-        code: codeMap[sightengineResult.detectedType] || 'INVALID_IMAGE'
+        code: sightengineResult.code || 'INVALID_IMAGE'
       };
     }
 
@@ -274,11 +271,12 @@ export const verifyImage = async (filePath) => {
     console.log('[IMAGE VERIFY] ✓ All verification layers passed');
     return {
       verified: true,
-      message: 'Image verified as real photo',
+      message: 'Image verified — real photo or screenshot accepted',
       metadata: {
         hasGPS: exifResult.hasGPS || false,
         cameraModel: exifResult.cameraModel || 'Unknown',
-        dimensions: sanityResult.dimensions
+        dimensions: sanityResult.dimensions,
+        imageType: sightengineResult.detectedType || 'unknown'
       }
     };
   } catch (error) {

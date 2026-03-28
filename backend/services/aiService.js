@@ -4,9 +4,60 @@ const FEATHERLESS_API_KEY = process.env.FEATHERLESS_API_KEY;
 const FEATHERLESS_BASE_URL = 'https://api.featherless.ai/v1';
 const MODEL = 'meta-llama/Meta-Llama-3.1-8B-Instruct';
 
+const DEFAULT_CLASSIFICATION = {
+  category: 'Other',
+  department: 'Municipal Corp',
+  severity: 'medium',
+  summary: 'Complaint received and forwarded for review.'
+};
+
+const VALID_CATEGORIES = ['Road', 'Water', 'Electricity', 'Sanitation', 'Public Safety', 'Other'];
+const VALID_DEPARTMENTS = ['PWD', 'Water Board', 'BESCOM', 'BBMP', 'Police', 'Municipal Corp'];
+const VALID_SEVERITIES = ['low', 'medium', 'high', 'urgent'];
+
+const extractJSONObject = (text) => {
+  if (!text || typeof text !== 'string') {
+    throw new Error('Empty AI response');
+  }
+
+  const cleaned = text
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    }
+    throw new Error('Unable to parse JSON response from AI');
+  }
+};
+
+const normalizeClassification = (parsed, fallbackSummary = '') => {
+  const category = VALID_CATEGORIES.includes(parsed?.category) ? parsed.category : DEFAULT_CLASSIFICATION.category;
+  const department = VALID_DEPARTMENTS.includes(parsed?.department) ? parsed.department : DEFAULT_CLASSIFICATION.department;
+  const severity = VALID_SEVERITIES.includes((parsed?.severity || '').toLowerCase())
+    ? parsed.severity.toLowerCase()
+    : DEFAULT_CLASSIFICATION.severity;
+  const summary = typeof parsed?.summary === 'string' && parsed.summary.trim().length > 0
+    ? parsed.summary.trim()
+    : (fallbackSummary || DEFAULT_CLASSIFICATION.summary);
+
+  return { category, department, severity, summary };
+};
+
 // Helper function to call Featherless AI
 const callFeatherlessAI = async (messages, temperature = 0.7) => {
   try {
+    if (!FEATHERLESS_API_KEY) {
+      throw new Error('FEATHERLESS_API_KEY is not configured');
+    }
+
     const response = await axios.post(
       `${FEATHERLESS_BASE_URL}/chat/completions`,
       {
@@ -32,7 +83,7 @@ const callFeatherlessAI = async (messages, temperature = 0.7) => {
 // TASK 1: Classify complaint into category, department, severity
 export const classifyComplaint = async (text, imageDescription = '') => {
   try {
-    const prompt = `You are a civic complaint classifier. Analyze the complaint and respond in JSON format ONLY.
+    const prompt = `You are a civic complaint classifier. Analyze the complaint and return strict JSON only.
 
 Complaint: ${text}
 ${imageDescription ? `Image Description: ${imageDescription}` : ''}
@@ -46,16 +97,13 @@ Respond with ONLY valid JSON (no markdown, no extra text):
 }`;
 
     const response = await callFeatherlessAI([{ role: 'user', content: prompt }], 0.3);
-    const parsed = JSON.parse(response);
-    return parsed;
+    const parsed = extractJSONObject(response);
+    return normalizeClassification(parsed, text?.slice(0, 140));
   } catch (error) {
     console.error('Error classifying complaint:', error.message);
-    // Fallback response
     return {
-      category: 'Other',
-      department: 'Municipal Corp',
-      severity: 'medium',
-      summary: text.substring(0, 100)
+      ...DEFAULT_CLASSIFICATION,
+      summary: (text || '').slice(0, 140) || DEFAULT_CLASSIFICATION.summary
     };
   }
 };
@@ -71,12 +119,12 @@ Category: ${complaint.category}
 Location: ${complaint.location}
 Official's Resolution Note: ${resolutionNote}
 
-Format the ATR with these sections (use exact headers):
-ISSUE: [brief statement of the issue]
-ACTION TAKEN: [what was done to resolve]
-RESOLUTION DATE: [date resolved]
-DEPARTMENT: ${complaint.category || 'N/A'}
-STATUS: Resolved
+Format the ATR with these exact headers and clear values:
+Issue:
+Action Taken:
+Department:
+Resolution Date:
+Status:
 
 Keep it professional and concise (max 300 words).`;
 
@@ -84,8 +132,15 @@ Keep it professional and concise (max 300 words).`;
     return atrText;
   } catch (error) {
     console.error('Error generating ATR:', error.message);
-    // Fallback ATR
-    return `ISSUE: ${complaint.title}\nACTION TAKEN: ${resolutionNote}\nRESOLUTION DATE: ${new Date().toLocaleDateString()}\nDEPARTMENT: ${complaint.category}\nSTATUS: Resolved`;
+    const issueText = complaint?.title || complaint?.description || 'Complaint issue';
+    const departmentText = complaint?.department || complaint?.category || 'Municipal Corp';
+    return [
+      `Issue: ${issueText}`,
+      `Action Taken: ${resolutionNote || 'Action completed by concerned team.'}`,
+      `Department: ${departmentText}`,
+      `Resolution Date: ${new Date().toLocaleDateString()}`,
+      'Status: Resolved'
+    ].join('\n');
   }
 };
 
@@ -117,7 +172,7 @@ export const predictResolutionTime = async (category, severity) => {
 
     return {
       days: estimatedDays,
-      message: message || `Expected resolution within ${estimatedDays} business days.`
+      message: (message || '').trim() || `Expected resolution within ${estimatedDays} business days.`
     };
   } catch (error) {
     console.error('Error predicting resolution time:', error.message);
@@ -133,7 +188,7 @@ export const predictResolutionTime = async (category, severity) => {
 export const chatbotResponse = async (userMessage, complaints = []) => {
   try {
     const complaintsSummary = complaints
-      .map(c => `- ${c.title} (${c.status}, ${c.category}, ${c.severity})`)
+      .map(c => `- ${c.title || c.complaintId || 'Complaint'} (${c.status || 'submitted'}, ${c.category || 'other'}, ${c.severity || 'medium'})`)
       .join('\n');
 
     const prompt = `You are a helpful citizen support chatbot for a grievance portal. A user is asking about their complaints.
@@ -146,7 +201,7 @@ ${complaintsSummary || 'No active complaints'}
 Provide a helpful, empathetic response (1-3 sentences). Be conversational and supportive.`;
 
     const response = await callFeatherlessAI([{ role: 'user', content: prompt }], 0.7);
-    return response;
+    return (response || '').trim() || 'Your complaint is under review. Please check the dashboard for updates.';
   } catch (error) {
     console.error('Error generating chatbot response:', error.message);
     // Fallback response

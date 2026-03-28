@@ -152,7 +152,7 @@ export default function ComplaintFormScreen() {
       reader.onload = (ev) => setPhoto(ev.target.result);
       reader.readAsDataURL(file);
       
-      // AI image validation — enforce civic/sanitation images only
+      // AI image validation — enforce civic/sanitation images or screenshots
       toast.loading('Verifying image...', { id: 'ai-analysis' });
       const result = await analyzeImage(file);
       toast.dismiss('ai-analysis');
@@ -161,20 +161,25 @@ export default function ComplaintFormScreen() {
           setAiVisionResult(result);
           
           if (!result.isCivicIssue) {
-            // REJECT: not a civic/sanitation issue
+            // REJECT: not a civic/sanitation issue or screenshot
             setPhoto(null);
             setPhotoFile(null);
             setImageRejected(true);
             setImageRejectionReason(
               result.reason || 'This image does not appear to show a civic or sanitation issue.'
             );
-            toast.error('Image rejected — please upload a photo of the actual issue', { duration: 4000, icon: '🚫' });
+            toast.error('Image rejected — please upload a photo of the actual issue or a location screenshot', { duration: 4000, icon: '🚫' });
             return;
           }
           
-          // ACCEPTED: valid civic issue
+          // ACCEPTED: valid civic issue or screenshot
           setImageRejected(false);
-          toast.success('Image verified! Valid civic issue detected.', { icon: '✅' });
+          
+          if (result.isScreenshot) {
+            toast.success('✅ Screenshot accepted! Add description to continue.', { icon: '🗺️' });
+          } else {
+            toast.success('Image verified! Valid civic issue detected.', { icon: '✅' });
+          }
           
           // Auto-fill description if empty
           if (!description && result.description) {
@@ -240,8 +245,10 @@ export default function ComplaintFormScreen() {
     }
   };
 
-  // Block submit if: no description, no photo, image rejected by AI, or AI is still analyzing
-  const isValid = description.trim() && photo && !imageRejected && !isAnalyzing
+  const isNotCivicIssue = !!aiVisionResult && !aiVisionResult.isCivicIssue;
+
+  // Block submit if: no description, no photo, image rejected by AI, not civic issue, or AI is still analyzing
+  const isValid = description.trim() && photo && !imageRejected && !isNotCivicIssue && !isAnalyzing
     && (!aiVisionResult || aiVisionResult.isCivicIssue);
 
   if (submitted) {
@@ -640,9 +647,9 @@ export default function ComplaintFormScreen() {
             </div>
           )}
 
-          {imageRejected && (
-            <div className="text-sm text-red-600 font-medium italic">
-              Upload a valid photo of the issue to continue.
+          {(imageRejected || isNotCivicIssue) && (
+            <div className="text-sm text-red-600 font-medium">
+              Please upload a photo of an actual civic issue like a pothole, garbage, or broken infrastructure
             </div>
           )}
 

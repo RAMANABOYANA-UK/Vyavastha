@@ -111,6 +111,22 @@ const complaintSchema = new mongoose.Schema({
     enum: ['sanitation', 'health', 'municipal', 'environment', 'roads', 'water', 'electricity', 'other'],
     default: 'sanitation'
   },
+  aiCategory: {
+    type: String,
+    default: ''
+  },
+  aiDepartment: {
+    type: String,
+    default: ''
+  },
+  aiSeverity: {
+    type: String,
+    default: 'medium'
+  },
+  aiSummary: {
+    type: String,
+    default: ''
+  },
   timeline: [{
     status: String,
     comment: String,
