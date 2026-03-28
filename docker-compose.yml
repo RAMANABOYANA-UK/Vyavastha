@@ -60,8 +60,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      VITE_API_URL: http://localhost:5000/api
-      VITE_ANALYZE_URL: http://localhost:8000
+      VITE_API_URL: http://vyavastha-backend:5000/api
+      VITE_ANALYZE_URL: http://vyavastha-analyze:8000
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173/"]
       interval: 30s
