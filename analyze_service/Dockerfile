@@ -10,16 +10,9 @@ ENV HF_HOME=/app/.cache/huggingface
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir --upgrade setuptools \
+    && pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r requirements.txt
-
-RUN python - <<'EOF'
-from transformers import CLIPModel, CLIPProcessor
-print("Pre-downloading CLIP model into image cache...")
-CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-print("CLIP model cached successfully.")
-EOF
 
 COPY . .
 

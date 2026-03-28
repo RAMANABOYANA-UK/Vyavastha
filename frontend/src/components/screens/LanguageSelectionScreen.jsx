@@ -2,11 +2,9 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { useAuthStore } from '../../store';
 
 const LanguageSelectionScreen = ({ onComplete }) => {
   const { i18n } = useTranslation();
-  const { setUserLanguage } = useAuthStore();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
   const languages = [
@@ -45,13 +43,15 @@ const LanguageSelectionScreen = ({ onComplete }) => {
     setSelectedLang(langCode);
     i18n.changeLanguage(langCode);
     localStorage.setItem('userLanguage', langCode);
-    setUserLanguage(langCode);
+    
+    // If not authenticated yet, don't call setUserLanguage as it won't work
+    // It will be called after login/registration in the auth store
   };
 
   const handleContinue = () => {
     i18n.changeLanguage(selectedLang);
     localStorage.setItem('userLanguage', selectedLang);
-    setUserLanguage(selectedLang);
+    // Language will be synced to user profile during login/registration
     onComplete();
   };
 

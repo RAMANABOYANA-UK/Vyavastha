@@ -28,9 +28,19 @@ export const useAuthStore = create(
           const response = await authAPI.login(credentials);
           const { token, ...user } = response.data;
           localStorage.setItem('token', token);
-          const userLanguage = user.language || 'en';
+          const userLanguage = user.language || localStorage.getItem('userLanguage') || 'en';
           localStorage.setItem('userLanguage', userLanguage);
           set({ user, token, isAuthenticated: true, isLoading: false, userLanguage });
+          
+          // Sync language to user profile if not already set
+          if (!user.language) {
+            try {
+              await authAPI.updateProfile({ language: userLanguage });
+            } catch (err) {
+              console.error('Failed to sync language to profile:', err);
+            }
+          }
+          
           return { success: true };
         } catch (error) {
           set({ isLoading: false, error: error.error || 'Login failed' });
@@ -41,10 +51,15 @@ export const useAuthStore = create(
       register: async (data) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authAPI.register(data);
+          // Include language preference from localStorage when registering
+          const registerData = {
+            ...data,
+            language: localStorage.getItem('userLanguage') || 'en'
+          };
+          const response = await authAPI.register(registerData);
           const { token, ...user } = response.data;
           localStorage.setItem('token', token);
-          const userLanguage = user.language || 'en';
+          const userLanguage = user.language || registerData.language || 'en';
           localStorage.setItem('userLanguage', userLanguage);
           set({ user, token, isAuthenticated: true, isLoading: false, userLanguage });
           return { success: true };

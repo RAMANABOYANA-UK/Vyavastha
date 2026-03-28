@@ -117,5 +117,9 @@ export default {
       },
     },
   },
+  corePlugins: {
+    // Enable dir attribute support for RTL/LTR
+    dir: true,
+  },
   plugins: [],
 }

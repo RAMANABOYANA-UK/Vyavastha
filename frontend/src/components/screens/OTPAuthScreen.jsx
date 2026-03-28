@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Loader, CheckCircle, User, MapPin, Lock, LogIn, UserPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { getLocationWithAddress } from '../../services/location';
@@ -10,6 +11,7 @@ const OTP_LENGTH = 6;
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export default function OTPAuthScreen({ role, onBack, onSuccess }) {
+  const { t } = useTranslation();
   // step: 'choose' → 'contact' → 'otp' → 'details' (signup only)
   const [step, setStep] = useState('choose');
   const [isLogin, setIsLogin] = useState(true);
@@ -129,7 +131,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
     if (otpValue.length !== OTP_LENGTH) {
-      toast.error('Please enter complete OTP');
+      toast.error(t('auth.incompleteOTP'));
       return;
     }
 
@@ -157,7 +159,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
           setStep('details');
         }
       } else {
-        toast.error('Invalid OTP. Please try again.');
+        toast.error(t('auth.invalidOTP'));
       }
       setIsLoading(false);
       return;
@@ -310,8 +312,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
           >
             <div className="text-center mb-6">
               <div className="text-4xl mb-3">🏛️</div>
-              <h2 className="text-2xl font-bold text-gray-800">Welcome to VYAVASTHA</h2>
-              <p className="text-gray-500 mt-1 text-sm">Citizen Grievance Management</p>
+              <h2 className="text-2xl font-bold text-gray-800">{t('auth.welcomeTitle')}</h2>
+              <p className="text-gray-500 mt-1 text-sm">{t('auth.welcomeSubtitle')}</p>
             </div>
 
             {/* Login */}
@@ -323,8 +325,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                 <LogIn size={24} className="text-white" />
               </div>
               <div className="text-left">
-                <div className="font-bold text-lg">Login</div>
-                <div className="text-white/80 text-sm">Already have an account? Sign in</div>
+                <div className="font-bold text-lg">{t('auth.loginButton')}</div>
+                <div className="text-white/80 text-sm">{t('auth.loginDesc')}</div>
               </div>
             </button>
 
@@ -337,8 +339,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                 <UserPlus size={24} className="text-teal" />
               </div>
               <div className="text-left">
-                <div className="font-bold text-lg text-gray-800">Create Account</div>
-                <div className="text-gray-500 text-sm">New here? Register for free</div>
+                <div className="font-bold text-lg text-gray-800">{t('auth.signupButton')}</div>
+                <div className="text-gray-500 text-sm">{t('auth.signupDesc')}</div>
               </div>
             </button>
           </motion.div>
@@ -358,15 +360,15 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               onClick={() => { setStep('choose'); setIdentifier(''); }}
               className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
             >
-              <ArrowLeft size={20} /> Back
+              <ArrowLeft size={20} /> {t('common.back')}
             </button>
 
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-800">
-                {isLogin ? 'Login to your account' : 'Create your account'}
+                {isLogin ? t('auth.loginTitle') : t('auth.signupTitle')}
               </h2>
               <p className="text-gray-500 mt-1 text-sm">
-                {isLogin ? 'Enter your registered contact' : 'Choose how you want to receive OTP'}
+                {isLogin ? t('auth.phoneOrEmail') : t('auth.enterPhoneEmail')}
               </p>
             </div>
 
@@ -378,7 +380,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                   authType === 'phone' ? 'bg-white text-teal shadow' : 'text-gray-500'
                 }`}
               >
-                📱 Phone
+                📱 {t('auth.phone')}
               </button>
               <button
                 onClick={() => { setAuthType('email'); setIdentifier(''); }}
@@ -386,7 +388,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                   authType === 'email' ? 'bg-white text-teal shadow' : 'text-gray-500'
                 }`}
               >
-                ✉️ Email
+                ✉️ {t('auth.email')}
               </button>
             </div>
 
@@ -421,28 +423,28 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               className="w-full py-3.5 bg-teal text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading
-                ? <><Loader size={20} className="animate-spin" />Sending OTP...</>
-                : 'Send OTP'
+                ? <><Loader size={20} className="animate-spin" />{t('auth.sendOTP')}...</>
+                : t('auth.sendOTP')
               }
             </button>
 
             <p className="text-center text-sm text-gray-400">
               {isLogin ? (
-                <>New here?{' '}
+                <>{t('auth.noAccount')}{' '}
                   <button
                     onClick={() => { setIsLogin(false); setIdentifier(''); }}
                     className="text-teal font-semibold hover:underline"
                   >
-                    Create Account
+                    {t('auth.signupButton')}
                   </button>
                 </>
               ) : (
-                <>Already have an account?{' '}
+                <>{t('auth.haveAccount')}{' '}
                   <button
                     onClick={() => { setIsLogin(true); setIdentifier(''); }}
                     className="text-teal font-semibold hover:underline"
                   >
-                    Login
+                    {t('auth.loginButton')}
                   </button>
                 </>
               )}
@@ -464,16 +466,16 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               onClick={() => { setStep('contact'); setOtp(['', '', '', '', '', '']); }}
               className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
             >
-              <ArrowLeft size={20} /> Back
+              <ArrowLeft size={20} /> {t('common.back')}
             </button>
 
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-full bg-teal-100 flex items-center justify-center mb-4">
                 <Lock size={32} className="text-teal" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">Enter OTP</h2>
+              <h2 className="text-xl font-bold text-gray-800">{t('auth.enterOTP')}</h2>
               <p className="text-gray-500 mt-1 text-sm">
-                Sent to {authType === 'phone' ? `+91 ${identifier}` : identifier}
+                {t('auth.otpSentTo')} {authType === 'phone' ? `+91 ${identifier}` : identifier}
               </p>
             </div>
 
@@ -499,15 +501,15 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               className="w-full py-3.5 bg-teal text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading
-                ? <><Loader size={20} className="animate-spin" />Verifying...</>
-                : 'Verify OTP'
+                ? <><Loader size={20} className="animate-spin" />{t('auth.verifyOTP')}...</>
+                : t('auth.verifyOTP')
               }
             </button>
 
             <div className="text-center">
               {timer > 0 ? (
                 <p className="text-gray-500 text-sm">
-                  Resend OTP in <span className="font-semibold text-teal">{timer}s</span>
+                  {t('auth.resendIn')} <span className="font-semibold text-teal">{timer}{t('auth.seconds')}</span>
                 </p>
               ) : (
                 <button
@@ -515,7 +517,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
                   disabled={isLoading}
                   className="text-teal font-semibold hover:underline text-sm"
                 >
-                  Resend OTP
+                  {t('auth.resendOTP')}
                 </button>
               )}
             </div>
@@ -536,27 +538,27 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-3">
                 <CheckCircle size={32} className="text-green-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">Complete Your Profile</h2>
+              <h2 className="text-xl font-bold text-gray-800">{t('auth.completeProfile')}</h2>
               <p className="text-gray-500 mt-1 text-sm">Just a few more details</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm text-gray-500 mb-1 block">Full Name</label>
+                <label className="text-sm text-gray-500 mb-1 block">{t('auth.fullName')}</label>
                 <div className="flex items-center gap-3 border-2 border-gray-200 rounded-xl px-4 py-3 focus-within:border-teal">
                   <User size={20} className="text-gray-400" />
                   <input
                     type="text"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter your full name"
+                    placeholder={t('auth.enterName')}
                     className="flex-1 outline-none text-gray-800"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 mb-1 block">Location (Auto-detected)</label>
+                <label className="text-sm text-gray-500 mb-1 block">{t('auth.detectLocation')}</label>
                 <div className="flex items-center gap-3 border-2 border-gray-200 rounded-xl px-4 py-3 bg-gray-50">
                   {isLocating
                     ? <Loader size={20} className="text-teal animate-spin" />
@@ -572,7 +574,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 mb-1 block">Create Password</label>
+                <label className="text-sm text-gray-500 mb-1 block">{t('auth.password')}</label>
                 <div className="flex items-center gap-3 border-2 border-gray-200 rounded-xl px-4 py-3 focus-within:border-teal">
                   <Lock size={20} className="text-gray-400" />
                   <input
@@ -606,8 +608,8 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
               className="w-full py-3.5 bg-teal text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
             >
               {isLoading
-                ? <><Loader size={20} className="animate-spin" />Creating Account...</>
-                : 'Create Account'
+                ? <><Loader size={20} className="animate-spin" />{t('auth.completeSignup')}...</>
+                : t('auth.completeSignup')
               }
             </button>
           </motion.div>
@@ -633,7 +635,7 @@ export default function OTPAuthScreen({ role, onBack, onSuccess }) {
             onClick={onBack}
             className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6"
           >
-            <ArrowLeft size={20} /> Back to role selection
+            <ArrowLeft size={20} /> {t('common.back')}
           </button>
         )}
 

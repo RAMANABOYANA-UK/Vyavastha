@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore, useUIStore, useComplaintsStore } from './store';
+import { setDocumentDirection } from './utils/languageUtils';
 import NotificationPopup from './components/NotificationPopup';
 
 // Lazy-load MobileRatingScreen — keeps the /rate/:serviceId bundle tiny
@@ -68,6 +69,11 @@ function MainApp() {
     }
   }, [switchRoleRequested, clearSwitchRoleRequest]);
 
+  // Set document direction based on language (RTL support for Arabic, Hebrew)
+  useEffect(() => {
+    setDocumentDirection(i18n.language);
+  }, [i18n.language]);
+
   useEffect(() => {
     fetchCategories();
     
@@ -125,9 +131,14 @@ function MainApp() {
     
     // Sync language from user profile or localStorage
     const userLang = userData?.language || localStorage.getItem('userLanguage') || 'en';
+    localStorage.setItem('userLanguage', userLang);
     if (i18n.language !== userLang) {
       i18n.changeLanguage(userLang);
     }
+    
+    // Also update the store's userLanguage
+    const { setUserLanguage } = useAuthStore.getState();
+    setUserLanguage(userLang);
     
     if (userData.role === 'citizen' || !userData.role) {
       // Pass userId so the store can detect a user switch and clear stale data

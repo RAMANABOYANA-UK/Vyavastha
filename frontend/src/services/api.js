@@ -33,6 +33,7 @@ const toPublicUser = (user) => ({
   points: user.points || 0,
   complaintsPosted: user.complaintsPosted || 0,
   location: user.location || null,
+  language: user.language || 'en',
 });
 
 const makeLocalToken = () => `demo_token_${Date.now()}`;
@@ -86,6 +87,9 @@ export const authAPI = {
       return Promise.reject({ error: 'Account already exists' });
     }
 
+    // Get language from data or localStorage
+    const language = data.language || localStorage.getItem('userLanguage') || 'en';
+
     const localUser = {
       _id: `local_${Date.now()}`,
       name: data.name,
@@ -96,6 +100,7 @@ export const authAPI = {
       points: 0,
       complaintsPosted: 0,
       location: data.location || null,
+      language: language,
       createdAt: new Date().toISOString(),
     };
     users.unshift(localUser);
@@ -105,7 +110,7 @@ export const authAPI = {
     const publicUser = toPublicUser(localUser);
     localStorage.setItem('vyavastha_token', token);
     localStorage.setItem('vyavastha_demo_user', JSON.stringify(publicUser));
-    return { success: true, data: { ...publicUser, token } };
+    return { success: true, data: { ...publicUser, token, language } };
   },
 
   login: async (data) => {
@@ -125,11 +130,18 @@ export const authAPI = {
       return Promise.reject({ error: 'Invalid credentials' });
     }
 
+    // Sync language from localStorage if not in user profile
+    if (!user.language) {
+      user.language = localStorage.getItem('userLanguage') || 'en';
+      const users = readLocalUsers();
+      writeLocalUsers(users.map((u) => (u._id === user._id ? user : u)));
+    }
+
     const token = makeLocalToken();
     const publicUser = toPublicUser(user);
     localStorage.setItem('vyavastha_token', token);
     localStorage.setItem('vyavastha_demo_user', JSON.stringify(publicUser));
-    return { success: true, data: { ...publicUser, token } };
+    return { success: true, data: { ...publicUser, token, language: user.language } };
   },
 
   getMe: async () => {
